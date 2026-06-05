@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .text-header {
+    @apply text-2xl font-inter-bold;
+  }
+  .text-subheader {
+    @apply text-xl font-inter-semibold;
+  }
+  .text-body {
+    @apply text-base font-inter-regular;
+  }
+}

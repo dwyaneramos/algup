@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./app/**/*.{js,jsx,ts,tsx}",
@@ -7,7 +6,18 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        accent: '#CB30E0',
+      },
+      fontFamily: {
+        'inter-regular': 'Inter_400Regular',
+        'inter-medium': 'Inter_500Medium',
+        'inter-semibold': 'Inter_600SemiBold',
+        'inter-bold': 'Inter_700Bold',
+        'inter-extrabold': 'Inter_800ExtraBold',
+      },
+    },
   },
   plugins: [],
 };
