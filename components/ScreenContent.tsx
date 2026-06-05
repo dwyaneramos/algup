@@ -1,4 +1,3 @@
-import React from 'react';
 import { Text, View } from 'react-native';
 
 import { EditScreenInfo } from './EditScreenInfo';
@@ -13,6 +12,7 @@ export const ScreenContent: React.FC<ScreenContentProps> = ({ title, path, child
   return (
     <View className={styles.container}>
       <Text className={styles.title}>{title}</Text>
+      <Text className="text-blue-500">hello</Text>
       <View className={styles.separator} />
       <EditScreenInfo path={path} />
       {children}
