@@ -79,6 +79,7 @@ export default function MainScreen() {
         </Animated.View>
       )}
       <Timer
+        disabled={attemptDone}
         formatted={formatted()}
         running={running}
         onStart={start}

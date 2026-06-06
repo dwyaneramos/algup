@@ -10,6 +10,7 @@ module.exports = {
       colors: {
         accent: '#CB30E0',
         'accent-light': '#e899f2',
+        muted: '#9ca3af',
       },
       fontFamily: {
         'inter-regular': 'Inter_400Regular',

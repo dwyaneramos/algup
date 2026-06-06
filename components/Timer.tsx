@@ -7,9 +7,10 @@ interface TimerProps {
   running: boolean;
   onStart: () => void;
   onStop: () => Promise<void>;
+  disabled: boolean;
 }
 
-export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
+export function Timer({ formatted, running, onStart, onStop, disabled }: TimerProps) {
   const scale = useSharedValue(1);
   const baseScale = useRef(1);
 
@@ -25,6 +26,7 @@ export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
   return (
     <Animated.View className="absolute inset-0 items-center justify-center">
       <Pressable
+        disabled={disabled}
         onPress={running ? onStop : onStart}
         onPressIn={() => { scale.value = withSpring(baseScale.current + 0.2); }}
         onPressOut={() => { scale.value = withSpring(baseScale.current); }}
@@ -32,7 +34,7 @@ export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
       >
         <Animated.Text
           style={[{ fontVariant: ['tabular-nums'] }, animatedStyle]}
-          className="text-7xl py-10 font-inter-bold text-center"
+          className={`text-7xl py-10 font-inter-bold text-center ${disabled ? "text-muted" : ""}`}
         >
           {formatted}
         </Animated.Text>
