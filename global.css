@@ -10,6 +10,6 @@
     @apply text-xl font-inter-semibold;
   }
   .text-body {
-    @apply text-base font-inter-regular;
+    @apply text-lg font-inter-regular;
   }
 }
