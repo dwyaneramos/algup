@@ -1,4 +1,5 @@
 export interface Case {
+  id?: number;
   alg: string;
 }
 

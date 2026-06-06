@@ -24,6 +24,11 @@ export function getAlgSets(): AlgSet[] {
   }));
 }
 
+export function getCases(algsetName: string): Case[] {
+  const cases = db.getAllSync<{ id: number; alg: string }>('SELECT * FROM cases WHERE algset = ?', [algsetName]);
+  return cases;
+}
+
 export function getCasesWithConfidence(algsetId: string): CaseWithConfidence[] {
   return db.getAllSync<CaseWithConfidence>(`
     SELECT c.*, COALESCE(cp.confidence, 1.0) as confidence

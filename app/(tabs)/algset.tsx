@@ -1,5 +1,5 @@
-import { Text, View, Button, Pressable } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, interpolateColor } from 'react-native-reanimated';
+import { Text, View, Pressable } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { getAlgSets } from '@/src/db/queries';
 import { type AlgSet } from '@/src/logic/algsets';

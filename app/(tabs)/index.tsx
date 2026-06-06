@@ -4,8 +4,9 @@ import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import { generateScrambleFromAlg } from '@/src/utils/scramble';
 import Animated, { FadeIn, FadeOut, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { getRandomCase } from '@/src/utils/case';
 import { Sad, Mid, Happy } from '@/assets/icons';
 
 
@@ -14,27 +15,41 @@ const DEFAULT_TIME_STRING = '0.00'
 
 export default function MainScreen() {
   const [scramble, setScramble] = useState("D2 L D B2 R2 D2 R F' D' F2 U R2 B2 R2 U' D' B2 R'");
-  const [solution, setSolution] = useState("");
   const [alg, setAlg] = useState("R U R' U R U2 R'");
   const scale = useSharedValue(1);
   const [attemptDone, setAttemptDone] = useState(false);
   const nextScramble = useRef<string>('');
 
+  const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+
   const { running, start, stop, formatted, resetTime } = useTimer();
 
-  async function generateNewScramble(): Promise<void> {
+  async function generateNewScramble(alg: string): Promise<void> {
     const newScramble = await generateScrambleFromAlg(alg);
     nextScramble.current = newScramble;
+  }
+
+  useEffect(() => {
+    (async () => {
+      await setNewCase();
+      setScramble(nextScramble.current);
+    })()
+  }, [selectedAlgSet])
+
+  async function setNewCase() {
+    if (selectedAlgSet === null) return;
+    const newCase = await getRandomCase(selectedAlgSet.name);
+    setAlg(newCase.alg);
+    await generateNewScramble(newCase.alg);
   }
 
 
   async function handleStopAttempt(): Promise<void> {
     setAttemptDone(true);
-    await generateNewScramble();
+    await setNewCase();
     stop();
   }
 
-  const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
 
   function handleGrade() {
     setAttemptDone(false);
