@@ -1,6 +1,6 @@
 import { Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface TimerProps {
   formatted: string;
@@ -8,23 +8,27 @@ interface TimerProps {
   onStart: () => void;
   onStop: () => Promise<void>;
 }
+
 export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
   const scale = useSharedValue(1);
+  const baseScale = useRef(1);
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   useEffect(() => {
-    scale.value = withSpring(running ? 2 : 1);
+    baseScale.current = running ? 2 : 1;
+    scale.value = withSpring(baseScale.current);
   }, [running]);
 
   return (
-    <Animated.View
-      className="absolute inset-0 items-center justify-center"
-    >
+    <Animated.View className="absolute inset-0 items-center justify-center">
       <Pressable
         onPress={running ? onStop : onStart}
-        className={running ? 'absolute inset-0 items-center justify-center' : 'w-full py-14 '}
+        onPressIn={() => { scale.value = withSpring(baseScale.current + 0.2); }}
+        onPressOut={() => { scale.value = withSpring(baseScale.current); }}
+        className={running ? 'absolute inset-0 items-center justify-center' : 'w-full py-14'}
       >
         <Animated.Text
           style={[{ fontVariant: ['tabular-nums'] }, animatedStyle]}

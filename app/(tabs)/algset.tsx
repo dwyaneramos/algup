@@ -17,7 +17,7 @@ function AlgSetRow({ name, algCount }: { name: string, algCount: number }) {
     >
       <View className="flex flex-col justify-center">
 
-        <Text className="font-inter-medium ">
+        <Text className="font-inter-semibold text-xl">
           {name}
         </Text>
         <Text className="font-inter-medium ">
