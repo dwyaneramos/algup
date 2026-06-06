@@ -5,6 +5,17 @@ export interface CaseWithConfidence extends Case {
   confidence: number;
 }
 
+export function getAlgSet(name: string): AlgSet | null {
+  const algset = db.getFirstSync<{ name: string }>(
+    'SELECT * FROM algsets WHERE name = ?', [name]
+  );
+  if (!algset) return null;
+  return {
+    ...algset,
+    cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [algset.name])
+  };
+}
+
 export function getAlgSets(): AlgSet[] {
   const algsets = db.getAllSync<{ id: string; name: string }>('SELECT * FROM algsets');
   return algsets.map(a => ({

@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       colors: {
         accent: '#CB30E0',
+        'accent-light': '#e899f2',
       },
       fontFamily: {
         'inter-regular': 'Inter_400Regular',

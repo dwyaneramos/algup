@@ -2,6 +2,8 @@ export interface Case {
   alg: string;
 }
 
+export const SELECTED_ALGSET_KEY = "selectedAlgset"
+
 export interface AlgSet {
   name: string;
   cases: Case[];

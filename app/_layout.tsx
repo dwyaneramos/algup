@@ -21,10 +21,25 @@ import { Inter_700Bold_Italic } from '@expo-google-fonts/inter/700Bold_Italic';
 import { Inter_800ExtraBold_Italic } from '@expo-google-fonts/inter/800ExtraBold_Italic';
 import { Inter_900Black_Italic } from '@expo-google-fonts/inter/900Black_Italic';
 import { initDB } from '@/src/db/schema';
+import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
+import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
+import { useAlgSetStore } from '@/src/store/algsetStore';
+import { useEffect } from 'react';
 
 initDB();
-
 export default function RootLayout() {
+  const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
+
+  let selectedAlgsetName = getSetting(SELECTED_ALGSET_KEY);
+  if (selectedAlgsetName === null) {
+    // guaranteed to not be null if initDB is called successfully
+    const defaultAlgset = getAlgSets()[0];
+    setSelectedAlgSet(defaultAlgset);
+  } else {
+    const retrievedAlgSet = getAlgSet(selectedAlgsetName);
+    if (retrievedAlgSet !== null) setSelectedAlgSet(retrievedAlgSet);
+    else alert("No Algset exists")
+  }
 
   let [fontsLoaded] = useFonts({
     Inter_100Thin,
