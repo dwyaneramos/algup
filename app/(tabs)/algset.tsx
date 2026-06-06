@@ -21,7 +21,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   }));
 
   useEffect(() => {
-    selected.value = withTiming(isSelected ? 1 : 0, { duration: 300 });
+    selected.value = withTiming(isSelected ? 1 : 0, { duration: 150 });
   }, [isSelected]);
 
   const handlePress = () => {

@@ -78,6 +78,7 @@ export default function MainScreen() {
           </View>
         </Animated.View>
       )}
+
       <Timer
         disabled={attemptDone}
         formatted={formatted()}
@@ -86,16 +87,41 @@ export default function MainScreen() {
         onStop={handleStopAttempt}
       />
 
-      {!running && formatted() !== DEFAULT_TIME_STRING &&
 
+
+      {!running &&
         < Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          className="gap-3 flex-1 pt-16 px-3 items-center justify-start"
+          className="gap-3 flex-1 px-3 items-center justify-start"
         >
-          <AttemptGrader />
+          {formatted() !== DEFAULT_TIME_STRING &&
+
+            <AttemptGrader />
+
+          }
+          <View className="absolute bottom-5 items-center gap-5">
+
+            <View className="bg-muted w-64 h-64"></View>
+            <View className="flex flex-row gap-5">
+              <StatPill info={"10/42 algs to master"} />
+              <StatPill info={"confidence"} />
+            </View>
+          </View>
+
+
+
         </Animated.View>
       }
     </View >
   );
+}
+
+
+function StatPill({ info }: { info: string }) {
+  return (
+    <View className=" bg-white p-2 px-5 rounded-3xl min-h-12 max-h-12 items-center justify-center">
+      <Text className="font-inter-medium  ">{info}</Text>
+    </View>
+  )
 }
