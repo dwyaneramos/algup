@@ -8,10 +8,8 @@ interface TimerProps {
   onStart: () => void;
   onStop: () => Promise<void>;
 }
-
 export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
   const scale = useSharedValue(1);
-
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
@@ -21,8 +19,13 @@ export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
   }, [running]);
 
   return (
-    <Animated.View className="absolute inset-0 items-center justify-center">
-      <Pressable onPress={running ? onStop : onStart}>
+    <Animated.View
+      className="absolute inset-0 items-center justify-center"
+    >
+      <Pressable
+        onPress={running ? onStop : onStart}
+        className={running ? 'absolute inset-0 items-center justify-center' : 'w-full py-14 '}
+      >
         <Animated.Text
           style={[{ fontVariant: ['tabular-nums'] }, animatedStyle]}
           className="text-7xl font-inter-bold text-center"

@@ -15,9 +15,6 @@ export default function MainScreen() {
 
   const scale = useSharedValue(1);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
 
   async function generateNewScramble(): Promise<void> {
     const newScramble = await generateScrambleFromAlg(alg);

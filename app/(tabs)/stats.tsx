@@ -6,6 +6,7 @@ export default function Stats() {
     <View className="items-center flex-1 justify-center bg-white">
       <Text>stats page</Text>
       <Link href="/">go to main page</Link>
+      <Link href="/algset">go to algset page</Link>
     </View>
   );
 }

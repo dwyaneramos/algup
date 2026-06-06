@@ -20,6 +20,9 @@ import { Inter_600SemiBold_Italic } from '@expo-google-fonts/inter/600SemiBold_I
 import { Inter_700Bold_Italic } from '@expo-google-fonts/inter/700Bold_Italic';
 import { Inter_800ExtraBold_Italic } from '@expo-google-fonts/inter/800ExtraBold_Italic';
 import { Inter_900Black_Italic } from '@expo-google-fonts/inter/900Black_Italic';
+import { initDB } from '@/src/db/schema';
+
+initDB();
 
 export default function RootLayout() {
 
