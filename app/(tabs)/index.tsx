@@ -6,16 +6,18 @@ import { generateScrambleFromAlg } from '@/src/utils/scramble';
 import Animated, { FadeIn, FadeOut, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useState } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { Sad, Mid, Happy } from '@/assets/icons';
 
+
+const ICON_SIZE = 48;
+const DEFAULT_TIME_STRING = '0.00'
 
 export default function MainScreen() {
   const [scramble, setScramble] = useState("D2 L D B2 R2 D2 R F' D' F2 U R2 B2 R2 U' D' B2 R'");
   const [solution, setSolution] = useState("");
   const [alg, setAlg] = useState("R U R' U R U2 R'");
   const scale = useSharedValue(1);
-
-
-
+  const [attemptDone, setAttemptDone] = useState(false);
 
   async function generateNewScramble(): Promise<void> {
     const newScramble = await generateScrambleFromAlg(alg);
@@ -23,14 +25,44 @@ export default function MainScreen() {
   }
 
 
-  const { running, start, stop, formatted } = useTimer();
+  const { running, start, stop, formatted, resetTime } = useTimer();
 
   async function handleStopAttempt(): Promise<void> {
     await generateNewScramble();
+    setAttemptDone(true);
     stop();
   }
 
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+
+  function handleGrade() {
+    setAttemptDone(false)
+    resetTime();
+  }
+
+
+  function AttemptGrader() {
+    return (
+      <View className="flex flex-row justify-around w-full">
+        <Pressable onPress={handleGrade}>
+          <Sad size={ICON_SIZE} color={'#d95f6b'} />
+        </Pressable>
+
+        <Pressable onPress={handleGrade}>
+          <Text>
+            <Mid size={ICON_SIZE} color={'#d9a45f'} />
+          </Text>
+        </Pressable>
+
+        <Pressable onPress={handleGrade}>
+          <Text>
+            <Happy size={ICON_SIZE} color={'#5fd976'} />
+          </Text>
+        </Pressable>
+
+      </View>
+    )
+  }
 
   return (
     <View className="flex-1">
@@ -41,7 +73,7 @@ export default function MainScreen() {
           className="gap-3 flex-1 pt-16 px-3 items-center justify-start"
         >
           <Text className="font-inter-bold text-header">{selectedAlgSet?.name}</Text>
-          <View className="bg-white p-2 px-5 shadow-xl rounded-3xl min-h-32 max-h-32 w-full items-center justify-center">
+          <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 w-full items-center justify-center">
             <Text className="text-center text-body font-inter-medium">{scramble}</Text>
           </View>
         </Animated.View>
@@ -52,6 +84,17 @@ export default function MainScreen() {
         onStart={start}
         onStop={handleStopAttempt}
       />
-    </View>
+
+      {!running && formatted() !== DEFAULT_TIME_STRING &&
+
+        < Animated.View
+          entering={FadeIn.duration(200)}
+          exiting={FadeOut.duration(200)}
+          className="gap-3 flex-1 pt-16 px-3 items-center justify-start"
+        >
+          <AttemptGrader />
+        </Animated.View>
+      }
+    </View >
   );
 }

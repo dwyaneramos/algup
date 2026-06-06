@@ -32,7 +32,7 @@ export function Timer({ formatted, running, onStart, onStop }: TimerProps) {
       >
         <Animated.Text
           style={[{ fontVariant: ['tabular-nums'] }, animatedStyle]}
-          className="text-7xl font-inter-bold text-center"
+          className="text-7xl py-10 font-inter-bold text-center"
         >
           {formatted}
         </Animated.Text>

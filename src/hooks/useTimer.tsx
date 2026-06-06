@@ -9,7 +9,7 @@ export function useTimer() {
   const start = () => {
     if (running) return;
     clearInterval(intervalRef.current!);
-    setTime(0);
+    resetTime();
     setRunning(true);
     intervalRef.current = setInterval(() => {
       setTime(prev => prev + 10);
@@ -29,5 +29,9 @@ export function useTimer() {
     return `${m > 0 ? `${m}:${String(s).padStart(2, '0')}` : s}.${String(ms).padStart(3, '0').slice(0, 2)}`;
   };
 
-  return { time, running, start, stop, formatted };
+  const resetTime = () => {
+    setTime(0);
+  }
+
+  return { time, running, start, stop, formatted, resetTime };
 }

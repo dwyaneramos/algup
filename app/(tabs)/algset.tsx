@@ -33,14 +33,8 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
 
   return (
     <Animated.View
-      style={[animatedStyle, {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-      }]}
-      className="w-full p-3 flex flex-row justify-between rounded-xl"
+      style={[animatedStyle]}
+      className="w-full p-3  bg-white flex flex-row justify-between rounded-xl"
     >
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
         <View className="flex flex-col justify-center">
@@ -64,7 +58,7 @@ export default function Algset() {
 
 
   return (
-    <View className="items-center flex-1 justify-center bg-white">
+    <View className="items-center flex-1 justify-center">
       <Text className="text-header mb-10">Select Algorithm Set</Text>
       {algsets.length > 0 &&
         <View className="w-full gap-3 px-3">
