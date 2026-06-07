@@ -41,10 +41,10 @@ export default function MainScreen() {
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          className="gap-3 flex-1 pt-16 px-3 items-center justify-start"
+          className="gap-0 flex-1 pt-16 px-3 items-center justify-start"
         >
           <Text className="font-inter-bold text-header">{selectedAlgSet?.name}</Text>
-          <Text>Confidence: {overallConfidence.toFixed(2)}%</Text>
+          <Text className="mb-3">Confidence: {overallConfidence.toFixed(2)}%</Text>
 
           <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 w-full items-center justify-center">
             <Text className="text-center text-body font-inter-medium">{scramble}</Text>
@@ -95,11 +95,8 @@ function GradeButton({ onPress, icon: Icon, color }: {
     transform: [{ scale: scale.value }]
   }));
 
-
-
   return (
     <Pressable onPress={onPress}
-
       onPressIn={() => { scale.value = withSpring(1.2); }}
       onPressOut={() => { scale.value = withSpring(1); }}
     >
