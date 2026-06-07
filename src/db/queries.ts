@@ -55,7 +55,7 @@ export function getAlgSets(): AlgSet[] {
   }));
 }
 
-export function getAverageConfidence(algsetName: string): number {
+export function getOverallConfidence(algsetName: string): number {
   const result = db.getFirstSync<{ avg: number }>(`
     SELECT AVG(COALESCE(cp.confidence, 1.0)) as avg
     FROM cases c
