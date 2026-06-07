@@ -4,19 +4,15 @@ import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { useState, useEffect } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { getAlgSetProgress } from '@/src/db/queries';
 import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { Sad, Mid, Happy } from '@/assets/icons';
-import { getNumberOfAlgsPracticing } from '@/src/logic/caseQueue';
 
 const ICON_SIZE = 48;
 const DEFAULT_TIME_STRING = '0.00';
 
 export default function MainScreen() {
   const [attemptDone, setAttemptDone] = useState(false);
-  const [lastBoundary, setLastBoundary] = useState(0);
-
 
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const { running, start, stop, formatted, resetTime } = useTimer();
@@ -33,8 +29,10 @@ export default function MainScreen() {
 
   function handleGrade(grade: number) {
     submitGrade(grade);
-    setAttemptDone(false);
-    resetTime();
+    setTimeout(() => {
+      setAttemptDone(false);
+      resetTime();
+    }, 200);
   }
 
   return (
@@ -74,15 +72,9 @@ export default function MainScreen() {
               exiting={FadeOut.duration(200)}
               className="flex flex-row justify-around w-full"
             >
-              <Pressable onPress={() => handleGrade(1)}>
-                <Sad size={ICON_SIZE} color={'#d95f6b'} />
-              </Pressable>
-              <Pressable onPress={() => handleGrade(2)}>
-                <Mid size={ICON_SIZE} color={'#d9a45f'} />
-              </Pressable>
-              <Pressable onPress={() => handleGrade(3)}>
-                <Happy size={ICON_SIZE} color={'#5fd976'} />
-              </Pressable>
+              <GradeButton onPress={() => handleGrade(1)} icon={Sad} color='#d95f6b' />
+              <GradeButton onPress={() => handleGrade(2)} icon={Mid} color='#d9a45f' />
+              <GradeButton onPress={() => handleGrade(3)} icon={Happy} color='#5fd976' />
             </Animated.View>
           )}
 
@@ -92,4 +84,28 @@ export default function MainScreen() {
   );
 }
 
+function GradeButton({ onPress, icon: Icon, color }: {
+  onPress: () => void,
+  icon: any,
+  color: string
+}) {
+  const scale = useSharedValue(1);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }]
+  }));
+
+
+
+  return (
+    <Pressable onPress={onPress}
+
+      onPressIn={() => { scale.value = withSpring(1.2); }}
+      onPressOut={() => { scale.value = withSpring(1); }}
+    >
+      <Animated.View style={animatedStyle}>
+        <Icon size={ICON_SIZE} color={color} />
+      </Animated.View>
+    </Pressable>
+  );
+}
