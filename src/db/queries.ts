@@ -6,6 +6,14 @@ export interface CaseWithConfidence extends Case {
   confidence: number;
 }
 
+export interface AlgSetProgress {
+  total: number;
+  learning: number;
+  reviewing: number;
+  mastered: number;
+  locked: number;
+}
+
 export function getAlgSet(name: string): AlgSet | null {
   const algset = db.getFirstSync<{ name: string }>(
     'SELECT * FROM algsets WHERE name = ?', [name]
@@ -15,6 +23,28 @@ export function getAlgSet(name: string): AlgSet | null {
     ...algset,
     cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [algset.name])
   };
+}
+
+
+export function getAlgSetProgress(algset: string): AlgSetProgress {
+  const result = db.getFirstSync<{
+    total: number;
+    learning: number;
+    reviewing: number;
+    mastered: number;
+    locked: number;
+  }>(`
+    SELECT COUNT(*) as total,
+      SUM(CASE WHEN COALESCE(cp.state, 'locked') = 'learning' THEN 1 ELSE 0 END) as learning,
+      SUM(CASE WHEN COALESCE(cp.state, 'locked') = 'reviewing' THEN 1 ELSE 0 END) as reviewing,
+      SUM(CASE WHEN COALESCE(cp.state, 'locked') = 'mastered' THEN 1 ELSE 0 END) as mastered,
+      SUM(CASE WHEN COALESCE(cp.state, 'locked') = 'locked' THEN 1 ELSE 0 END) as locked
+    FROM cases c
+    LEFT JOIN case_progress cp ON c.id = cp.case_id
+    WHERE c.algset = ?
+  `, [algset]);
+
+  return result ?? { total: 0, learning: 0, reviewing: 0, mastered: 0, locked: 0 };
 }
 
 export function getAlgSets(): AlgSet[] {

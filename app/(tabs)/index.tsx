@@ -4,6 +4,7 @@ import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { useState, useEffect } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { getAlgSetProgress } from '@/src/db/queries';
 import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { Sad, Mid, Happy } from '@/assets/icons';
@@ -15,6 +16,7 @@ const DEFAULT_TIME_STRING = '0.00';
 export default function MainScreen() {
   const [attemptDone, setAttemptDone] = useState(false);
   const [lastBoundary, setLastBoundary] = useState(0);
+
 
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const { running, start, stop, formatted, resetTime } = useTimer();
@@ -44,6 +46,8 @@ export default function MainScreen() {
           className="gap-3 flex-1 pt-16 px-3 items-center justify-start"
         >
           <Text className="font-inter-bold text-header">{selectedAlgSet?.name}</Text>
+          <Text>Confidence: {averageConfidence.toFixed(2)}%</Text>
+
           <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 w-full items-center justify-center">
             <Text className="text-center text-body font-inter-medium">{scramble}</Text>
           </View>
@@ -82,9 +86,6 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
-          <View className="absolute bottom-5 items-center gap-5">
-            <StatPill confidence={averageConfidence} lastBoundary={lastBoundary} setLastBoundary={setLastBoundary} />
-          </View>
         </Animated.View>
       )}
     </View>
@@ -92,57 +93,3 @@ export default function MainScreen() {
 }
 
 
-function StatPill({ confidence, lastBoundary, setLastBoundary }: { confidence: number, lastBoundary: number, setLastBoundary: (lastBoundary: number) => void }) {
-
-  const translateY = useSharedValue(0);
-  const rotateZ = useSharedValue(0);
-
-  useEffect(() => {
-    const level = Math.floor(Math.floor(confidence) / 10)
-    console.log(level, lastBoundary)
-    if (level > lastBoundary) {
-      console.log("ANIMATION HAPPENING")
-      setLastBoundary(level);
-
-
-      // jump up then back down
-      translateY.value = withSequence(
-        withTiming(-20, { duration: 150 }),
-        withTiming(0, { duration: 500 })
-      );
-      // spin side to side
-      rotateZ.value = withSequence(
-        withTiming(-10, { duration: 100 }),
-        withTiming(10, { duration: 100 }),
-        withTiming(-10, { duration: 100 }),
-        withTiming(10, { duration: 100 }),
-        withTiming(-10, { duration: 100 }),
-        withTiming(0, { duration: 100 })
-      );
-    } else if (level < lastBoundary) {
-      setLastBoundary(level)
-    }
-
-  }, [confidence]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: translateY.value },
-      { rotateZ: `${rotateZ.value}deg` },
-    ],
-    backgroundColor: interpolateColor(
-      Math.pow(confidence / 100, 2) * 100,
-      [0, 100],
-      ['#ffffff', '#e899f2']
-    )
-  }));
-
-  return (
-    <Animated.View style={animatedStyle} className="rounded-3xl min-h-12 max-h-12">
-      <Pressable className="p-2 px-5 min-h-12 max-h-12 items-center justify-center">
-        <Text className="font-inter-medium">Confidence: {confidence.toFixed(2)}%</Text>
-
-      </Pressable>
-    </Animated.View>
-  );
-}
