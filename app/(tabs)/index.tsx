@@ -1,89 +1,36 @@
-import { View, Text, Button, Pressable } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, Pressable } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
-import { generateScrambleFromAlg } from '@/src/utils/scramble';
-import Animated, { FadeIn, FadeOut, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useState, useRef, useEffect } from "react";
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useState } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { getRandomCase } from '@/src/utils/case';
+import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
+import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { Sad, Mid, Happy } from '@/assets/icons';
 
-
 const ICON_SIZE = 48;
-const DEFAULT_TIME_STRING = '0.00'
+const DEFAULT_TIME_STRING = '0.00';
 
 export default function MainScreen() {
-  const [scramble, setScramble] = useState("D2 L D B2 R2 D2 R F' D' F2 U R2 B2 R2 U' D' B2 R'");
-  const [alg, setAlg] = useState("R U R' U R U2 R'");
-  const scale = useSharedValue(1);
   const [attemptDone, setAttemptDone] = useState(false);
-  const nextScramble = useRef<string>('');
 
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
-
   const { running, start, stop, formatted, resetTime } = useTimer();
+  const { scramble, submitGrade } = useTrainingSession(selectedAlgSet?.name ?? '');
 
-  async function generateNewScramble(alg: string): Promise<void> {
-    const newScramble = await generateScrambleFromAlg(alg);
-    nextScramble.current = newScramble;
-  }
-
-  useEffect(() => {
-    (async () => {
-      await setNewCase();
-      setScramble(nextScramble.current);
-    })()
-  }, [selectedAlgSet])
-
-  async function setNewCase() {
-    if (selectedAlgSet === null) return;
-    const newCase = await getRandomCase(selectedAlgSet.name);
-    setAlg(newCase.alg);
-    await generateNewScramble(newCase.alg);
-  }
-
+  const averageConfidence = selectedAlgSet
+    ? getAlgSetConfidencePercentage(selectedAlgSet.name)
+    : 0;
 
   async function handleStopAttempt(): Promise<void> {
     setAttemptDone(true);
-    await setNewCase();
     stop();
   }
 
-
-  function handleGrade() {
+  function handleGrade(grade: number) {
+    submitGrade(grade);
     setAttemptDone(false);
     resetTime();
-    setScramble(nextScramble.current);
-
-
-  }
-
-
-  function AttemptGrader() {
-    return (
-      <Animated.View
-        entering={FadeIn.duration(200)}
-        exiting={FadeOut.duration(200)}
-        className="flex flex-row justify-around w-full">
-        <Pressable onPress={handleGrade}>
-          <Sad size={ICON_SIZE} color={'#d95f6b'} />
-        </Pressable>
-
-        <Pressable onPress={handleGrade}>
-          <Text>
-            <Mid size={ICON_SIZE} color={'#d9a45f'} />
-          </Text>
-        </Pressable>
-
-        <Pressable onPress={handleGrade}>
-          <Text>
-            <Happy size={ICON_SIZE} color={'#5fd976'} />
-          </Text>
-        </Pressable>
-
-      </Animated.View>
-    )
   }
 
   return (
@@ -109,42 +56,46 @@ export default function MainScreen() {
         onStop={handleStopAttempt}
       />
 
-
-
-      {!running &&
-        < Animated.View
+      {!running && (
+        <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
           className="gap-3 flex-1 px-10 items-center justify-start"
         >
-          {formatted() !== DEFAULT_TIME_STRING &&
+          {formatted() !== DEFAULT_TIME_STRING && (
+            <Animated.View
+              entering={FadeIn.duration(200)}
+              exiting={FadeOut.duration(200)}
+              className="flex flex-row justify-around w-full"
+            >
+              <Pressable onPress={() => handleGrade(1)}>
+                <Sad size={ICON_SIZE} color={'#d95f6b'} />
+              </Pressable>
+              <Pressable onPress={() => handleGrade(2)}>
+                <Mid size={ICON_SIZE} color={'#d9a45f'} />
+              </Pressable>
+              <Pressable onPress={() => handleGrade(3)}>
+                <Happy size={ICON_SIZE} color={'#5fd976'} />
+              </Pressable>
+            </Animated.View>
+          )}
 
-            <AttemptGrader />
-
-          }
           <View className="absolute bottom-5 items-center gap-5">
-            {/*
-<View className="bg-muted w-64 h-64"></View>
-            */}
             <View className="flex flex-row gap-5">
-              <StatPill info={"10/42 algs to master"} />
-              <StatPill info={"confidence"} />
+              <StatPill info="10/42 algs to master" />
+              <StatPill info={`Confidence: ${averageConfidence.toFixed(2)}%`} />
             </View>
           </View>
-
-
-
         </Animated.View>
-      }
-    </View >
+      )}
+    </View>
   );
 }
 
-
 function StatPill({ info }: { info: string }) {
   return (
-    <View className=" bg-white p-2 px-5 rounded-3xl min-h-12 max-h-12 items-center justify-center">
-      <Text className="font-inter-medium  ">{info}</Text>
+    <View className="bg-white p-2 px-5 rounded-3xl min-h-12 max-h-12 items-center justify-center">
+      <Text className="font-inter-medium">{info}</Text>
     </View>
-  )
+  );
 }

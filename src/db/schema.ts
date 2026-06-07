@@ -33,7 +33,7 @@ export function initDB() {
     );
 
     CREATE TABLE IF NOT EXISTS cases (
-      id INT AUTO_INCREMENT PRIMARY KEY,
+      id INTEGER PRIMARY KEY,
 
       algset TEXT NOT NULL,
       alg TEXT NOT NULL,
@@ -42,8 +42,9 @@ export function initDB() {
     );
 
     CREATE TABLE IF NOT EXISTS case_progress (
-      case_id INT PRIMARY KEY,
+      case_id INTEGER PRIMARY KEY,
       confidence REAL DEFAULT 1.0,
+      state TEXT DEFAULT 'locked',
       FOREIGN KEY (case_id) REFERENCES cases(id)
     );
   `);
