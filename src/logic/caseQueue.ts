@@ -24,6 +24,8 @@ const CONFIDENCE_THRESHOLDS = {
   toMastered: 4.5,
 };
 
+let available = []
+
 export function getNextState(state: CaseState, confidence: number): CaseState {
   if (state === 'learning' && confidence >= CONFIDENCE_THRESHOLDS.toReviewing) {
     return 'reviewing';
@@ -46,8 +48,12 @@ export function shouldIntroduceNewCase(cases: CaseWithProgress[]): boolean {
   return learningOrReviewing.length < MAX_ACTIVE && learningCases.length < MAX_LEARNING;
 }
 
+export function getNumberOfAlgsPracticing(): number {
+  return available.length;
+}
+
 export function pickNextCase(cases: CaseWithProgress[], excludeId?: number): CaseWithProgress | null {
-  const available = cases.filter(c => c.state !== 'locked' && c.id !== excludeId);
+  available = cases.filter(c => c.state !== 'locked' && c.id !== excludeId);
   if (available.length === 0) return null;
 
   const totalWeight = available.reduce((sum, c) => sum + STATE_WEIGHTS[c.state] * (6 - c.confidence), 0);

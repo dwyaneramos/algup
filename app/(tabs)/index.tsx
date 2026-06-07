@@ -7,6 +7,7 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { Sad, Mid, Happy } from '@/assets/icons';
+import { getNumberOfAlgsPracticing } from '@/src/logic/caseQueue';
 
 const ICON_SIZE = 48;
 const DEFAULT_TIME_STRING = '0.00';
@@ -82,7 +83,7 @@ export default function MainScreen() {
 
           <View className="absolute bottom-5 items-center gap-5">
             <View className="flex flex-row gap-5">
-              <StatPill info="10/42 algs to master" />
+              <StatPill info={`Training ${getNumberOfAlgsPracticing()} / ${selectedAlgSet?.cases.length} algs`} />
               <StatPill info={`Confidence: ${averageConfidence.toFixed(2)}%`} />
             </View>
           </View>
