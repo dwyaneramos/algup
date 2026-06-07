@@ -35,6 +35,11 @@ export default function MainScreen() {
     }, 200);
   }
 
+  useEffect(() => {
+    setAttemptDone(false)
+    resetTime();
+  }, [selectedAlgSet])
+
   return (
     <View className="flex-1">
       {!running && (

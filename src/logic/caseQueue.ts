@@ -36,7 +36,7 @@ export function getNextState(state: CaseState, confidence: number): CaseState {
   return state;
 }
 
-export function updateConfidence(current: number, grade: number, alpha: number = 0.3): number {
+export function getUpdatedConfidence(current: number, grade: number, alpha: number = 0.3): number {
   const scaled = grade === 1 ? 1 : grade === 2 ? 3 : 5;
   const next = alpha * scaled + (1 - alpha) * current;
   const rounded = Math.round(next * 10) / 10;

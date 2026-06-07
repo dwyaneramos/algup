@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getCasesWithProgress, updateCaseProgress, introduceNextCase } from '@/src/db/queries';
-import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, updateConfidence } from '@/src/logic/caseQueue';
+import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedConfidence } from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/utils/scramble';
-import { db } from '../db/schema';
 
 
 export function useTrainingSession(algset: string) {
@@ -35,7 +34,7 @@ export function useTrainingSession(algset: string) {
 
   const submitGrade = (grade: number) => {
     if (!currentCase) return;
-    const newConfidence = updateConfidence(currentCase.confidence, grade);
+    const newConfidence = getUpdatedConfidence(currentCase.confidence, grade);
     const newState = getNextState(currentCase.state, newConfidence);
     updateCaseProgress(currentCase.id, newConfidence, newState);
 
