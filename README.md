@@ -10,9 +10,6 @@
   </p>
 </div>
 
-# algup
-App for training your cubing algorithms
-
 
 <!-- GETTING STARTED -->
 
@@ -82,6 +79,21 @@ _Below are instructions for how you can clone and run a development build of the
    ```sh
    npm run dev
    ```
+
+<!-- BACK LOG -->
+# Backlog
+- [ ] Able to add new alg sets
+- [ ] Able to edit existing alg sets
+  - [ ] Add new algorithms
+  - [ ] Delete algorithms
+  - [ ] Edit algorithms
+- [ ] Backtrack to previous case
+- [ ] Show solution
+- [ ] Draw scramble
+- [ ] View confidence for each individual algset (can you edit it from there?)
+  - [ ] SVG generated for the particular case
+
+<!-- WIREFRAMES / MOCKUPS -->
    
 # Wireframes / Mockups :
 <img width="711" height="436" alt="image" src="https://github.com/user-attachments/assets/c374e2ef-aa20-493f-82ee-c05e1bc64f43" />
