@@ -8,8 +8,8 @@ export interface CaseWithProgress {
   state: CaseState;
 }
 
-// TODO: change to 10
-const MAX_ACTIVE = 3;
+// TODO: tweak value
+const MAX_ACTIVE = 5;
 const MAX_LEARNING = 3;
 
 const STATE_WEIGHTS: Record<CaseState, number> = {
@@ -40,7 +40,8 @@ export function updateConfidence(current: number, grade: number, alpha: number =
   const scaled = grade === 1 ? 1 : grade === 2 ? 3 : 5;
   const next = alpha * scaled + (1 - alpha) * current;
   const rounded = Math.round(next * 10) / 10;
-  // Help with the fact that with the default alpha, it will never approach 5 (stay at 4.9)
+  // Help with the fact that with the default alpha, it will never approach 5 (stay at 4.9) or 0 for a case you learnt then lost confidence in
+  if (rounded <= 1.1 && grade === 1) return 1;
   if (rounded >= 4.9 && grade === 3) return 5;
   return Math.max(1, Math.min(5, rounded));
 }

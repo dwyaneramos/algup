@@ -1,5 +1,6 @@
 import { Text, View, Button } from 'react-native';
-import { Link } from 'expo-router';
+import { useFocusEffect, Link } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { getAlgSetProgress } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
@@ -7,7 +8,16 @@ import { type AlgSetProgress } from '@/src/db/queries';
 
 export default function Stats() {
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
-  const algSetProgress = getAlgSetProgress(selectedAlgSet!.name);
+  const [algSetProgress, setAlgSetProgress] = useState<AlgSetProgress | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      if (!selectedAlgSet) return;
+      const progress = getAlgSetProgress(selectedAlgSet.name);
+      setAlgSetProgress(progress);
+    }, [selectedAlgSet])
+  );
+
+  if (!algSetProgress) return null;
   return (
     <View className=" px-3 items-center flex-1 justify-center bg-white">
       <Text>stats page</Text>
@@ -23,37 +33,44 @@ export default function Stats() {
   );
 }
 
+interface AlgCategoryAttributes {
+  numCases: number,
+  color: string,
+  header: string
+}
+
 function AlgProgressBar({ algSetProgress }: {
   algSetProgress: AlgSetProgress,
 }) {
   const total = algSetProgress.total;
-  const learning = algSetProgress.learning;
-  const mastered = algSetProgress.mastered;
-  const reviewing = algSetProgress.reviewing;
+  const learning = { numCases: algSetProgress.learning, color: "bg-blue-400", header: "learning" }
+  const mastered = { numCases: algSetProgress.mastered, color: "bg-accent", header: "mastered" }
+  const reviewing = { numCases: algSetProgress.reviewing, color: "bg-green-400", header: "reviewing" }
+  const remaining = { numCases: total - learning.numCases - mastered.numCases - reviewing.numCases, color: "bg-gray-400", header: "remaining" }
+  const algCategories: AlgCategoryAttributes[] = [mastered, reviewing, learning, remaining];
 
-  const remaining = total - learning - mastered - reviewing;
 
-  const learningPct = (learning / total) * 100;
-  const masteredPct = (mastered / total) * 100;
-  const reviewingPct = (reviewing / total) * 100;
-  const remainingPct = (remaining / total) * 100;
 
   return (
     <View className="w-full">
       <View className="flex-row h-2 rounded-full overflow-hidden bg-gray-100">
-        <View style={{ width: `${masteredPct}%` }} className="bg-accent" />
-        <View style={{ width: `${learningPct}%` }} className="bg-yellow-400" />
-        <View style={{ width: `${reviewingPct}%` }} className="bg-blue-400" />
-        <View style={{ width: `${remainingPct}%` }} className="bg-gray-200" />
+        {algCategories.map((c) => {
+          return (
+            <View key={c.header} style={{ width: `${(c.numCases / total) * 100}%` }} className={c.color} />
+          )
+        })}
       </View>
       <View className="flex-col justify-between mt-1">
 
         <View className='flex flex-row justify-between'>
+          {algCategories.filter((c) => c.numCases > 0).map((c) => {
+            return (
+              <View key={c.header}>
+                <ProgressBarLegendTitle color={c.color} numCases={c.numCases} category={c.header} />
+              </View>
+            )
+          })}
 
-          <ProgressBarLegendTitle color="bg-accent" numCases={mastered} category="mastered" />
-          <ProgressBarLegendTitle color="bg-yellow-400" numCases={reviewing} category="reviewing" />
-          <ProgressBarLegendTitle color="bg-blue-400" numCases={learning} category="learning" />
-          <ProgressBarLegendTitle color="bg-gray-200" numCases={remaining} category="remaining" />
         </View>
       </View>
     </View>
