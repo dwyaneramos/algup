@@ -35,11 +35,14 @@ export function getNextState(state: CaseState, confidence: number): CaseState {
   }
   return state;
 }
+
 export function updateConfidence(current: number, grade: number, alpha: number = 0.3): number {
   const scaled = grade === 1 ? 1 : grade === 2 ? 3 : 5;
   const next = alpha * scaled + (1 - alpha) * current;
-
-  return Math.round(next * 10) / 10;
+  const rounded = Math.round(next * 10) / 10;
+  // Help with the fact that with the default alpha, it will never approach 5 (stay at 4.9)
+  if (rounded >= 4.9 && grade === 3) return 5;
+  return Math.max(1, Math.min(5, rounded));
 }
 
 export function shouldIntroduceNewCase(cases: CaseWithProgress[]): boolean {

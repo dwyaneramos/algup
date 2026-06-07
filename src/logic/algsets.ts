@@ -12,6 +12,16 @@ export interface AlgSet {
 
 export const ALG_SETS: AlgSet[] = [
   {
+    name: 'test',
+    cases: [
+      { alg: "R' U'" },
+      { alg: "R' U'" },
+      { alg: "R' U'" },
+      { alg: "R' U'" },
+    ]
+
+  },
+  {
     name: 'CMLL',
     cases: [
       { alg: "R U2 R' U' R U' R2 U2 R U R' U R " },
