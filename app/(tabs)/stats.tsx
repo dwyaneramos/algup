@@ -9,6 +9,8 @@ import { type AlgSetProgress } from '@/src/db/queries';
 export default function Stats() {
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const [algSetProgress, setAlgSetProgress] = useState<AlgSetProgress | null>(null);
+
+  // Force state to be most updated on load
   useFocusEffect(
     useCallback(() => {
       if (!selectedAlgSet) return;
