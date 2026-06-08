@@ -1,40 +1,38 @@
-import Svg, { Rect } from 'react-native-svg';
-import { applyScramble, solvedCube, type CubeState } from '@/src/utils/scramble';
-// generated with Claude Code Sonnet 4.6
+import Svg, { Rect, G } from 'react-native-svg';
+import { applyScramble, solvedCube } from '@/src/utils/scramble';
+import type { CubeState } from '@/src/utils/scramble';
 
 const COLORS: Record<string, string> = {
   W: '#ffffff', R: '#ff0000', G: '#00aa00',
   Y: '#ffff00', O: '#ffa500', B: '#0000ff',
 };
 
-const s = 20, g = 2, p = 4;
-const f = s * 3 + g * 2;
+const s = 18;  // sticker size
+const g = 1;   // gap
 
-interface FaceProps {
-  cube: CubeState;
-  faceIndex: number;
-  x: number;
-  y: number;
-}
-
-function Face({ cube, faceIndex, x, y }: FaceProps) {
+function Face({ cube, faceIndex }: {
+  cube: CubeState,
+  faceIndex: number,
+}) {
   const offset = faceIndex * 9;
   return (
     <>
       {Array(9).fill(0).map((_, i) => {
         const row = Math.floor(i / 3);
         const col = i % 3;
+        const hex = COLORS[cube[offset + i]];
+        const fill = hex;
         return (
           <Rect
             key={i}
-            x={x + col * (s + g)}
-            y={y + row * (s + g)}
+            x={col * (s + g)}
+            y={row * (s + g)}
+            rx={2}
             width={s}
             height={s}
-            fill={COLORS[cube[offset + i]]}
-            rx={4}
-            stroke="#333"
-            strokeWidth={0.3}
+            fill={fill}
+            stroke="#d4d4d4"
+            strokeWidth={0.5}
           />
         );
       })}
@@ -42,19 +40,24 @@ function Face({ cube, faceIndex, x, y }: FaceProps) {
   );
 }
 
+
+
 export function DrawScramble({ scramble }: { scramble: string }) {
   const cube = scramble ? applyScramble(scramble) : solvedCube();
-  const totalW = f * 4 + p * 3;
-  const totalH = f * 3 + p * 2;
 
   return (
-    <Svg width={totalW} height={totalH}>
-      <Face cube={cube} faceIndex={0} x={f + p} y={0} />
-      <Face cube={cube} faceIndex={4} x={0} y={f + p} />
-      <Face cube={cube} faceIndex={2} x={f + p} y={f + p} />
-      <Face cube={cube} faceIndex={1} x={f * 2 + p * 2} y={f + p} />
-      <Face cube={cube} faceIndex={5} x={f * 3 + p * 3} y={f + p} />
-      <Face cube={cube} faceIndex={3} x={f + p} y={f * 2 + p * 2} />
+    <Svg width={118} height={140} transform={`scale(1.5) translate(0, 30)`}>
+      <G transform={`translate(56,0 )  scale(1.43,0.81) rotate(45)`}>
+        <Face cube={cube} faceIndex={0} />
+      </G>
+
+      <G transform={`translate(0,33) skewY(30) scale(1,1.15)`}>
+        <Face cube={cube} faceIndex={2} />
+      </G>
+
+      <G transform={`translate(57,65) skewY(-30) scale(1,1.15)`}>
+        <Face cube={cube} faceIndex={1} />
+      </G>
     </Svg>
   );
 }

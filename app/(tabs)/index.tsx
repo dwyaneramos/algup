@@ -95,9 +95,7 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
-          <View className="bg-white p-2 rounded-3xl">
-            <DrawScramble scramble={scramble} />
-          </View>
+          <DrawScramble scramble={scramble} />
 
 
 
