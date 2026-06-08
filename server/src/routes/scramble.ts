@@ -62,7 +62,8 @@ router.post('/', async (req: Request, res: Response) => {
       scramble = new Alg(`${solution.toString()} ${prefix}`).experimentalSimplify({ cancel: true, puzzleLoader: cube3x3x3 }).toString();
     } while (scramble.split(" ").length < minimumScrambleLength);
 
-    res.status(200).json({ scramble: scramble });
+    res.status(200).json({ scramble: scramble, solution: new Alg(alg).experimentalSimplify({ cancel: true, puzzleLoader: cube3x3x3 }).toString() });
+
     console.log(`Generated scramble for alg "${alg}" with length ${scramble.split(" ").length}: ${scramble}`);
   } catch (err) {
     res.status(500).json({ error: 'Failed to generate scramble' });

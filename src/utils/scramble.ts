@@ -136,19 +136,21 @@ export function generateDrawScramble(scramble: string): void {
     console.log(f, rows);
   });
   console.log('---------')
-
-
 }
 
-export async function generateScrambleFromAlg(algString: string): Promise<string> {
+export interface ScrambleSolutionPair {
+  scramble: string,
+  solution: string,
+}
+
+export async function generateScrambleFromAlg(algString: string): Promise<ScrambleSolutionPair> {
   const res = await fetch(`${API_URL}/scramble`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ alg: algString }),
   });
-  const { scramble } = await res.json();
 
-  return scramble;
+  return await res.json();
 }
 
 

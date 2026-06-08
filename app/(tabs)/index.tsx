@@ -13,12 +13,14 @@ import { Sad, Mid, Happy } from '@/assets/icons';
 const ICON_SIZE = 48;
 const DEFAULT_TIME_STRING = '0.00';
 
+enum DisplayInfoType { Scramble, Solution }
+
 export default function MainScreen() {
   const [attemptDone, setAttemptDone] = useState(false);
-
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const { running, start, stop, formatted, resetTime } = useTimer();
-  const { scramble, submitGrade } = useTrainingSession(selectedAlgSet?.name ?? '');
+  const { scramble, submitGrade, solution } = useTrainingSession(selectedAlgSet?.name ?? '');
+  const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<DisplayInfoType>(DisplayInfoType.Scramble)
 
   const overallFluency = selectedAlgSet
     ? getAlgSetFluencyPercentage(selectedAlgSet.name)
@@ -43,19 +45,23 @@ export default function MainScreen() {
   }, [selectedAlgSet])
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 flex-col items-center justify-start">
       {!running && (
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          className="gap-0 flex-1 pt-16 px-3 items-center justify-start"
+          className="gap-0 flex pt-16 px-3 flex-col"
         >
-          <Text className="font-inter-bold text-header">{selectedAlgSet?.name}</Text>
-          <Text className="mb-3">Fluency: {overallFluency.toFixed(2)}%</Text>
+          <Text className="font-inter-bold text-center text-header">{selectedAlgSet?.name}</Text>
+          <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
           <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 w-full items-center justify-center">
-            <Text className="text-center text-body font-inter-medium">{scramble}</Text>
+            <Pressable onPress={() => alert("AJH")}>
+              <Text className="text-center text-body font-inter-medium">{scramble}</Text>
+            </Pressable>
           </View>
+
+
         </Animated.View>
       )}
 
@@ -71,21 +77,22 @@ export default function MainScreen() {
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          className="gap-3 flex-1 px-10 items-center justify-start"
+          className="flex flex-col items-center relative justify-center"
         >
           {formatted() !== DEFAULT_TIME_STRING && (
             <Animated.View
               entering={FadeIn.duration(200)}
               exiting={FadeOut.duration(200)}
-              className="flex flex-row justify-around w-full"
+              className="absolute left-0 right-0 top-0 flex-row justify-center items-center gap-10"
+              style={{ transform: [{ translateY: -80 }] }}
             >
-              <GradeButton onPress={() => handleGrade(1)} icon={Sad} color='#d95f6b' />
-              <GradeButton onPress={() => handleGrade(2)} icon={Mid} color='#d9a45f' />
-              <GradeButton onPress={() => handleGrade(3)} icon={Happy} color='#5fd976' />
+              <GradeButton onPress={() => handleGrade(1)} icon={Sad} color="#d95f6b" />
+              <GradeButton onPress={() => handleGrade(2)} icon={Mid} color="#d9a45f" />
+              <GradeButton onPress={() => handleGrade(3)} icon={Happy} color="#5fd976" />
             </Animated.View>
           )}
 
-          <View className="bg-white p-2 rounded-3xl absolute bottom-5">
+          <View className="bg-white p-2 rounded-3xl">
             <DrawScramble scramble={scramble} />
           </View>
 

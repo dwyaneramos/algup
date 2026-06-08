@@ -8,6 +8,7 @@ export function useTrainingSession(algset: string) {
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [currentCase, setCurrentCase] = useState<CaseWithProgress | null>(null);
   const [scramble, setScramble] = useState('');
+  const [solution, setSolution] = useState('');
 
   useEffect(() => {
     if (!algset) return;
@@ -28,7 +29,11 @@ export function useTrainingSession(algset: string) {
 
   useEffect(() => {
     if (!currentCase) return;
-    generateScrambleFromAlg(currentCase.alg).then(setScramble);
+    (async () => {
+      const scrambleSolutionPair = await generateScrambleFromAlg(currentCase.alg);
+      setScramble(scrambleSolutionPair.scramble);
+      setSolution(scrambleSolutionPair.solution);
+    })()
   }, [currentCase]);
 
   const submitGrade = (grade: number) => {
@@ -53,5 +58,5 @@ export function useTrainingSession(algset: string) {
     setCurrentCase(newCase);
   };
 
-  return { currentCase, scramble, submitGrade };
+  return { currentCase, scramble, solution, submitGrade };
 }
