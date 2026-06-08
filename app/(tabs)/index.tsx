@@ -13,14 +13,13 @@ import { Sad, Mid, Happy } from '@/assets/icons';
 const ICON_SIZE = 48;
 const DEFAULT_TIME_STRING = '0.00';
 
-enum DisplayInfoType { Scramble, Solution }
 
 export default function MainScreen() {
   const [attemptDone, setAttemptDone] = useState(false);
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const { running, start, stop, formatted, resetTime } = useTimer();
   const { scramble, submitGrade, solution } = useTrainingSession(selectedAlgSet?.name ?? '');
-  const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<DisplayInfoType>(DisplayInfoType.Scramble)
+  const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<string>('scramble');
 
   const overallFluency = selectedAlgSet
     ? getAlgSetFluencyPercentage(selectedAlgSet.name)
@@ -39,6 +38,10 @@ export default function MainScreen() {
     }, 200);
   }
 
+  function toggleDisplayMode() {
+    setShowScrambleOrSolution((prev) => prev === 'scramble' ? 'solution' : 'scramble');
+  }
+
   useEffect(() => {
     setAttemptDone(false)
     resetTime();
@@ -55,9 +58,9 @@ export default function MainScreen() {
           <Text className="font-inter-bold text-center text-header">{selectedAlgSet?.name}</Text>
           <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
-          <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 w-full items-center justify-center">
-            <Pressable onPress={() => alert("AJH")}>
-              <Text className="text-center text-body font-inter-medium">{scramble}</Text>
+          <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
+            <Pressable onPress={toggleDisplayMode}>
+              <Text className="text-center text-body font-inter-medium">{showScrambleOrSolution === 'solution' ? solution : scramble}</Text>
             </Pressable>
           </View>
 
