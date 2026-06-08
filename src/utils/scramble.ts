@@ -35,7 +35,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 // 48 49 50
 // 51 52 53
 
-type CubeState = string[];
+export type CubeState = string[];
 
 // Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
 const MOVES: Record<string, number[][]> = {

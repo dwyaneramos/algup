@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
+import { DrawScramble } from '@/components/DrawScramble';
 import { Sad, Mid, Happy } from '@/assets/icons';
 import { generateDrawScramble } from '@/src/utils/scramble';
 
@@ -85,13 +86,9 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
+          <DrawScramble scramble={scramble} />
 
-          <Button
-            onPress={() => generateDrawScramble(scramble)}
-            title="generate draw scramble"
-            color="#000"
-            accessibilityLabel="generates draw scramble"
-          />
+
 
 
         </Animated.View>
