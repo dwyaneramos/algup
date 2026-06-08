@@ -1,5 +1,5 @@
 import Svg, { Rect, G } from 'react-native-svg';
-import { applyScramble, solvedCube } from '@/src/utils/scramble';
+import { applyScramble, solvedCube, Colour } from '@/src/utils/scramble';
 import type { CubeState } from '@/src/utils/scramble';
 
 const COLORS: Record<string, string> = {
@@ -7,8 +7,11 @@ const COLORS: Record<string, string> = {
   Y: '#ffff00', O: '#ffa500', B: '#0000ff',
 };
 
-const s = 18;  // sticker size
-const g = 1;   // gap
+// These variables are very coupled with the transformation values
+// sticker size
+const s = 18;
+// gap
+const g = 1;
 
 function Face({ cube, faceIndex }: {
   cube: CubeState,
@@ -48,15 +51,15 @@ export function DrawScramble({ scramble }: { scramble: string }) {
   return (
     <Svg width={118} height={140} transform={`scale(1.5) translate(0, 30)`}>
       <G transform={`translate(56,0 )  scale(1.43,0.81) rotate(45)`}>
-        <Face cube={cube} faceIndex={0} />
+        <Face cube={cube} faceIndex={Colour.White} />
       </G>
 
       <G transform={`translate(0,33) skewY(30) scale(1,1.15)`}>
-        <Face cube={cube} faceIndex={2} />
+        <Face cube={cube} faceIndex={Colour.Green} />
       </G>
 
       <G transform={`translate(57,65) skewY(-30) scale(1,1.15)`}>
-        <Face cube={cube} faceIndex={1} />
+        <Face cube={cube} faceIndex={Colour.Red} />
       </G>
     </Svg>
   );

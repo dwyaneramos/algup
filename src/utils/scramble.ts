@@ -37,6 +37,11 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export type CubeState = string[];
 
+
+export enum Colour {
+  White, Red, Green, Yellow, Orange, Blue
+}
+
 // Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
 const MOVES: Record<string, number[][]> = {
   'U': [
@@ -83,6 +88,7 @@ const MOVES: Record<string, number[][]> = {
     [0, 42, 35, 11]
   ],
 };
+
 
 
 function applyMove(cube: CubeState, move: string): CubeState {
