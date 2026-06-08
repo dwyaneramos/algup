@@ -2,8 +2,8 @@ import { db } from './schema';
 import { AlgSet, Case } from '@/src/logic/algsets';
 import { type CaseWithProgress, type CaseState } from '@/src/logic/caseQueue';
 
-export interface CaseWithConfidence extends Case {
-  confidence: number;
+export interface CaseWithFluency extends Case {
+  fluency: number;
 }
 
 export interface AlgSetProgress {
@@ -55,9 +55,9 @@ export function getAlgSets(): AlgSet[] {
   }));
 }
 
-export function getOverallConfidence(algsetName: string): number {
+export function getOverallFluency(algsetName: string): number {
   const result = db.getFirstSync<{ avg: number }>(`
-    SELECT AVG(COALESCE(cp.confidence, 1.0)) as avg
+    SELECT AVG(COALESCE(cp.fluency, 1.0)) as avg
     FROM cases c
     LEFT JOIN case_progress cp ON c.id = cp.case_id
     WHERE c.algset = ?
@@ -70,20 +70,20 @@ export function getCases(algsetName: string): Case[] {
   return cases;
 }
 
-export function getCasesWithConfidence(algsetId: string): CaseWithConfidence[] {
-  return db.getAllSync<CaseWithConfidence>(`
-    SELECT c.*, COALESCE(cp.confidence, 1.0) as confidence
+export function getCasesWithFluency(algsetId: string): CaseWithFluency[] {
+  return db.getAllSync<CaseWithFluency>(`
+    SELECT c.*, COALESCE(cp.fluency, 1.0) as fluency
     FROM cases c
     LEFT JOIN case_progress cp ON c.id = cp.case_id
     WHERE c.algset_id = ?
   `, [algsetId]);
 }
 
-export function saveCaseConfidence(caseId: string, confidence: number) {
+export function saveCaseFluency(caseId: string, fluency: number) {
   db.runSync(`
-    INSERT OR REPLACE INTO case_progress (case_id, confidence)
+    INSERT OR REPLACE INTO case_progress (case_id, fluency)
     VALUES (?, ?)
-  `, [caseId, confidence]);
+  `, [caseId, fluency]);
 }
 
 export function getSetting(key: string): string | null {
@@ -106,7 +106,7 @@ export function getCasesWithProgress(
 ): CaseWithProgress[] {
   return db.getAllSync<CaseWithProgress>(`
     SELECT c.*, 
-      COALESCE(cp.confidence, 1.0) AS confidence,
+      COALESCE(cp.fluency, 1.0) AS fluency,
       COALESCE(cp.state, 'locked') AS state
     FROM cases c
     LEFT JOIN case_progress cp
@@ -117,17 +117,17 @@ export function getCasesWithProgress(
 
 export function updateCaseProgress(
   caseId: number,
-  confidence: number,
+  fluency: number,
   state: CaseState
 ) {
   db.runSync(`
     INSERT OR REPLACE INTO case_progress (
       case_id,
-      confidence,
+      fluency,
       state
     )
     VALUES (?, ?, ?)
-  `, [caseId, confidence, state]);
+  `, [caseId, fluency, state]);
 }
 
 export function introduceNextCase(
@@ -148,7 +148,7 @@ export function introduceNextCase(
   db.runSync(`
     INSERT OR REPLACE INTO case_progress (
       case_id,
-      confidence,
+      fluency,
       state
     )
     VALUES (?, 1.0, 'learning')

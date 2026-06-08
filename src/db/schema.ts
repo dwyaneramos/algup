@@ -43,7 +43,7 @@ export function initDB() {
 
     CREATE TABLE IF NOT EXISTS case_progress (
       case_id INTEGER PRIMARY KEY,
-      confidence REAL DEFAULT 1.0,
+      fluency REAL DEFAULT 1.0,
       state TEXT DEFAULT 'locked',
       FOREIGN KEY (case_id) REFERENCES cases(id)
     );

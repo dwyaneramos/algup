@@ -4,7 +4,7 @@ export interface CaseWithProgress {
   id: number;
   alg: string;
   algset: string;
-  confidence: number;
+  fluency: number;
   state: CaseState;
 }
 
@@ -19,28 +19,28 @@ const STATE_WEIGHTS: Record<CaseState, number> = {
   mastered: 1,
 };
 
-const CONFIDENCE_THRESHOLDS = {
+const fluency_THRESHOLDS = {
   toReviewing: 3.0,
   toMastered: 4.5,
 };
 
 let available = []
 
-export function getNextState(state: CaseState, confidence: number): CaseState {
-  if (state === 'learning' && confidence >= CONFIDENCE_THRESHOLDS.toReviewing) {
+export function getNextState(state: CaseState, fluency: number): CaseState {
+  if (state === 'learning' && fluency >= fluency_THRESHOLDS.toReviewing) {
     return 'reviewing';
   }
-  if (state === 'reviewing' && confidence >= CONFIDENCE_THRESHOLDS.toMastered) {
+  if (state === 'reviewing' && fluency >= fluency_THRESHOLDS.toMastered) {
     return 'mastered';
   }
   return state;
 }
 
-export function getUpdatedConfidence(current: number, grade: number, alpha: number = 0.3): number {
+export function getUpdatedFluency(current: number, grade: number, alpha: number = 0.3): number {
   const scaled = grade === 1 ? 1 : grade === 2 ? 3 : 5;
   const next = alpha * scaled + (1 - alpha) * current;
   const rounded = Math.round(next * 10) / 10;
-  // Help with the fact that with the default alpha, it will never approach 5 (stay at 4.9) or 0 for a case you learnt then lost confidence in
+  // Help with the fact that with the default alpha, it will never approach 5 (stay at 4.9) or 0 for a case you learnt then lost fluency in
   if (rounded <= 1.1 && grade === 1) return 1;
   if (rounded >= 4.9 && grade === 3) return 5;
   return Math.max(1, Math.min(5, rounded));
@@ -60,11 +60,11 @@ export function pickNextCase(cases: CaseWithProgress[], excludeId?: number): Cas
   available = cases.filter(c => c.state !== 'locked' && c.id !== excludeId);
   if (available.length === 0) return null;
 
-  const totalWeight = available.reduce((sum, c) => sum + STATE_WEIGHTS[c.state] * (6 - c.confidence), 0);
+  const totalWeight = available.reduce((sum, c) => sum + STATE_WEIGHTS[c.state] * (6 - c.fluency), 0);
   let random = Math.random() * totalWeight;
 
   for (const c of available) {
-    random -= STATE_WEIGHTS[c.state] * (6 - c.confidence);
+    random -= STATE_WEIGHTS[c.state] * (6 - c.fluency);
     if (random <= 0) return c;
   }
 

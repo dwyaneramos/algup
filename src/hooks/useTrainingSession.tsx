@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCasesWithProgress, updateCaseProgress, introduceNextCase } from '@/src/db/queries';
-import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedConfidence } from '@/src/logic/caseQueue';
+import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedFluency } from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/utils/scramble';
 
 
@@ -33,13 +33,13 @@ export function useTrainingSession(algset: string) {
 
   const submitGrade = (grade: number) => {
     if (!currentCase) return;
-    const newConfidence = getUpdatedConfidence(currentCase.confidence, grade);
-    const newState = getNextState(currentCase.state, newConfidence);
-    updateCaseProgress(currentCase.id, newConfidence, newState);
+    const newFluency = getUpdatedFluency(currentCase.fluency, grade);
+    const newState = getNextState(currentCase.state, newFluency);
+    updateCaseProgress(currentCase.id, newFluency, newState);
 
     let updatedCases = cases.map(c =>
       c.id === currentCase.id
-        ? { ...c, confidence: newConfidence, state: newState }
+        ? { ...c, fluency: newFluency, state: newState }
         : c
     );
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { getAlgSets } from '@/src/db/queries';
 import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
+import { getAlgSetFluencyPercentage } from '@/src/utils/fluency';
 import { useFocusEffect } from 'expo-router';
 
 
@@ -42,7 +42,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
         <View className="flex flex-col justify-center">
           <Text className="font-inter-semibold text-xl">{algset.name}</Text>
-          <Text className="font-inter-medium">{getAlgSetConfidencePercentage(algset.name).toFixed(2)}%</Text>
+          <Text className="font-inter-medium">{getAlgSetFluencyPercentage(algset.name).toFixed(2)}%</Text>
           <Text className="font-inter-medium">{algset.cases.length} Algorithms</Text>
         </View>
         <View className="h-16 w-16 bg-gray-300" />
