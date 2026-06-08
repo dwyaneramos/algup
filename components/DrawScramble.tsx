@@ -1,5 +1,6 @@
 import Svg, { Rect } from 'react-native-svg';
 import { applyScramble, solvedCube, type CubeState } from '@/src/utils/scramble';
+// generated with Claude Code Sonnet 4.6
 
 const COLORS: Record<string, string> = {
   W: '#ffffff', R: '#ff0000', G: '#00aa00',
