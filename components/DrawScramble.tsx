@@ -31,7 +31,9 @@ function Face({ cube, faceIndex, x, y }: FaceProps) {
             width={s}
             height={s}
             fill={COLORS[cube[offset + i]]}
-            rx={3}
+            rx={4}
+            stroke="#333"
+            strokeWidth={0.3}
           />
         );
       })}

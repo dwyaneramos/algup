@@ -8,7 +8,6 @@ import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
 import { Sad, Mid, Happy } from '@/assets/icons';
-import { generateDrawScramble } from '@/src/utils/scramble';
 
 
 const ICON_SIZE = 48;
@@ -86,7 +85,9 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
-          <DrawScramble scramble={scramble} />
+          <View className="bg-white p-2 rounded-3xl absolute bottom-5">
+            <DrawScramble scramble={scramble} />
+          </View>
 
 
 
