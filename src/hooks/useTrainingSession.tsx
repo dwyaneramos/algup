@@ -23,7 +23,6 @@ export function useTrainingSession(algset: string) {
 
     setCases(initial);
     const newCase = pickNextCase(initial);
-    console.log(newCase, "YAY")
     setCurrentCase(newCase);
   }, [algset]);
 
@@ -51,7 +50,6 @@ export function useTrainingSession(algset: string) {
 
     setCases(updatedCases);
     const newCase = pickNextCase(updatedCases, currentCase.id)
-    console.log(newCase, "YIPI")
     setCurrentCase(newCase);
   };
 

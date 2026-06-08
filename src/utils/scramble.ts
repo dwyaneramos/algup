@@ -1,4 +1,144 @@
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+// 54 stickers, 9 per face in this order:
+// U(0-8) R(9-17) F(18-26) D(27-35) L(36-44) B(45-53)
+// Each face reading left-right, top-bottom:
+//
+// U (0-8)
+// 0 1 2
+// 3 4 5
+// 6 7 8
+
+// R (9-17)
+// 9  10 11
+// 12 13 14
+// 15 16 17
+
+// F (18-26)
+// 18 19 20
+// 21 22 23
+// 24 25 26
+
+// D (27-35)
+// 27 28 29
+// 30 31 32
+// 33 34 35
+
+// L (36-44)
+// 36 37 38
+// 39 40 41
+// 42 43 44
+
+// B (45-53)
+// 45 46 47
+// 48 49 50
+// 51 52 53
+
+type CubeState = string[];
+
+// Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
+const MOVES: Record<string, number[][]> = {
+  'U': [
+    [0, 2, 8, 6],
+    [1, 5, 7, 3],
+    [18, 36, 45, 9],
+    [19, 37, 46, 10],
+    [20, 38, 47, 11]
+  ],
+  'R': [
+    [9, 11, 17, 15],
+    [10, 14, 16, 12],
+    [2, 51, 29, 20],
+    [5, 48, 32, 23],
+    [8, 45, 35, 26],
+  ],
+  'F': [
+    [18, 20, 26, 24],
+    [19, 23, 25, 21],
+    [8, 15, 27, 38],
+    [7, 12, 28, 41],
+    [6, 9, 29, 44],
+
+  ],
+  'D': [
+    [27, 29, 35, 33],
+    [28, 32, 34, 30],
+    [24, 15, 51, 42],
+    [25, 16, 52, 43],
+    [26, 17, 53, 44]
+  ],
+  'L': [
+    [36, 38, 44, 42],
+    [37, 41, 43, 39],
+    [0, 18, 27, 53],
+    [3, 21, 30, 50],
+    [6, 24, 33, 47]
+  ],
+  'B': [
+    [45, 47, 53, 51],
+    [46, 50, 52, 48],
+    [2, 36, 33, 17,],
+    [1, 39, 34, 14],
+    [0, 42, 35, 11]
+  ],
+};
+
+
+function applyMove(cube: CubeState, move: string): CubeState {
+  const next = [...cube];
+  const base = move.replace("'", '').replace('2', '');
+  const isPrime = move.includes("'");
+  const isDouble = move.includes('2');
+  const cycles = MOVES[base];
+
+  const times = isDouble ? 2 : isPrime ? 3 : 1; // 3 clockwise = 1 counter-clockwise
+
+  for (let t = 0; t < times; t++) {
+    const temp = [...next];
+    for (const cycle of cycles) {
+      for (let i = 0; i < cycle.length; i++) {
+        next[cycle[(i + 1) % cycle.length]] = temp[cycle[i]];
+      }
+    }
+  }
+
+  return next;
+}
+
+export function applyScramble(scramble: string): CubeState {
+  const moves = scramble.trim().split(/\s+/);
+  return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
+}
+
+export function solvedCube(): CubeState {
+  return [
+    ...Array(9).fill('W'),
+    ...Array(9).fill('R'),
+    ...Array(9).fill('G'),
+    ...Array(9).fill('Y'),
+    ...Array(9).fill('O'),
+    ...Array(9).fill('B'),
+  ];
+}
+export function generateDrawScramble(scramble: string): void {
+  const state = applyScramble(scramble);
+  const faces = ['U', 'R', 'F', 'D', 'L', 'B'];
+
+  console.log('---------')
+  faces.forEach((f, i) => {
+    const face = state.slice(i * 9, i * 9 + 9);
+    const rows = [
+      face.slice(0, 3).join(''),
+      face.slice(3, 6).join(''),
+      face.slice(6, 9).join(''),
+    ].join(' ');
+    console.log(f, rows);
+  });
+  console.log('---------')
+
+
+}
 
 export async function generateScrambleFromAlg(algString: string): Promise<string> {
   const res = await fetch(`${API_URL}/scramble`, {
@@ -10,3 +150,5 @@ export async function generateScrambleFromAlg(algString: string): Promise<string
 
   return scramble;
 }
+
+

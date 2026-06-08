@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Button } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
@@ -7,6 +7,8 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetConfidencePercentage } from '@/src/utils/confidence';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { Sad, Mid, Happy } from '@/assets/icons';
+import { generateDrawScramble } from '@/src/utils/scramble';
+
 
 const ICON_SIZE = 48;
 const DEFAULT_TIME_STRING = '0.00';
@@ -83,8 +85,18 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
+
+          <Button
+            onPress={() => generateDrawScramble(scramble)}
+            title="generate draw scramble"
+            color="#000"
+            accessibilityLabel="generates draw scramble"
+          />
+
+
         </Animated.View>
       )}
+
     </View>
   );
 }
