@@ -44,6 +44,7 @@ export default function MainScreen() {
 
   useEffect(() => {
     setAttemptDone(false)
+    setShowScrambleOrSolution('scramble')
     resetTime();
   }, [selectedAlgSet])
 
