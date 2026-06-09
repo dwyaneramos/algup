@@ -6,13 +6,18 @@ import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/utils/fluency';
 import { useFocusEffect } from 'expo-router';
+import { getDisplayCaseScramble } from '@/src/utils/case';
+import { DrawScramble } from '@/components/DrawScramble';
 
 
 function AlgSetRow({ algset }: { algset: AlgSet }) {
   const { selectedAlgSet, setSelectedAlgSet } = useAlgSetStore();
+  const [scramble, setScramble] = useState<string | null>(null);
+
   const isSelected = selectedAlgSet?.name === algset.name;
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
+
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -22,6 +27,11 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
       ['#ffffff', '#e899f2']
     ),
   }));
+
+
+  useEffect(() => {
+    getDisplayCaseScramble(algset.name).then(setScramble);
+  }, [algset.name]);
 
   useEffect(() => {
     selected.value = withTiming(isSelected ? 1 : 0, { duration: 150 });
@@ -34,6 +44,9 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     });
   };
 
+  if (scramble === null) return null;
+
+
   return (
     <Animated.View
       style={[animatedStyle]}
@@ -42,10 +55,10 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
         <View className="flex flex-col justify-center">
           <Text className="font-inter-semibold text-xl">{algset.name}</Text>
-          <Text className="font-inter-medium">{getAlgSetFluencyPercentage(algset.name).toFixed(2)}%</Text>
+          <Text className="font-inter-medium">{getAlgSetFluencyPercentage(algset.name).toFixed(2)}% Fluency</Text>
           <Text className="font-inter-medium">{algset.cases.length} Algorithms</Text>
         </View>
-        <View className="h-16 w-16 bg-gray-300" />
+        <DrawScramble scramble={scramble} scale={0.6} />
       </Pressable>
     </Animated.View>
   );

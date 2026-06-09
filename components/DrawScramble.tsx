@@ -1,6 +1,7 @@
 import Svg, { Rect, G } from 'react-native-svg';
 import { applyScramble, solvedCube, Colour } from '@/src/utils/scramble';
 import type { CubeState } from '@/src/utils/scramble';
+import { View } from 'react-native';
 
 const COLORS: Record<string, string> = {
   W: '#ffffff', R: '#ff0000', G: '#00aa00',
@@ -45,21 +46,23 @@ function Face({ cube, faceIndex }: {
 
 
 
-export function DrawScramble({ scramble }: { scramble: string }) {
+export function DrawScramble({ scramble, scale = 1 }: { scramble: string, scale?: number }) {
   const cube = scramble ? applyScramble(scramble) : solvedCube();
+  const w = 118 * scale;
+  const h = 140 * scale;
 
   return (
-    <Svg width={118} height={140} transform={`scale(1.5) translate(0, 30)`}>
-      <G transform={`translate(56,0 )  scale(1.43,0.81) rotate(45)`}>
-        <Face cube={cube} faceIndex={Colour.White} />
-      </G>
-
-      <G transform={`translate(0,33) skewY(30) scale(1,1.15)`}>
-        <Face cube={cube} faceIndex={Colour.Green} />
-      </G>
-
-      <G transform={`translate(57,65) skewY(-30) scale(1,1.15)`}>
-        <Face cube={cube} faceIndex={Colour.Red} />
+    <Svg width={w} height={h} viewBox="0 0 118 170">
+      <G transform="translate(0, 30)">
+        <G transform="translate(56, 0) scale(1.43, 0.81) rotate(45)">
+          <Face cube={cube} faceIndex={Colour.White} />
+        </G>
+        <G transform="translate(0, 33) skewY(30) scale(1, 1.15)">
+          <Face cube={cube} faceIndex={Colour.Green} />
+        </G>
+        <G transform="translate(57, 65) skewY(-30) scale(1, 1.15)">
+          <Face cube={cube} faceIndex={Colour.Red} />
+        </G>
       </G>
     </Svg>
   );

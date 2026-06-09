@@ -25,6 +25,13 @@ export function getAlgSet(name: string): AlgSet | null {
   };
 }
 
+export function getFirstCase(algsetName: string): Case | null {
+  return db.getFirstSync<Case>(
+    'SELECT * FROM cases WHERE algset = ? ORDER BY id ASC LIMIT 1',
+    [algsetName]
+  );
+}
+
 
 export function getAlgSetProgress(algset: string): AlgSetProgress {
   const result = db.getFirstSync<{
