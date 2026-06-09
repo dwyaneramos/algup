@@ -95,7 +95,7 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
-          <DrawScramble scale={1.8} scramble={scramble} />
+          <DrawScramble scale={2} scramble={scramble} />
 
 
 

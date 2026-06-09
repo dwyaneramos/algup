@@ -48,12 +48,12 @@ function Face({ cube, faceIndex }: {
 
 export function DrawScramble({ scramble, scale = 1 }: { scramble: string, scale?: number }) {
   const cube = scramble ? applyScramble(scramble) : solvedCube();
-  const w = 118 * scale;
-  const h = 140 * scale;
+  const w = 90 * scale;
+  const h = 100 * scale;
 
   return (
-    <Svg width={w} height={h} viewBox="0 0 118 170">
-      <G transform="translate(0, 30)">
+    <Svg width={w} height={h} viewBox="0 0 112 135">
+      <G transform="translate(0, 2.5)">
         <G transform="translate(56, 0) scale(1.43, 0.81) rotate(45)">
           <Face cube={cube} faceIndex={Colour.White} />
         </G>

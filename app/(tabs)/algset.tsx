@@ -38,6 +38,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   }, [isSelected]);
 
   const handlePress = () => {
+    if (selectedAlgSet !== null && algset.name === selectedAlgSet.name) return;
     setSelectedAlgSet(algset);
     translateY.value = withTiming(-10, { duration: 200 }, () => {
       translateY.value = withTiming(0, { duration: 350 });
