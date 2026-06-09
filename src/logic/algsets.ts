@@ -10,6 +10,7 @@ export interface AlgSet {
   cases: Case[];
 }
 
+// Default cases
 export const ALG_SETS: AlgSet[] = [
   {
     name: 'test',

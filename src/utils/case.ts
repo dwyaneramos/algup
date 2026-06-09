@@ -5,7 +5,11 @@ export async function getRandomCase(algsetName: string): Promise<Case> {
   const cases = getCases(algsetName);
   const i = Math.floor(Math.random() * cases.length);
   return cases[i];
+}
 
+export async function getAllCases(algsetName: string): Promise<Case[]> {
+  const cases = getCases(algsetName);
+  return cases;
 }
 
 export async function getDisplayCaseScramble(algsetName: string): Promise<string> {
