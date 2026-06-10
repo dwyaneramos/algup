@@ -203,7 +203,7 @@ function applyMove(cube: CubeState, move: string): CubeState {
 export function applyScramble(scramble: string): CubeState {
   const clean = scramble.replace(/[()]/g, '');
   scramble = new Alg(clean).invert().toString();
-  const moves = clean.trim().split(/\s+/);
+  const moves = scramble.trim().split(/\s+/);
   return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
 }
 

@@ -68,6 +68,7 @@ export default function Algset() {
 function CaseRow({ c }: { c: CaseWithProgress }) {
 
   if (c.alg === undefined) return;
+
   return (
     <Animated.View
       entering={FadeIn.duration(300)}
