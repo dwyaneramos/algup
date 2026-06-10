@@ -168,6 +168,10 @@ function invertCycle(cycle: number[]): number[] {
   return [...cycle].reverse();
 }
 
+export function invertAlgorithm(alg: string): string {
+  return new Alg(alg).invert().toString();
+}
+
 const MOVES: Record<string, number[][]> = {
   ...BASE_MOVES,
   r: [...BASE_MOVES.R, ...BASE_MOVES.M.map(invertCycle)],
@@ -200,10 +204,14 @@ function applyMove(cube: CubeState, move: string): CubeState {
   return next;
 }
 
+export function sanitiseAlgorithm(alg: string): string {
+  const sanitised = alg.replace(/[()]/g, '');
+  return sanitised;
+}
+
 export function applyScramble(scramble: string): CubeState {
-  const clean = scramble.replace(/[()]/g, '');
-  scramble = new Alg(clean).invert().toString();
-  const moves = scramble.trim().split(/\s+/);
+  const sanitised = sanitiseAlgorithm(scramble);
+  const moves = sanitised.trim().split(/\s+/);
   return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
 }
 
@@ -223,10 +231,11 @@ export interface ScrambleSolutionPair {
 }
 
 export async function generateScrambleFromAlg(algString: string): Promise<ScrambleSolutionPair> {
+  const cleanAlg = algString.replace(/[()]/g, '');
   const res = await fetch(`${API_URL}/scramble`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ alg: algString }),
+    body: JSON.stringify({ alg: cleanAlg }),
   });
 
   return await res.json();

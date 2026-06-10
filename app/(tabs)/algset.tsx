@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Pressable } from 'react-native';
-import { applyScramble } from '@/src/utils/scramble';
+import { invertAlgorithm, sanitiseAlgorithm } from '@/src/utils/scramble';
 import { useEffect, useState, useCallback } from 'react';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
@@ -8,6 +8,7 @@ import { convertScoreToPercentage } from '@/src/utils/fluency';
 import { getAllCasesWithProgress } from '@/src/utils/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { Link, useFocusEffect } from 'expo-router';
+import { invert } from 'react-native-svg/lib/typescript/elements/Shape';
 
 export default function Algset() {
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
@@ -68,6 +69,7 @@ export default function Algset() {
 function CaseRow({ c }: { c: CaseWithProgress }) {
 
   if (c.alg === undefined) return;
+  console.log("HEHE", c.alg)
 
   return (
     <Animated.View
@@ -84,7 +86,7 @@ function CaseRow({ c }: { c: CaseWithProgress }) {
         </Text>
       </View>
       <View className="flex-shrink-0">
-        <DrawScramble scramble={c.alg} scale={0.5} />
+        <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} />
       </View>
     </Animated.View>
   )

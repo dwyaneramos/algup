@@ -60,15 +60,13 @@ export default function MainScreen() {
           <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
           <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
-            <Pressable onPress={toggleDisplayMode}>
-              <Animated.Text
-                key={showScrambleOrSolution}
-                entering={FadeIn.duration(300)}
-                className="text-center text-body font-inter-medium"
-              >
-                {showScrambleOrSolution === 'solution' ? solution : scramble}
-              </Animated.Text>
-            </Pressable>
+            <Animated.Text
+              key={showScrambleOrSolution}
+              entering={FadeIn.duration(200)}
+              className="text-center text-body font-inter-medium"
+            >
+              {showScrambleOrSolution === 'solution' ? solution : scramble}
+            </Animated.Text>
           </View>
 
           <Pressable className="bg-accent rounded-3xl w-48 p-3 mt-3" onPress={toggleDisplayMode}>
