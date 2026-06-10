@@ -54,28 +54,40 @@ export default function MainScreen() {
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(200)}
-          className="gap-0 flex pt-16 px-3 flex-col"
+          className="gap-0 flex pt-16 px-3 flex-col items-center"
         >
           <Text className="font-inter-bold text-center text-header">{selectedAlgSet?.name}</Text>
           <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
           <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
             <Pressable onPress={toggleDisplayMode}>
-              <Text className="text-center text-body font-inter-medium">{showScrambleOrSolution === 'solution' ? solution : scramble}</Text>
+              <Animated.Text
+                key={showScrambleOrSolution}
+                entering={FadeIn.duration(300)}
+                className="text-center text-body font-inter-medium"
+              >
+                {showScrambleOrSolution === 'solution' ? solution : scramble}
+              </Animated.Text>
             </Pressable>
           </View>
+
+          <Pressable className="bg-accent rounded-3xl w-48 p-3 mt-3" onPress={toggleDisplayMode}>
+            <Text className="text-white text-center">Show {showScrambleOrSolution === 'solution' ? "Scramble" : "Solution"}</Text>
+
+          </Pressable>
 
 
         </Animated.View>
       )}
-
-      <Timer
-        disabled={attemptDone}
-        formatted={formatted()}
-        running={running}
-        onStart={start}
-        onStop={handleStopAttempt}
-      />
+      <View className="mt-3">
+        <Timer
+          disabled={attemptDone}
+          formatted={formatted()}
+          running={running}
+          onStart={start}
+          onStop={handleStopAttempt}
+        />
+      </View>
 
       {!running && (
         <Animated.View

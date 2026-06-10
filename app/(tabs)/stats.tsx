@@ -21,7 +21,7 @@ export default function Stats() {
 
   if (!algSetProgress || selectedAlgSet === null) return null;
   return (
-    <View className=" px-3 items-center flex-1  pt-16 bg-white">
+    <View className=" px-3 items-center flex-1  pt-16 ">
 
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
