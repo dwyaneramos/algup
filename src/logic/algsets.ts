@@ -15,7 +15,7 @@ export const ALG_SETS: AlgSet[] = [
   {
     name: 'test',
     cases: [
-      { alg: "R' U'" },
+      { alg: "R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2'" },
       { alg: "R' U'" },
       { alg: "R' U'" },
       { alg: "R' U'" },

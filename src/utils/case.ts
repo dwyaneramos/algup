@@ -1,5 +1,6 @@
-import { getCases, getFirstCase } from "@/src/db/queries";
+import { getCases, getFirstCase, getCasesWithProgress } from "@/src/db/queries";
 import { type Case } from "@/src/logic/algsets";
+import type { CaseWithProgress } from "@/src/logic/caseQueue";
 
 export async function getRandomCase(algsetName: string): Promise<Case> {
   const cases = getCases(algsetName);
@@ -7,8 +8,8 @@ export async function getRandomCase(algsetName: string): Promise<Case> {
   return cases[i];
 }
 
-export async function getAllCases(algsetName: string): Promise<Case[]> {
-  const cases = getCases(algsetName);
+export async function getAllCasesWithProgress(algsetName: string): Promise<CaseWithProgress[]> {
+  const cases = getCasesWithProgress(algsetName);
   return cases;
 }
 

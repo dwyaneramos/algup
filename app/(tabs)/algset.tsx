@@ -2,24 +2,26 @@ import { View, Text, FlatList } from 'react-native';
 import { applyScramble } from '@/src/utils/scramble';
 import { useEffect, useState } from 'react';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { type Case } from '@/src/logic/algsets';
-import { getAllCases } from '@/src/utils/case';
+import type { CaseWithProgress } from '@/src/logic/caseQueue';
+import { convertScoreToPercentage } from '@/src/utils/fluency';
+import { getAllCasesWithProgress } from '@/src/utils/case';
 import { DrawScramble } from '@/components/DrawScramble';
 
 export default function Algset() {
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
-  const [cases, setCases] = useState<Case[]>([]);
+  const [cases, setCases] = useState<CaseWithProgress[]>([]);
 
   useEffect(() => {
     if (selectedAlgSet === null) return;
-    getAllCases(selectedAlgSet.name).then(setCases)
+    getAllCasesWithProgress(selectedAlgSet.name).then(setCases)
   }, [selectedAlgSet])
 
 
   if (selectedAlgSet === null) return;
 
   return (
-    <View className="pt-10">
+    <View className="pt-16">
+      <Text className="font-inter-bold text-center text-header">{selectedAlgSet.name}</Text>
 
       <FlatList
         data={cases}
@@ -50,17 +52,23 @@ export default function Algset() {
   )
 }
 
-function CaseRow({ c }: { c: Case }) {
-  console.log(c.alg)
-  const scramble = applyScramble(c.alg);
+function CaseRow({ c }: { c: CaseWithProgress }) {
 
   if (c.alg === undefined) return;
   return (
-    <View className="w-full bg-white rounded-xl h-20">
-      <Text>
-        {c.alg}
-      </Text>
-      <DrawScramble scramble={c.alg} />
+    <View className="w-full bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20">
+      <View className="flex-1 mr-3">
+
+        <Text className="">
+          {c.alg}
+        </Text>
+        <Text className="">
+          Fluency: {convertScoreToPercentage(c.fluency).toFixed(2)}%
+        </Text>
+      </View>
+      <View className="flex-shrink-0">
+        <DrawScramble scramble={c.alg} scale={0.5} />
+      </View>
     </View>
   )
 
