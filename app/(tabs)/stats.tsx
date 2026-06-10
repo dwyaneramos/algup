@@ -23,8 +23,7 @@ export default function Stats() {
   return (
     <View className=" px-3 items-center flex-1 justify-center bg-white">
       <Text>stats page</Text>
-      <Link href="/">go to main page</Link>
-      <Link href="/algset">go to algset page</Link>
+      <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">Case Stats</Link>
 
 
       <AlgProgressBar

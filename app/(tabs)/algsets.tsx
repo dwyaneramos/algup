@@ -70,7 +70,6 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
 export default function Algsets() {
   const [algsets, setAlgsets] = useState<AlgSet[]>([])
 
-
   useFocusEffect(
     useCallback(() => {
       const retrievedAlgsets = getAlgSets();

@@ -6,12 +6,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: 'Train' }} />
       <Tabs.Screen name="algsets" options={{ title: 'Algsets' }} />
       <Tabs.Screen name="stats" options={{ title: 'Stats' }} />
-      <Tabs.Screen
-        name="algset"
-        options={{
-          title: 'Algset',
-        }}
-      />
+      <Tabs.Screen name="algset" options={{ title: 'Algset', href: null }} />
     </Tabs>
   );
 }
