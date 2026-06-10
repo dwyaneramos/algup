@@ -47,7 +47,7 @@ enum Axis {
 }
 
 // Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
-const MOVES: Record<string, number[][]> = {
+const BASE_MOVES: Record<string, number[][]> = {
   'U': [
     [0, 2, 8, 6],
     [1, 5, 7, 3],
@@ -164,8 +164,23 @@ const MOVES: Record<string, number[][]> = {
     [3, 10, 32, 43],
     [4, 13, 31, 40],
     [5, 16, 30, 37]
-  ]
+  ],
+
 };
+
+function invertCycle(cycle: number[]): number[] {
+  return [...cycle].reverse();
+}
+
+const MOVES: Record<string, number[][]> = {
+  ...BASE_MOVES,
+  r: [...BASE_MOVES.R, ...BASE_MOVES.M.map(invertCycle)],
+  l: [...BASE_MOVES.L, ...BASE_MOVES.M],
+  u: [...BASE_MOVES.U, ...BASE_MOVES.E.map(invertCycle)],
+  d: [...BASE_MOVES.D, ...BASE_MOVES.E],
+  f: [...BASE_MOVES.F, ...BASE_MOVES.S],
+  b: [...BASE_MOVES.B, ...BASE_MOVES.S.map(invertCycle)],
+}
 
 
 function applyMove(cube: CubeState, move: string): CubeState {
