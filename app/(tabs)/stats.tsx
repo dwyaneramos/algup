@@ -19,17 +19,22 @@ export default function Stats() {
     }, [selectedAlgSet])
   );
 
-  if (!algSetProgress) return null;
+  if (!algSetProgress || selectedAlgSet === null) return null;
   return (
-    <View className=" px-3 items-center flex-1 justify-center bg-white">
-      <Text>stats page</Text>
-      <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">Case Stats</Link>
+    <View className=" px-3 items-center flex-1  pt-16 bg-white">
 
+      <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
+
+      <View className="flex flex-row justify-center items-center gap-3 mb-5">
+        <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
+        <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
+      </View>
 
       <AlgProgressBar
         algSetProgress={algSetProgress}
 
       />
+
     </View>
   );
 }

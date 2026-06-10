@@ -35,8 +35,8 @@ export default function Algset() {
   if (selectedAlgSet === null) return;
 
   return (
-    <View className="pt-16">
-      <Text className="font-inter-bold text-center text-header">{selectedAlgSet.name}</Text>
+    <View className="pt-16 pb-24">
+      <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
       <View className="flex flex-row justify-center items-center gap-3">
 
