@@ -1,8 +1,10 @@
 import { View, Text, FlatList } from 'react-native';
+import { applyScramble } from '@/src/utils/scramble';
 import { useEffect, useState } from 'react';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type Case } from '@/src/logic/algsets';
 import { getAllCases } from '@/src/utils/case';
+import { DrawScramble } from '@/components/DrawScramble';
 
 export default function Algset() {
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
@@ -49,11 +51,16 @@ export default function Algset() {
 }
 
 function CaseRow({ c }: { c: Case }) {
+  console.log(c.alg)
+  const scramble = applyScramble(c.alg);
+
+  if (c.alg === undefined) return;
   return (
     <View className="w-full bg-white rounded-xl h-20">
       <Text>
         {c.alg}
       </Text>
+      <DrawScramble scramble={c.alg} />
     </View>
   )
 

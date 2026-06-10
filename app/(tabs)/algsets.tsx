@@ -9,6 +9,8 @@ import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/utils/case';
 import { DrawScramble } from '@/components/DrawScramble';
 
+//TODO: scramble displayed is just the inverse of the fetched algorithm
+
 
 function AlgSetRow({ algset }: { algset: AlgSet }) {
   const { selectedAlgSet, setSelectedAlgSet } = useAlgSetStore();

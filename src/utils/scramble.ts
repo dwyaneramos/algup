@@ -42,6 +42,10 @@ export enum Colour {
   White, Red, Green, Yellow, Orange, Blue
 }
 
+enum Axis {
+  X, Y, Z
+}
+
 // Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
 const MOVES: Record<string, number[][]> = {
   'U': [
@@ -87,8 +91,26 @@ const MOVES: Record<string, number[][]> = {
     [1, 39, 34, 14],
     [0, 42, 35, 11]
   ],
-};
 
+  'x': [
+    [36, 42, 44, 38],
+    [37, 39, 43, 41],
+    [0, 53, 27, 18],
+    [3, 50, 30, 21],
+    [6, 47, 33, 24],
+
+    [9, 11, 17, 15],
+    [10, 14, 16, 12],
+    [2, 51, 29, 20],
+    [5, 48, 32, 23],
+    [8, 45, 35, 26],
+
+    [4, 49, 31, 22],
+    [7, 46, 34, 25],
+    [1, 52, 28, 19]
+
+  ],
+};
 
 
 function applyMove(cube: CubeState, move: string): CubeState {
@@ -127,23 +149,6 @@ export function solvedCube(): CubeState {
     ...Array(9).fill('B'),
   ];
 }
-export function generateDrawScramble(scramble: string): void {
-  const state = applyScramble(scramble);
-  const faces = ['U', 'R', 'F', 'D', 'L', 'B'];
-
-  console.log('---------')
-  faces.forEach((f, i) => {
-    const face = state.slice(i * 9, i * 9 + 9);
-    const rows = [
-      face.slice(0, 3).join(''),
-      face.slice(3, 6).join(''),
-      face.slice(6, 9).join(''),
-    ].join(' ');
-    console.log(f, rows);
-  });
-  console.log('---------')
-}
-
 export interface ScrambleSolutionPair {
   scramble: string,
   solution: string,
