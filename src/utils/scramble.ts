@@ -1,4 +1,4 @@
-
+import { Alg } from 'cubing/alg';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // 54 stickers, 9 per face in this order:
@@ -40,10 +40,6 @@ export type CubeState = string[];
 
 export enum Colour {
   White, Red, Green, Yellow, Orange, Blue
-}
-
-enum Axis {
-  X, Y, Z
 }
 
 // Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
@@ -206,6 +202,7 @@ function applyMove(cube: CubeState, move: string): CubeState {
 
 export function applyScramble(scramble: string): CubeState {
   const clean = scramble.replace(/[()]/g, '');
+  scramble = new Alg(clean).invert().toString();
   const moves = clean.trim().split(/\s+/);
   return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
 }
