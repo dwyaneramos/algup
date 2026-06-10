@@ -83,6 +83,7 @@ const MOVES: Record<string, number[][]> = {
     [3, 21, 30, 50],
     [6, 24, 33, 47]
   ],
+
   'B': [
     [45, 47, 53, 51],
     [46, 50, 52, 48],
@@ -90,6 +91,25 @@ const MOVES: Record<string, number[][]> = {
     [1, 39, 34, 14],
     [0, 42, 35, 11]
   ],
+
+  'M': [
+    [1, 19, 28, 52],
+    [4, 22, 31, 49],
+    [7, 25, 34, 46],
+  ],
+
+  'E': [
+    [23, 14, 50, 41],
+    [22, 13, 49, 40],
+    [21, 12, 48, 39],
+  ],
+
+  'S': [
+    [3, 10, 32, 43],
+    [4, 13, 31, 40],
+    [5, 16, 30, 37],
+  ],
+
 
   'x': [
     [36, 42, 44, 38],
@@ -171,6 +191,9 @@ function applyMove(cube: CubeState, move: string): CubeState {
 
 export function applyScramble(scramble: string): CubeState {
   const moves = scramble.trim().split(/\s+/);
+  console.log("--------")
+  console.log(moves)
+  console.log("--------")
   return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
 }
 
