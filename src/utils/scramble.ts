@@ -205,10 +205,8 @@ function applyMove(cube: CubeState, move: string): CubeState {
 }
 
 export function applyScramble(scramble: string): CubeState {
-  const moves = scramble.trim().split(/\s+/);
-  console.log("--------")
-  console.log(moves)
-  console.log("--------")
+  const clean = scramble.replace(/[()]/g, '');
+  const moves = clean.trim().split(/\s+/);
   return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
 }
 
