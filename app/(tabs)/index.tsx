@@ -31,6 +31,7 @@ export default function MainScreen() {
   }
 
   function handleGrade(grade: number) {
+    setShowScrambleOrSolution('scramble')
     submitGrade(grade);
     setTimeout(() => {
       setAttemptDone(false);
