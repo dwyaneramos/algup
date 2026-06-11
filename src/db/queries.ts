@@ -93,6 +93,20 @@ export function saveCaseFluency(caseId: string, fluency: number) {
   `, [caseId, fluency]);
 }
 
+export function getWorstCases(algsetName: string, n: number): CaseWithProgress[] {
+  return db.getAllSync<CaseWithProgress>(`
+    SELECT c.*, 
+      COALESCE(cp.fluency, 1.0) AS fluency,
+      COALESCE(cp.state, 'locked') AS state
+    FROM cases c
+    LEFT JOIN case_progress cp ON c.id = cp.case_id
+    WHERE c.algset = ?
+    AND COALESCE(cp.state, 'locked') != 'locked'
+    ORDER BY fluency ASC
+    LIMIT ?
+  `, [algsetName, n]);
+}
+
 export function getSetting(key: string): string | null {
   const result = db.getFirstSync<{ value: string }>(
     'SELECT value FROM settings WHERE key = ?', [key]

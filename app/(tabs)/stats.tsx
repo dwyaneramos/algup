@@ -1,21 +1,30 @@
-import { Text, View, Button } from 'react-native';
+import { Text, View, Button, FlatList } from 'react-native';
 import { useFocusEffect, Link } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { getAlgSetProgress } from '@/src/db/queries';
+import { getAlgSetProgress, getWorstCases } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
-
+import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
+import type { CaseWithProgress } from '@/src/logic/caseQueue';
+import { getNWorstCases } from '@/src/utils/case';
 
 export default function Stats() {
+  const NUM_WORST_CASES = 5;
+
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const [algSetProgress, setAlgSetProgress] = useState<AlgSetProgress | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [worstCases, setWorstCases] = useState<CaseWithProgress[]>([]);
 
-  // Force state to be most updated on load
   useFocusEffect(
     useCallback(() => {
       if (!selectedAlgSet) return;
+      setLoading(true);
+      setWorstCases([])
       const progress = getAlgSetProgress(selectedAlgSet.name);
       setAlgSetProgress(progress);
+      getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(setWorstCases);
+      setLoading(false);
     }, [selectedAlgSet])
   );
 
@@ -34,6 +43,19 @@ export default function Stats() {
         algSetProgress={algSetProgress}
 
       />
+
+      <Text className="font-inter-semibold text-center text-subheader my-3">Cases to Practice</Text>
+
+      <FlatList
+        data={loading ? Array(NUM_WORST_CASES).fill(null) : worstCases}
+        renderItem={({ item }) => loading ? <SkeletonCaseRow /> : <CaseRow c={item} />}
+        keyExtractor={(_, index) => index.toString()}
+        contentContainerStyle={{ gap: 12, padding: 12 }}
+        initialNumToRender={10}
+        maxToRenderPerBatch={5}
+        windowSize={5}
+      >
+      </FlatList>
 
     </View>
   );
@@ -76,7 +98,6 @@ function AlgProgressBar({ algSetProgress }: {
               </View>
             )
           })}
-
         </View>
       </View>
     </View>
