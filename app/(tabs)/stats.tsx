@@ -44,7 +44,7 @@ export default function Stats() {
 
       />
 
-      <Text className="font-inter-semibold text-center text-subheader my-3">Cases to Practice</Text>
+      <Text className="font-inter-semibold text-center text-subheader mb-3 mt-12">Cases to Practice</Text>
 
       <FlatList
         data={loading ? Array(NUM_WORST_CASES).fill(null) : worstCases}

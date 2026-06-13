@@ -1,7 +1,10 @@
 import '../global.css';
 import { Stack } from 'expo-router';
 import { useFonts } from '@expo-google-fonts/inter/useFonts';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Text, View, ActivityIndicator } from "react-native";
+
+// TODO: Find a better way to import this
 import { Inter_100Thin } from '@expo-google-fonts/inter/100Thin';
 import { Inter_200ExtraLight } from '@expo-google-fonts/inter/200ExtraLight';
 import { Inter_300Light } from '@expo-google-fonts/inter/300Light';
@@ -25,11 +28,13 @@ import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { useEffect } from 'react';
+
 // reset - remove after running once
 //db.execSync('DROP TABLE IF EXISTS case_progress');
 //db.execSync('DROP TABLE IF EXISTS cases');
 //db.execSync('DROP TABLE IF EXISTS algsets');
 //initDB();
+//
 export default function RootLayout() {
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
 
@@ -67,8 +72,11 @@ export default function RootLayout() {
   if (!fontsLoaded) return <View className="flex-1 items-center justify-center"><ActivityIndicator /></View>;
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <SafeAreaProvider>
+
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </SafeAreaProvider>
   );
 }
