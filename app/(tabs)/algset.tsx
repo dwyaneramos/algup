@@ -35,6 +35,7 @@ export default function Algset() {
     <View className="pt-16 pb-24">
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
+
       <View className="flex flex-row justify-center items-center gap-3">
 
         <Link href="/stats" className="w-48 bg-accent text-white rounded-xl p-2 text-center">Back to Overview</Link>

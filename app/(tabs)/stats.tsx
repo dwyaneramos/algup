@@ -1,5 +1,6 @@
 import { Text, View, Button, FlatList } from 'react-native';
 import { useFocusEffect, Link } from 'expo-router';
+import { ALG_CATEGORIES } from "@/utils/categories";
 import { useCallback, useState } from 'react';
 import { getAlgSetProgress, getWorstCases } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
@@ -61,47 +62,43 @@ export default function Stats() {
   );
 }
 
-interface AlgCategoryAttributes {
-  numCases: number,
-  color: string,
-  header: string
-}
-
 function AlgProgressBar({ algSetProgress }: {
   algSetProgress: AlgSetProgress,
 }) {
-  const total = algSetProgress.total;
-  const learning = { numCases: algSetProgress.learning, color: "bg-blue-400", header: "learning" }
-  const mastered = { numCases: algSetProgress.mastered, color: "bg-accent", header: "mastered" }
-  const reviewing = { numCases: algSetProgress.reviewing, color: "bg-green-400", header: "reviewing" }
-  const remaining = { numCases: total - learning.numCases - mastered.numCases - reviewing.numCases, color: "bg-gray-400", header: "remaining" }
-  const algCategories: AlgCategoryAttributes[] = [mastered, reviewing, learning, remaining];
+
+  const { total, mastered, reviewing, learning } = algSetProgress;
+
+  const counts: Record<string, number> = {
+    mastered,
+    reviewing,
+    learning,
+    remaining: total - mastered - reviewing - learning,
+  };
 
 
 
   return (
     <View className="w-full">
       <View className="flex-row h-2 rounded-full overflow-hidden bg-gray-100">
-        {algCategories.map((c) => {
-          return (
-            <View key={c.header} style={{ width: `${(c.numCases / total) * 100}%` }} className={c.color} />
-          )
-        })}
+        {ALG_CATEGORIES.map(({ key, color }) => (
+          <View
+            key={key}
+            style={{ width: `${(counts[key] / total) * 100}%` }}
+            className={color}
+          />
+        ))}
       </View>
-      <View className="flex-col justify-between mt-1">
-
-        <View className='flex flex-row justify-between'>
-          {algCategories.filter((c) => c.numCases > 0).map((c) => {
-            return (
-              <View key={c.header}>
-                <ProgressBarLegendTitle color={c.color} numCases={c.numCases} category={c.header} />
-              </View>
-            )
-          })}
-        </View>
+      <View className="flex-row justify-between mt-1">
+        {ALG_CATEGORIES.filter(({ key }) => counts[key] > 0).map(({ key, color, header }) => (
+          <ProgressBarLegendTitle
+            key={key}
+            color={color}
+            numCases={counts[key]}
+            category={header}
+          />
+        ))}
       </View>
-    </View>
-  );
+    </View>);
 }
 
 function ProgressBarLegendTitle({ color, numCases, category }: { color: string, numCases: number, category: string }) {
