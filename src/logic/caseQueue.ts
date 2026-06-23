@@ -5,6 +5,7 @@ export interface CaseWithProgress {
   alg: string;
   algset: string;
   fluency: number;
+  is_focused: boolean;
   state: CaseState;
 }
 

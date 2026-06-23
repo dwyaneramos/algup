@@ -1,15 +1,22 @@
 import type { CaseWithProgress } from "@/src/logic/caseQueue";
 import { DrawScramble } from "./DrawScramble";
-import Animated, { FadeIn, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing } from "react-native-reanimated";
 import { invertAlgorithm, sanitiseAlgorithm } from "@/src/utils/scramble";
-import { Text, View } from "react-native";
-import { useEffect } from "react";
+import { Text, View, Pressable } from "react-native";
+import { useEffect, useState } from "react";
 import { convertScoreToPercentage } from "@/src/utils/fluency";
 import { ALG_CATEGORIES } from "@/utils/categories";
+import { toggleCaseFocus } from "@/src/db/queries";
+
 
 
 
 export function CaseRow({ c }: { c: CaseWithProgress }) {
+  const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
+
+  useEffect(() => {
+    setIsFocused(!!c.is_focused);
+  }, [c.is_focused]);
 
   if (c.alg === undefined) return;
 
@@ -19,24 +26,40 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
 
 
   return (
-    <Animated.View
-      style={{ borderLeftColor: categoryAttributes.borderColor }} entering={FadeIn.duration(300)}
-      className={`w-full border-l-4 bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20`}
-    >
-      <View className="flex-1 mr-3">
+    <Pressable onPress={() => {
+      toggleCaseFocus(c.id);
+      setIsFocused(prev => !prev);
+    }
+    }>
+      <Animated.View
+        style={{ borderLeftColor: categoryAttributes.borderColor }} entering={FadeIn.duration(300)}
+        className={`w-full border-l-4 bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20`}
+      >
+        <View className="flex-1 mr-3">
 
-        <Text className="font-inter-semibold">
-          {c.alg}
-        </Text>
-        <Text className="text-muted">
-          Fluency: {convertScoreToPercentage(c.fluency).toFixed(2)}%
-        </Text>
-      </View>
+          <Text className="font-inter-semibold">
+            {c.alg}
+          </Text>
+          <Text className="text-muted">
+            Fluency: {convertScoreToPercentage(c.fluency).toFixed(2)}%
+          </Text>
+        </View>
 
-      <View className="flex-shrink-0">
-        <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} />
-      </View>
-    </Animated.View>
+        <View className="flex-shrink-0">
+          <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} />
+        </View>
+        {isFocused ?
+
+          <Animated.View
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(300)}
+            className="h-3 w-3 rounded-full bg-accent absolute top-2 right-2" />
+
+          : null
+        }
+
+      </Animated.View>
+    </Pressable>
   )
 
 }

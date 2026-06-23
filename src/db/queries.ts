@@ -93,11 +93,22 @@ export function saveCaseFluency(caseId: string, fluency: number) {
   `, [caseId, fluency]);
 }
 
+export function toggleCaseFocus(caseId: number) {
+  db.runSync(
+    `INSERT INTO case_progress (case_id, is_focused)
+     VALUES (?, 1)
+     ON CONFLICT(case_id) DO UPDATE SET
+       is_focused = CASE WHEN is_focused = 1 THEN 0 ELSE 1 END`,
+    [caseId]
+  );
+}
+
 export function getWorstCases(algsetName: string, n: number): CaseWithProgress[] {
   return db.getAllSync<CaseWithProgress>(`
     SELECT c.*, 
       COALESCE(cp.fluency, 1.0) AS fluency,
-      COALESCE(cp.state, 'locked') AS state
+      COALESCE(cp.state, 'locked') AS state,
+      COALESCE(cp.is_focused, 0) AS is_focused
     FROM cases c
     LEFT JOIN case_progress cp ON c.id = cp.case_id
     WHERE c.algset = ?
@@ -107,6 +118,17 @@ export function getWorstCases(algsetName: string, n: number): CaseWithProgress[]
   `, [algsetName, n]);
 }
 
+export function getCasesWithProgress(algset: string): CaseWithProgress[] {
+  return db.getAllSync<CaseWithProgress>(`
+    SELECT c.*, 
+      COALESCE(cp.fluency, 1.0) AS fluency,
+      COALESCE(cp.state, 'locked') AS state,
+      COALESCE(cp.is_focused, 0) AS is_focused
+    FROM cases c
+    LEFT JOIN case_progress cp ON c.id = cp.case_id
+    WHERE c.algset = ?
+  `, [algset]);
+}
 export function getSetting(key: string): string | null {
   const result = db.getFirstSync<{ value: string }>(
     'SELECT value FROM settings WHERE key = ?', [key]
@@ -122,43 +144,22 @@ export function setSetting(key: string, value: string): void {
 }
 
 
-export function getCasesWithProgress(
-  algset: string
-): CaseWithProgress[] {
-  return db.getAllSync<CaseWithProgress>(`
-    SELECT c.*, 
-      COALESCE(cp.fluency, 1.0) AS fluency,
-      COALESCE(cp.state, 'locked') AS state
-    FROM cases c
-    LEFT JOIN case_progress cp
-      ON c.id = cp.case_id
-    WHERE c.algset = ?
-  `, [algset]);
-}
 
-export function updateCaseProgress(
-  caseId: number,
-  fluency: number,
-  state: CaseState
-) {
+export function updateCaseProgress(caseId: number, fluency: number, state: CaseState) {
   db.runSync(`
-    INSERT OR REPLACE INTO case_progress (
-      case_id,
-      fluency,
-      state
-    )
+    INSERT INTO case_progress (case_id, fluency, state)
     VALUES (?, ?, ?)
+    ON CONFLICT(case_id) DO UPDATE SET
+      fluency = excluded.fluency,
+      state = excluded.state
   `, [caseId, fluency, state]);
 }
 
-export function introduceNextCase(
-  algset: string
-): void {
+export function introduceNextCase(algset: string): void {
   const nextLocked = db.getFirstSync<{ id: number }>(`
     SELECT c.id
     FROM cases c
-    LEFT JOIN case_progress cp
-      ON c.id = cp.case_id
+    LEFT JOIN case_progress cp ON c.id = cp.case_id
     WHERE c.algset = ?
       AND (cp.state = 'locked' OR cp.state IS NULL)
     LIMIT 1
@@ -167,11 +168,10 @@ export function introduceNextCase(
   if (!nextLocked) return;
 
   db.runSync(`
-    INSERT OR REPLACE INTO case_progress (
-      case_id,
-      fluency,
-      state
-    )
+    INSERT INTO case_progress (case_id, fluency, state)
     VALUES (?, 1.0, 'learning')
+    ON CONFLICT(case_id) DO UPDATE SET
+      fluency = 1.0,
+      state = 'learning'
   `, [nextLocked.id]);
 }

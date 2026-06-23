@@ -45,6 +45,7 @@ export function initDB() {
       case_id INTEGER PRIMARY KEY,
       fluency REAL DEFAULT 1.0,
       state TEXT DEFAULT 'locked',
+      is_focused BOOLEAN DEFAULT false,
       FOREIGN KEY (case_id) REFERENCES cases(id)
     );
   `);
