@@ -8,6 +8,7 @@ import { type AlgSetProgress } from '@/src/db/queries';
 import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
 import type { CaseWithProgress } from '@/src/logic/caseQueue';
 import { getNWorstCases } from '@/src/utils/case';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 export default function Stats() {
   const NUM_WORST_CASES = 5;
@@ -50,17 +51,19 @@ export default function Stats() {
 
       <Text className="font-inter-semibold text-center text-subheader mb-3 mt-12">Cases to Practice</Text>
 
-      <FlatList
-        data={loading ? Array(NUM_WORST_CASES).fill(null) : worstCases}
-        renderItem={({ item }) => loading ? <SkeletonCaseRow /> : <CaseRow c={item} />}
-        keyExtractor={(_, index) => index.toString()}
-        contentContainerStyle={{ gap: 12, padding: 12 }}
-        initialNumToRender={10}
-        maxToRenderPerBatch={5}
-        windowSize={5}
-      >
-      </FlatList>
-
+      {!loading && (
+        <Animated.View entering={FadeIn.duration(300)} className="flex-1 w-full">
+          <FlatList
+            data={worstCases}
+            renderItem={({ item }) => <CaseRow c={item} />}
+            keyExtractor={(_, index) => index.toString()}
+            contentContainerStyle={{ gap: 12, padding: 12 }}
+            initialNumToRender={10}
+            maxToRenderPerBatch={5}
+            windowSize={5}
+          />
+        </Animated.View>
+      )}
     </View>
   );
 }
