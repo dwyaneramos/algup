@@ -1,18 +1,25 @@
 import type { CaseWithProgress } from "@/src/logic/caseQueue";
+import { useEffect, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing } from "react-native-reanimated";
 import { invertAlgorithm, sanitiseAlgorithm } from "@/src/utils/scramble";
 import { Text, View, Pressable } from "react-native";
-import { useEffect, useState } from "react";
 import { convertScoreToPercentage } from "@/src/utils/fluency";
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { toggleCaseFocus } from "@/src/db/queries";
-
+import { toast } from 'sonner-native';
 
 
 
 export function CaseRow({ c }: { c: CaseWithProgress }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
+
+  useEffect(() => {
+    toast(`Case ${c.id} is${!isFocused ? " no longer" : ""} prioritised`, {
+      position: 'bottom-center',
+      icon: <></>,
+    })
+  }, [isFocused]);
 
   useEffect(() => {
     setIsFocused(!!c.is_focused);
@@ -25,12 +32,14 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
   if (categoryAttributes === undefined) return;
 
 
+  function onPress() {
+    toggleCaseFocus(c.id);
+    setIsFocused(prev => !prev);
+  }
+
+
   return (
-    <Pressable onPress={() => {
-      toggleCaseFocus(c.id);
-      setIsFocused(prev => !prev);
-    }
-    }>
+    <Pressable onPress={onPress}>
       <Animated.View
         style={{ borderLeftColor: categoryAttributes.borderColor }} entering={FadeIn.duration(300)}
         className={`w-full border-l-4 bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20`}

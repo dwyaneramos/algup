@@ -3,6 +3,8 @@ import { Stack } from 'expo-router';
 import { useFonts } from '@expo-google-fonts/inter/useFonts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Text, View, ActivityIndicator } from "react-native";
+import { Toaster } from 'sonner-native';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // TODO: Find a better way to import this
 import { Inter_100Thin } from '@expo-google-fonts/inter/100Thin';
@@ -72,11 +74,14 @@ export default function RootLayout() {
   if (!fontsLoaded) return <View className="flex-1 items-center justify-center"><ActivityIndicator /></View>;
 
   return (
-    <SafeAreaProvider>
+    <GestureHandlerRootView>
+      <SafeAreaProvider>
 
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </SafeAreaProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+        <Toaster offset={100} visibleToasts={1} />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
