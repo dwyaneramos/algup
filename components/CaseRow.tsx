@@ -5,28 +5,34 @@ import { invertAlgorithm, sanitiseAlgorithm } from "@/src/utils/scramble";
 import { Text, View } from "react-native";
 import { useEffect } from "react";
 import { convertScoreToPercentage } from "@/src/utils/fluency";
+import { ALG_CATEGORIES } from "@/utils/categories";
 
 
 
 export function CaseRow({ c }: { c: CaseWithProgress }) {
 
   if (c.alg === undefined) return;
-  console.log("HEHE", c.alg)
+
+  const categoryAttributes = ALG_CATEGORIES.find((cat) => cat.key === c.state)
+
+  if (categoryAttributes === undefined) return;
+
 
   return (
     <Animated.View
-      entering={FadeIn.duration(300)}
-      className="w-full bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20"
+      style={{ borderLeftColor: categoryAttributes.borderColor }} entering={FadeIn.duration(300)}
+      className={`w-full border-l-4 bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20`}
     >
       <View className="flex-1 mr-3">
 
         <Text className="font-inter-semibold">
           {c.alg}
         </Text>
-        <Text className="">
+        <Text className="text-muted">
           Fluency: {convertScoreToPercentage(c.fluency).toFixed(2)}%
         </Text>
       </View>
+
       <View className="flex-shrink-0">
         <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} />
       </View>

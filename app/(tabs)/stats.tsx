@@ -2,7 +2,7 @@ import { Text, View, Button, FlatList } from 'react-native';
 import { useFocusEffect, Link } from 'expo-router';
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { useCallback, useState } from 'react';
-import { getAlgSetProgress, getWorstCases } from '@/src/db/queries';
+import { getAlgSetProgress } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
 import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
