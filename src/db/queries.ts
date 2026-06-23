@@ -2,10 +2,6 @@ import { db } from './schema';
 import { AlgSet, Case } from '@/src/logic/algsets';
 import { type CaseWithProgress, type CaseState } from '@/src/logic/caseQueue';
 
-export interface CaseWithFluency extends Case {
-  fluency: number;
-}
-
 export interface AlgSetProgress {
   total: number;
   learning: number;
@@ -77,14 +73,18 @@ export function getCases(algsetName: string): Case[] {
   return cases;
 }
 
-export function getCasesWithFluency(algsetId: string): CaseWithFluency[] {
-  return db.getAllSync<CaseWithFluency>(`
-    SELECT c.*, COALESCE(cp.fluency, 1.0) as fluency
+export function getCasesWithProgress(algset: string): CaseWithProgress[] {
+  return db.getAllSync<CaseWithProgress>(`
+    SELECT c.*, 
+      COALESCE(cp.fluency, 1.0) AS fluency,
+      COALESCE(cp.state, 'locked') AS state,
+      COALESCE(cp.is_focused, 0) AS is_focused
     FROM cases c
     LEFT JOIN case_progress cp ON c.id = cp.case_id
-    WHERE c.algset_id = ?
-  `, [algsetId]);
+    WHERE c.algset = ?
+  `, [algset]);
 }
+
 
 export function saveCaseFluency(caseId: string, fluency: number) {
   db.runSync(`
@@ -118,17 +118,7 @@ export function getWorstCases(algsetName: string, n: number): CaseWithProgress[]
   `, [algsetName, n]);
 }
 
-export function getCasesWithProgress(algset: string): CaseWithProgress[] {
-  return db.getAllSync<CaseWithProgress>(`
-    SELECT c.*, 
-      COALESCE(cp.fluency, 1.0) AS fluency,
-      COALESCE(cp.state, 'locked') AS state,
-      COALESCE(cp.is_focused, 0) AS is_focused
-    FROM cases c
-    LEFT JOIN case_progress cp ON c.id = cp.case_id
-    WHERE c.algset = ?
-  `, [algset]);
-}
+
 export function getSetting(key: string): string | null {
   const result = db.getFirstSync<{ value: string }>(
     'SELECT value FROM settings WHERE key = ?', [key]

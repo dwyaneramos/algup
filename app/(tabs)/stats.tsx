@@ -80,11 +80,10 @@ function AlgProgressBar({ algSetProgress }: {
   return (
     <View className="w-full">
       <View className="flex-row h-2 rounded-full overflow-hidden bg-gray-100">
-        {ALG_CATEGORIES.map(({ key, color }) => (
+        {ALG_CATEGORIES.map(({ key, bgColor }) => (
           <View
             key={key}
-            style={{ width: `${(counts[key] / total) * 100}%` }}
-            className={color}
+            style={{ width: `${(counts[key] / total) * 100}%`, backgroundColor: bgColor }}
           />
         ))}
       </View>
