@@ -31,7 +31,7 @@ export default function Stats() {
 
   if (!algSetProgress || selectedAlgSet === null) return null;
   return (
-    <View className=" px-3 items-center flex-1  pt-16 ">
+    <View className="items-center flex-1  pt-16 ">
 
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
@@ -40,10 +40,13 @@ export default function Stats() {
         <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
       </View>
 
-      <AlgProgressBar
-        algSetProgress={algSetProgress}
+      <View className="px-3">
 
-      />
+        <AlgProgressBar
+          algSetProgress={algSetProgress}
+        />
+      </View>
+
 
       <Text className="font-inter-semibold text-center text-subheader mb-3 mt-12">Cases to Practice</Text>
 
