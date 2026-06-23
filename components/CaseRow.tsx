@@ -15,13 +15,6 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
 
   useEffect(() => {
-    toast(`Case ${c.id} is${!isFocused ? " no longer" : ""} prioritised`, {
-      position: 'bottom-center',
-      icon: <></>,
-    })
-  }, [isFocused]);
-
-  useEffect(() => {
     setIsFocused(!!c.is_focused);
   }, [c.is_focused]);
 
@@ -35,6 +28,15 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
   function onPress() {
     toggleCaseFocus(c.id);
     setIsFocused(prev => !prev);
+
+    // isFocused at this point would be its inverse as state isn't updated
+    toast(`Case ${c.id} is${isFocused ? " no longer" : ""} prioritised`, {
+      position: 'bottom-center',
+      icon: <></>,
+      animation: {
+        exit: FadeOut.duration(400),
+      },
+    })
   }
 
 
