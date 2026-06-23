@@ -1,7 +1,7 @@
 import type { CaseWithProgress } from "@/src/logic/caseQueue";
 import { useEffect, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing, withSequence, withSpring } from "react-native-reanimated";
 import { invertAlgorithm, sanitiseAlgorithm } from "@/src/utils/scramble";
 import { Text, View, Pressable } from "react-native";
 import { convertScoreToPercentage } from "@/src/utils/fluency";
@@ -9,11 +9,15 @@ import { ALG_CATEGORIES } from "@/utils/categories";
 import { toggleCaseFocus } from "@/src/db/queries";
 import { toast } from 'sonner-native';
 
-
+const FOCUSED_COLOR = ALG_CATEGORIES.find((c) => c.key === "focused")?.borderColor ?? "#000000";
 
 export function CaseRow({ c }: { c: CaseWithProgress }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
+  const translateY = useSharedValue(0);
 
+  const jumpStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
   useEffect(() => {
     setIsFocused(!!c.is_focused);
   }, [c.is_focused]);
@@ -24,26 +28,26 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
 
   if (categoryAttributes === undefined) return;
 
-
   function onPress() {
     toggleCaseFocus(c.id);
     setIsFocused(prev => !prev);
-
+    translateY.value = withSequence(
+      withTiming(-10, { duration: 150, easing: Easing.out(Easing.ease) }),
+      withTiming(0, { duration: 250, easing: Easing.in(Easing.ease) }),
+    );
     // isFocused at this point would be its inverse as state isn't updated
     toast(`Case ${c.id} is${isFocused ? " no longer" : ""} prioritised`, {
       position: 'bottom-center',
       icon: <></>,
-      animation: {
-        exit: FadeOut.duration(400),
-      },
-    })
+      animation: { exit: FadeOut.duration(400) },
+    });
   }
 
 
   return (
     <Pressable onPress={onPress}>
       <Animated.View
-        style={{ borderLeftColor: categoryAttributes.borderColor }} entering={FadeIn.duration(300)}
+        style={[{ borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor }, jumpStyle]}
         className={`w-full border-l-4 bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20`}
       >
         <View className="flex-1 mr-3">
@@ -59,16 +63,6 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
         <View className="flex-shrink-0">
           <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} />
         </View>
-        {isFocused ?
-
-          <Animated.View
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(300)}
-            className="h-3 w-3 rounded-full bg-accent absolute top-2 right-2" />
-
-          : null
-        }
-
       </Animated.View>
     </Pressable>
   )

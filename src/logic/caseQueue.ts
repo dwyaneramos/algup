@@ -13,6 +13,8 @@ export interface CaseWithProgress {
 const MAX_ACTIVE = 5;
 const MAX_LEARNING = 3;
 
+const FOCUSED_WEIGHT = 10;
+
 const STATE_WEIGHTS: Record<CaseState, number> = {
   locked: 0,
   learning: 5,
@@ -48,8 +50,12 @@ export function getUpdatedFluency(current: number, grade: number, alpha: number 
 }
 
 export function shouldIntroduceNewCase(cases: CaseWithProgress[]): boolean {
-  const learningOrReviewing = cases.filter(c => c.state === 'learning' || c.state === 'reviewing');
-  const learningCases = cases.filter(c => c.state === 'learning');
+  const learningOrReviewing = cases.filter(c =>
+    !c.is_focused && (c.state === 'learning' || c.state === 'reviewing')
+  );
+  const learningCases = cases.filter(c =>
+    !c.is_focused && c.state === 'learning'
+  );
   return learningOrReviewing.length < MAX_ACTIVE && learningCases.length < MAX_LEARNING;
 }
 
@@ -57,15 +63,23 @@ export function getNumberOfAlgsPracticing(): number {
   return available.length;
 }
 
+
 export function pickNextCase(cases: CaseWithProgress[], excludeId?: number): CaseWithProgress | null {
-  available = cases.filter(c => c.state !== 'locked' && c.id !== excludeId);
+  const focused = cases.filter(c => c.is_focused && c.id !== excludeId);
+  const normal = cases.filter(c => !c.is_focused && c.state !== 'locked' && c.id !== excludeId);
+
+  available = [...focused, ...normal];
   if (available.length === 0) return null;
 
-  const totalWeight = available.reduce((sum, c) => sum + STATE_WEIGHTS[c.state] * (6 - c.fluency), 0);
-  let random = Math.random() * totalWeight;
+  const totalWeight = available.reduce((sum, c) => {
+    const weight = c.is_focused ? FOCUSED_WEIGHT : STATE_WEIGHTS[c.state];
+    return sum + weight * (6 - c.fluency);
+  }, 0);
 
+  let random = Math.random() * totalWeight;
   for (const c of available) {
-    random -= STATE_WEIGHTS[c.state] * (6 - c.fluency);
+    const weight = c.is_focused ? FOCUSED_WEIGHT : STATE_WEIGHTS[c.state];
+    random -= weight * (6 - c.fluency);
     if (random <= 0) return c;
   }
 
