@@ -7,7 +7,7 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/utils/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
-import { Sad, Mid, Happy } from '@/assets/icons';
+import { IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 
 
 const ICON_SIZE = 48;
@@ -101,9 +101,9 @@ export default function MainScreen() {
               className="absolute left-0 right-0 top-0 flex-row justify-center items-center gap-10"
               style={{ transform: [{ translateY: -80 }] }}
             >
-              <GradeButton onPress={() => handleGrade(1)} icon={Sad} color="#d95f6b" />
-              <GradeButton onPress={() => handleGrade(2)} icon={Mid} color="#d9a45f" />
-              <GradeButton onPress={() => handleGrade(3)} icon={Happy} color="#5fd976" />
+              <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
+              <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
+              <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
             </Animated.View>
           )}
 
