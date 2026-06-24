@@ -32,9 +32,9 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { useEffect } from 'react';
 
 // reset - remove after running once
-db.execSync('DROP TABLE IF EXISTS case_progress');
-db.execSync('DROP TABLE IF EXISTS cases');
-db.execSync('DROP TABLE IF EXISTS algsets');
+//db.execSync('DROP TABLE IF EXISTS case_progress');
+//db.execSync('DROP TABLE IF EXISTS cases');
+//db.execSync('DROP TABLE IF EXISTS algsets');
 initDB();
 //
 export default function RootLayout() {
