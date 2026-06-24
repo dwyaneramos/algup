@@ -44,8 +44,8 @@ export default function Stats() {
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
       <View className="flex flex-row justify-center items-center gap-3 mb-5">
-        <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
-        <Link href="/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
+        <Link href="/stats/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
+        <Link href="/stats/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
       </View>
 
       <View className="px-3">
