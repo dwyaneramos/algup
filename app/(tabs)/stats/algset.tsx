@@ -36,6 +36,7 @@ export default function Algset() {
   );
 
   if (selectedAlgSet === null) return null;
+  console.log(insets)
 
   return (
     <View className="pt-16">
@@ -60,7 +61,7 @@ export default function Algset() {
             data={sortedCases}
             renderItem={({ item }) => <CaseRow c={item} />}
             keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 200 }}
+            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 210 }}
             initialNumToRender={20}
             maxToRenderPerBatch={10}
             windowSize={10}

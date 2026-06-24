@@ -11,15 +11,12 @@ import { DrawScramble } from '@/components/DrawScramble';
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
-
 function AlgSetRow({ algset }: { algset: AlgSet }) {
-  const { selectedAlgSet, setSelectedAlgSet } = useAlgSetStore();
+  const isSelected = useAlgSetStore(s => s.selectedAlgSet?.name === algset.name);
+  const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
   const [scramble, setScramble] = useState<string | null>(null);
-
-  const isSelected = selectedAlgSet?.name === algset.name;
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
-
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -30,7 +27,6 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     ),
   }));
 
-
   useEffect(() => {
     getDisplayCaseScramble(algset.name).then(setScramble);
   }, [algset.name]);
@@ -40,35 +36,39 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   }, [isSelected]);
 
   const handlePress = () => {
-    if (selectedAlgSet !== null && algset.name === selectedAlgSet.name) return;
-    setSelectedAlgSet(algset);
+    if (isSelected) return;
+    selected.value = withTiming(1, { duration: 150 });
     translateY.value = withTiming(-10, { duration: 200 }, () => {
       translateY.value = withTiming(0, { duration: 350 });
     });
+    setSelectedAlgSet(algset);
   };
 
   if (scramble === null) return null;
 
-
   return (
     <Animated.View
-      style={[animatedStyle]}
-      className="w-full p-3  bg-white flex flex-row justify-between rounded-xl"
+      style={animatedStyle}
+      className="w-full p-3 flex flex-row justify-between rounded-xl"
     >
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
         <View className="flex flex-col justify-center">
           <Text className="font-inter-semibold text-xl">{algset.name}</Text>
-          <Text className="font-inter-medium">{getAlgSetFluencyPercentage(algset.name).toFixed(2)}% Fluency</Text>
-          <Text className="font-inter-medium">{algset.cases.length} Algorithms</Text>
+          <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
+            {getAlgSetFluencyPercentage(algset.name).toFixed(2)}% Fluency
+          </Text>
+          <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
+            {algset.cases.length} Algorithms
+          </Text>
         </View>
         <DrawScramble scramble={scramble} scale={0.6} />
       </Pressable>
     </Animated.View>
   );
 }
-
 export default function Algsets() {
   const [algsets, setAlgsets] = useState<AlgSet[]>([])
+
 
   useFocusEffect(
     useCallback(() => {
