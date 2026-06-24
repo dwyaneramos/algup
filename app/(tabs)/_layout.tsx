@@ -100,9 +100,9 @@ export default function TabLayout() {
       tabBar={(props) => <TabBar {...props} />}
     >
       <Tabs.Screen
-        name="algsets"
+        name="select"
         options={{
-          title: 'Algsets',
+          title: 'Select',
           tabBarIcon: ({ color, size }) => <IconCards color={color} size={size} />,
         }}
       />
