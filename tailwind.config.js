@@ -10,8 +10,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        accent: COLOR_ACCENT,
-        'accent-light': COLOR_ACCENT_LIGHT,
+        accent: '#CB30E0',
+        'accent-light': '#e899f2',
         muted: '#9ca3af',
       },
       fontFamily: {

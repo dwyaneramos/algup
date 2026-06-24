@@ -29,9 +29,7 @@ function TabItem({ isFocused, onPress, icon, label }: TabItemProps) {
       <Reanimated.View style={animatedStyle}>
         {icon}
       </Reanimated.View>
-      <Text
-        style={{ color: isFocused ? COLOR_ACCENT : '#9ca3af' }}
-        className="text-xs font-semibold">
+      <Text className={`text-xs font-semibold ${isFocused ? 'text-accent' : 'text-gray-400'}`}>
         {label}
       </Text>
     </Pressable>
