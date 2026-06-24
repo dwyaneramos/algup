@@ -217,11 +217,11 @@ export function applyScramble(scramble: string): CubeState {
 
 export function solvedCube(): CubeState {
   return [
-    ...Array(9).fill('W'),
-    ...Array(9).fill('R'),
-    ...Array(9).fill('G'),
     ...Array(9).fill('Y'),
     ...Array(9).fill('O'),
+    ...Array(9).fill('G'),
+    ...Array(9).fill('W'),
+    ...Array(9).fill('R'),
     ...Array(9).fill('B'),
   ];
 }

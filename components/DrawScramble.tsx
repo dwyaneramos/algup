@@ -1,7 +1,6 @@
 import Svg, { Rect, G } from 'react-native-svg';
 import { applyScramble, solvedCube, Colour } from '@/src/utils/scramble';
 import type { CubeState } from '@/src/utils/scramble';
-import { View } from 'react-native';
 
 const COLORS: Record<string, string> = {
   W: '#ffffff', R: '#ff0000', G: '#00aa00',
