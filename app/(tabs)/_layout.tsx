@@ -1,4 +1,5 @@
-import { Tabs } from 'expo-router';
+import { Tabs } from 'expo-router'
+import { IconChartDots2, IconCards, IconStopwatch } from '@tabler/icons-react-native';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
@@ -40,18 +41,19 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           }
         };
 
+        const icon = options.tabBarIcon?.({
+          focused: isFocused,
+          color: isFocused ? '#000' : '#9ca3af',
+          size: 22,
+        });
+
         return (
-          <TouchableOpacity
-            key={route.key}
-            onPress={onPress}
-            className="flex-1 items-center justify-center py-1 rounded-xl"
-          >
-            <Text className={`text-sm font-semibold ${isFocused ? 'text-black' : 'text-gray-400'}`}>
+          <TouchableOpacity key={route.key} onPress={onPress}
+            className="flex-1 items-center justify-center py-1 rounded-xl gap-1">
+            {icon}
+            <Text className={`text-xs font-semibold ${isFocused ? 'text-black' : 'text-gray-400'}`}>
               {label}
             </Text>
-            {isFocused && (
-              <View className="absolute bottom-0 w-1 h-1 rounded-full bg-black" />
-            )}
           </TouchableOpacity>
         );
       })}
@@ -67,10 +69,34 @@ export default function TabLayout() {
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      <Tabs.Screen name="index" options={{ title: 'Train' }} />
-      <Tabs.Screen name="algsets" options={{ title: 'Algsets' }} />
-      <Tabs.Screen name="stats/index" options={{ title: 'Stats' }} />
-      <Tabs.Screen name="stats/algset" options={{ title: 'Algset', href: null }} />
+
+      <Tabs.Screen
+        name="algsets"
+        options={{
+          title: 'Algsets',
+          tabBarIcon: ({ color, size }) => <IconCards color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Train',
+          tabBarIcon: ({ color, size }) => <IconStopwatch color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="stats/index"
+        options={{
+          title: 'Stats',
+          tabBarIcon: ({ color, size }) => <IconChartDots2 color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="stats/algset"
+        options={{
+          title: 'Algset',
+        }}
+      />
     </Tabs>
   );
 }
