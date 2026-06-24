@@ -22,11 +22,18 @@ export default function Stats() {
     useCallback(() => {
       if (!selectedAlgSet) return;
       setLoading(true);
-      setWorstCases([])
-      const progress = getAlgSetProgress(selectedAlgSet.name);
-      setAlgSetProgress(progress);
-      getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(setWorstCases);
-      setLoading(false);
+      setWorstCases([]);
+
+      const id = setTimeout(() => {
+        const progress = getAlgSetProgress(selectedAlgSet.name); // sync
+        setAlgSetProgress(progress);
+        getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(cases => {
+          setWorstCases(cases);
+          setLoading(false);
+        });
+      }, 0);
+
+      return () => clearTimeout(id);
     }, [selectedAlgSet])
   );
 

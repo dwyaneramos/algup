@@ -73,8 +73,8 @@ export function getCases(algsetName: string): Case[] {
   return cases;
 }
 
-export function getCasesWithProgress(algset: string): CaseWithProgress[] {
-  return db.getAllSync<CaseWithProgress>(`
+export async function getCasesWithProgress(algset: string): Promise<CaseWithProgress[]> {
+  return db.getAllAsync<CaseWithProgress>(`
     SELECT c.*, 
       COALESCE(cp.fluency, 1.0) AS fluency,
       COALESCE(cp.state, 'locked') AS state,

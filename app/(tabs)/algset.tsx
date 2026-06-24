@@ -18,14 +18,17 @@ export default function Algset() {
       if (selectedAlgSet === null) return;
       setLoading(true);
       setCases([]);
-      (async () => {
+
+      // Defer fetch until after the transition frame
+      const id = setTimeout(async () => {
         const result = await getAllCasesWithProgress(selectedAlgSet.name);
         setCases(result);
         setLoading(false);
-      })();
+      }, 0);
+
+      return () => clearTimeout(id);
     }, [selectedAlgSet])
   );
-
   const sortedCases = [...cases].sort((a, b) =>
     sortAsc ? a.fluency - b.fluency : b.fluency - a.fluency
   );

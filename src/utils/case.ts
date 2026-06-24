@@ -9,7 +9,7 @@ export async function getRandomCase(algsetName: string): Promise<Case> {
 }
 
 export async function getAllCasesWithProgress(algsetName: string): Promise<CaseWithProgress[]> {
-  const cases = getCasesWithProgress(algsetName);
+  const cases = await getCasesWithProgress(algsetName);
   return cases;
 }
 

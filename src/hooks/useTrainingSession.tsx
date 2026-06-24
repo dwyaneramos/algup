@@ -3,7 +3,6 @@ import { getCasesWithProgress, updateCaseProgress, introduceNextCase } from '@/s
 import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedFluency } from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/utils/scramble';
 
-
 export function useTrainingSession(algset: string) {
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [currentCase, setCurrentCase] = useState<CaseWithProgress | null>(null);
@@ -12,31 +11,30 @@ export function useTrainingSession(algset: string) {
 
   useEffect(() => {
     if (!algset) return;
-
-    let initial = getCasesWithProgress(algset);
-    const hasActive = initial.some(c => c.state !== 'locked');
-    if (!hasActive) {
-      introduceNextCase(algset);
-      introduceNextCase(algset);
-      introduceNextCase(algset);
-      initial = getCasesWithProgress(algset);
-    }
-
-    setCases(initial);
-    const newCase = pickNextCase(initial);
-    setCurrentCase(newCase);
+    (async () => {
+      let initial = await getCasesWithProgress(algset);
+      const hasActive = initial.some(c => c.state !== 'locked');
+      if (!hasActive) {
+        introduceNextCase(algset);
+        introduceNextCase(algset);
+        introduceNextCase(algset);
+        initial = await getCasesWithProgress(algset);
+      }
+      setCases(initial);
+      setCurrentCase(pickNextCase(initial));
+    })();
   }, [algset]);
 
   useEffect(() => {
     if (!currentCase) return;
     (async () => {
-      const scrambleSolutionPair = await generateScrambleFromAlg(currentCase.alg);
-      setScramble(scrambleSolutionPair.scramble);
-      setSolution(scrambleSolutionPair.solution);
-    })()
+      const { scramble, solution } = await generateScrambleFromAlg(currentCase.alg);
+      setScramble(scramble);
+      setSolution(solution);
+    })();
   }, [currentCase]);
 
-  const submitGrade = (grade: number) => {
+  const submitGrade = async (grade: number) => {
     if (!currentCase) return;
     const newFluency = getUpdatedFluency(currentCase.fluency, grade);
     const newState = getNextState(currentCase.state, newFluency);
@@ -50,12 +48,11 @@ export function useTrainingSession(algset: string) {
 
     if (shouldIntroduceNewCase(updatedCases)) {
       introduceNextCase(algset);
-      updatedCases = getCasesWithProgress(algset);
+      updatedCases = await getCasesWithProgress(algset);
     }
 
     setCases(updatedCases);
-    const newCase = pickNextCase(updatedCases, currentCase.id)
-    setCurrentCase(newCase);
+    setCurrentCase(pickNextCase(updatedCases, currentCase.id));
   };
 
   return { currentCase, scramble, solution, submitGrade };
