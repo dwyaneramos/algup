@@ -1,3 +1,5 @@
+import { COLOR_ACCENT, COLOR_ACCENT_LIGHT } from "@/utils/constants/colors";
+
 module.exports = {
   content: [
     "./app/**/*.{js,jsx,ts,tsx}",
@@ -8,8 +10,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        accent: '#CB30E0',
-        'accent-light': '#e899f2',
+        accent: COLOR_ACCENT,
+        'accent-light': COLOR_ACCENT_LIGHT,
         muted: '#9ca3af',
       },
       fontFamily: {
