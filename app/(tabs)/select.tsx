@@ -135,7 +135,14 @@ export default function Select() {
           ]
 
         })
-      }} />
+      }}
+        onEdit={() => {
+          console.log('edit')
+        }}
+        onDelete={() => {
+          console.log('delete')
+        }}
+      />
     </View>
   );
 }
