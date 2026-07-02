@@ -4,7 +4,7 @@ import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { useState, useEffect } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { getAlgSetFluencyPercentage } from '@/src/utils/fluency';
+import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
 import { IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';

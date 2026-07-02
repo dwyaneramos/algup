@@ -7,7 +7,7 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
 import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
 import type { CaseWithProgress } from '@/src/logic/caseQueue';
-import { getNWorstCases } from '@/src/utils/case';
+import { getNWorstCases } from '@/src/logic/case';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 export default function Stats() {

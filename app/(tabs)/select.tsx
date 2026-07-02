@@ -12,10 +12,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { getAlgSets } from '@/src/db/queries';
 import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { getAlgSetFluencyPercentage } from '@/src/utils/fluency';
+import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useFocusEffect } from 'expo-router';
-import { getDisplayCaseScramble } from '@/src/utils/case';
+import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
+import { FadeOut } from 'react-native-reanimated';
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
@@ -74,7 +75,6 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     </Animated.View>
   );
 }
-
 function Fab({ onPress }: { onPress: () => void }) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({

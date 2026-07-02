@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getCasesWithProgress, updateCaseProgress, introduceNextCase } from '@/src/db/queries';
 import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedFluency } from '@/src/logic/caseQueue';
-import { generateScrambleFromAlg } from '@/src/utils/scramble';
+import { generateScrambleFromAlg } from '@/src/logic/scramble';
 
 export function useTrainingSession(algset: string) {
   const [cases, setCases] = useState<CaseWithProgress[]>([]);

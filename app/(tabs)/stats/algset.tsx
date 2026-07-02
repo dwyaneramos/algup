@@ -2,7 +2,7 @@ import { View, Text, FlatList, Pressable } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useEffect, useState, useCallback } from 'react';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { getAllCasesWithProgress } from '@/src/utils/case';
+import { getAllCasesWithProgress } from '@/src/logic/case';
 import { CaseRow, SkeletonCaseRow } from '@/components/CaseRow';
 import type { CaseWithProgress } from '@/src/logic/caseQueue';
 import { Link, useFocusEffect } from 'expo-router';
