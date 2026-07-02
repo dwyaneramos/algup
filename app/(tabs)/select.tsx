@@ -34,9 +34,12 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     ),
   }));
 
-  useEffect(() => {
-    opacity.value = withTiming(1, { duration: 300 });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      opacity.value = 0;
+      opacity.value = withTiming(1, { duration: 300 });
+    }, [])
+  );
 
   useEffect(() => {
     getDisplayCaseScramble(algset.name).then(setScramble);
@@ -122,7 +125,7 @@ export default function Select() {
           windowSize={20}
         />
       )}
-      <Fab onPress={() => {
+      <Fab onCreate={() => {
         addAlgSet(newAlgset);
         showToast(`${newAlgset.name} added!`);
         setLol(lol + 1);

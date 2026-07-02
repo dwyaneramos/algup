@@ -7,7 +7,7 @@ import Reanimated, {
   Easing,
 } from 'react-native-reanimated';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
-import { IconPlus, IconPencil, IconTrash } from '@tabler/icons-react-native';
+import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
 import { useCallback, useState, ComponentType } from 'react';
 import { useFocusEffect } from 'expo-router';
 const SATELLITE_SIZE = 52;
@@ -170,7 +170,7 @@ export function Fab({ onCreate, onEdit, onDelete }: FabProps) {
             backgroundColor: COLOR_ACCENT,
           }}
         >
-          <IconPlus color="white" size={26} />
+          <IconDotsVertical color="white" size={26} />
         </Pressable>
       </Reanimated.View>
     </Reanimated.View>
