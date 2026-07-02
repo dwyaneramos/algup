@@ -1,10 +1,8 @@
-import { Text, View, Pressable } from 'react-native';
+import { Text, View, Pressable, FlatList } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
-import { insertNewAlgSet } from '@/src/logic/algsets';
 
 import Fab from '@/components/Fab';
 import { useEffect, useState, useCallback } from 'react';
-import { getAlgSets } from '@/src/db/queries';
 import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
@@ -14,7 +12,7 @@ import { DrawScramble } from '@/components/DrawScramble';
 
 const newAlgset: AlgSet =
 {
-  name: 'my new algset omgg',
+  name: 'teehee',
   cases: [
     { alg: "R U R' U R U2 R'" },
     { alg: "R U2 R' U' R U' R'" },
@@ -78,32 +76,45 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     </Animated.View>
   );
 }
-export default function Algsets() {
-  const [algsets, setAlgsets] = useState<AlgSet[]>([])
+
+
+//<FlatList
+//  data={sortedCases}
+//  renderItem={({ item }) => <CaseRow c={item} />}
+//  keyExtractor={(_, index) => index.toString()}
+//  contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 210 }}
+//  initialNumToRender={20}
+//  maxToRenderPerBatch={10}
+//  windowSize={10}
+///>
+export default function Select() {
+  const algsets = useAlgSetStore(s => s.algSets);
+  const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
+  const addAlgSet = useAlgSetStore(s => s.addAlgSet);
 
   useFocusEffect(
     useCallback(() => {
-      const retrievedAlgsets = getAlgSets();
-      setAlgsets(retrievedAlgsets);
+      loadAlgSets();
     }, [])
   );
 
   return (
     <View className="items-center flex-1 justify-start flex-col pt-16">
       <Text className="text-header mb-10">Select Algorithm Set</Text>
-      {algsets.length > 0 &&
-        <View className="w-full gap-3 px-3">
-          {
-            algsets.map((algset: AlgSet) => {
-              return (
-                <View key={algset.name}>
-                  <AlgSetRow algset={algset} />
-                </View>
-              )
-            })}
-        </View>
-      }
-      <Fab onPress={() => insertNewAlgSet(newAlgset)} />
+      {algsets.length > 0 && (
+        <FlatList
+          className="w-full flex-1"
+          data={algsets}
+          renderItem={({ item }) => <AlgSetRow algset={item} />}
+          keyExtractor={(item) => item.name}
+          contentContainerStyle={{ gap: 12, padding: 12 }}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          removeClippedSubviews={false}
+        />
+      )}
+      <Fab onPress={() => addAlgSet(newAlgset)} />
     </View>
   );
 }
