@@ -30,6 +30,7 @@ import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 
+
 // reset - remove after running once
 resetDB()
 initDB();
@@ -47,6 +48,10 @@ export default function RootLayout() {
     if (retrievedAlgSet !== null) setSelectedAlgSet(retrievedAlgSet);
     else alert("No Algset exists")
   }
+
+
+  const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
+  loadAlgSets();
 
   let [fontsLoaded] = useFonts({
     Inter_100Thin,

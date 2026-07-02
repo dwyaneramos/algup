@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AlgSet, SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
-import { setSetting, getAlgSets } from '@/src/db/queries';
+import { setSetting, getSetting, getAlgSets } from '@/src/db/queries';
 
 interface AlgSetStore {
   algSets: AlgSet[];
@@ -20,7 +20,15 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
   },
 
   loadAlgSets: () => {
-    set({ algSets: getAlgSets() });
+    const algSets = getAlgSets();
+    set({ algSets });
+
+    const { selectedAlgSet } = get();
+    if (selectedAlgSet || algSets.length === 0) return;
+
+    const savedName = getSetting(SELECTED_ALGSET_KEY);
+    const restored = algSets.find((a) => a.name === savedName);
+    set({ selectedAlgSet: restored ?? algSets[0] });
   },
 
   addAlgSet: (algSet) => {
