@@ -1,4 +1,5 @@
 import type { CaseWithProgress } from "@/src/logic/caseQueue";
+import { showToast } from "@/utils/toast";
 import { useEffect, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing, withSequence, withSpring } from "react-native-reanimated";
@@ -7,8 +8,6 @@ import { Text, View, Pressable } from "react-native";
 import { convertScoreToPercentage } from "@/src/logic/fluency";
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { toggleCaseFocus } from "@/src/db/queries";
-import { toast } from 'sonner-native';
-
 const FOCUSED_COLOR = ALG_CATEGORIES.find((c) => c.key === "focused")?.borderColor ?? "#000000";
 
 export function CaseRow({ c }: { c: CaseWithProgress }) {
@@ -36,12 +35,7 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
       withTiming(0, { duration: 250, easing: Easing.in(Easing.ease) }),
     );
     // isFocused at this point would be its inverse as state isn't updated
-    toast(`Case ${c.id} is${isFocused ? " no longer" : ""} prioritised`, {
-      position: 'bottom-center',
-      icon: <></>,
-      duration: 1000,
-      animation: { exit: FadeOut.duration(400) },
-    });
+    showToast(`Case ${c.id} is${isFocused ? " no longer" : ""} prioritised`)
   }
 
 

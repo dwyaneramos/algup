@@ -14,6 +14,12 @@ function seedAlgSets() {
   }
 }
 
+export function resetDB() {
+  db.execSync('DROP TABLE IF EXISTS case_progress');
+  db.execSync('DROP TABLE IF EXISTS cases');
+  db.execSync('DROP TABLE IF EXISTS algsets');
+}
+
 export function initDB() {
   db.execSync(`
     CREATE TABLE IF NOT EXISTS settings (

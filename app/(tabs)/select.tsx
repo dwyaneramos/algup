@@ -1,4 +1,5 @@
 import { Text, View, Pressable, FlatList } from 'react-native';
+import { showToast } from '@/utils/toast';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
 
 import Fab from '@/components/Fab';
@@ -77,16 +78,6 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   );
 }
 
-
-//<FlatList
-//  data={sortedCases}
-//  renderItem={({ item }) => <CaseRow c={item} />}
-//  keyExtractor={(_, index) => index.toString()}
-//  contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 210 }}
-//  initialNumToRender={20}
-//  maxToRenderPerBatch={10}
-//  windowSize={10}
-///>
 export default function Select() {
   const algsets = useAlgSetStore(s => s.algSets);
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
@@ -100,7 +91,7 @@ export default function Select() {
 
   return (
     <View className="items-center flex-1 justify-start flex-col pt-16">
-      <Text className="text-header mb-10">Select Algorithm Set</Text>
+      <Text className="text-header mb-2">Select Algorithm Set</Text>
       {algsets.length > 0 && (
         <FlatList
           className="w-full flex-1"
@@ -114,7 +105,10 @@ export default function Select() {
           removeClippedSubviews={false}
         />
       )}
-      <Fab onPress={() => addAlgSet(newAlgset)} />
+      <Fab onPress={() => {
+        addAlgSet(newAlgset);
+        showToast(`${newAlgset.name} added!`);
+      }} />
     </View>
   );
 }
