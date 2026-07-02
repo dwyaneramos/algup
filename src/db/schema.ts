@@ -1,23 +1,16 @@
 import * as SQLite from 'expo-sqlite';
 import { ALG_SETS } from '@/src/logic/algsets';
+import { createAlgSet, insertCases } from '@/src/db/queries';
 
-export const db = SQLite.openDatabaseSync('algup.db');
+const db = SQLite.openDatabaseSync('algup.db');
 
 function seedAlgSets() {
   const existing = db.getFirstSync('SELECT COUNT(*) as count FROM algsets') as { count: number };
   if (existing.count > 0) return;
 
   for (const algSet of ALG_SETS) {
-    db.runSync(
-      'INSERT OR IGNORE INTO algsets (name) VALUES (?)',
-      [algSet.name]
-    );
-    for (const c of algSet.cases) {
-      db.runSync(
-        'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
-        [algSet.name, c.alg]
-      );
-    }
+    createAlgSet(algSet.name);
+    insertCases(algSet);
   }
 }
 

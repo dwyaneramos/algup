@@ -1,6 +1,8 @@
-import { db } from './schema';
 import { AlgSet, Case } from '@/src/logic/algsets';
 import { type CaseWithProgress, type CaseState } from '@/src/logic/caseQueue';
+import * as SQLite from 'expo-sqlite';
+
+const db = SQLite.openDatabaseSync('algup.db');
 
 export interface AlgSetProgress {
   total: number;
@@ -19,6 +21,23 @@ export function getAlgSet(name: string): AlgSet | null {
     ...algset,
     cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [algset.name])
   };
+}
+
+export function insertCases(algset: AlgSet): void {
+  for (const c of algset.cases) {
+    db.runSync(
+      'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
+      [algset.name, c.alg]
+    );
+  }
+}
+
+
+export function createAlgSet(name: string): void {
+  db.runSync(
+    'INSERT OR IGNORE INTO algsets (name) VALUES (?)',
+    [name]
+  );
 }
 
 export function getFirstCase(algsetName: string): Case | null {
