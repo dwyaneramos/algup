@@ -1,3 +1,5 @@
+import { createAlgSet, insertCases } from "@/src/db/queries";
+
 export interface Case {
   id?: number;
   alg: string;
@@ -10,6 +12,19 @@ export interface AlgSet {
   cases: Case[];
 }
 
+export function insertNewAlgSet(algset: AlgSet): boolean {
+  try {
+    createAlgSet(algset.name);
+    insertCases(algset);
+    return true;
+
+  } catch (error) {
+    console.error(`Failed to store new algset "${algset.name}":`, error);
+    return false;
+  }
+
+}
+
 // Default cases
 export const ALG_SETS: AlgSet[] = [
   {
@@ -20,7 +35,6 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "R' U'" },
       { alg: "R' U'" },
     ]
-
   },
   {
     name: 'CMLL',

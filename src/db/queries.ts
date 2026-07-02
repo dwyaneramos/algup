@@ -24,12 +24,14 @@ export function getAlgSet(name: string): AlgSet | null {
 }
 
 export function insertCases(algset: AlgSet): void {
-  for (const c of algset.cases) {
-    db.runSync(
-      'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
-      [algset.name, c.alg]
-    );
-  }
+  db.withTransactionSync(() => {
+    for (const c of algset.cases) {
+      db.runSync(
+        'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
+        [algset.name, c.alg]
+      );
+    }
+  });
 }
 
 
