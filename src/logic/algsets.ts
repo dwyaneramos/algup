@@ -28,15 +28,6 @@ export function insertNewAlgSet(algset: AlgSet): boolean {
 // Default cases
 export const ALG_SETS: AlgSet[] = [
   {
-    name: 'test',
-    cases: [
-      { alg: "R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2' R2'" },
-      { alg: "R' U'" },
-      { alg: "R' U'" },
-      { alg: "R' U'" },
-    ]
-  },
-  {
     name: 'CMLL',
     cases: [
       { alg: "R U2 R' U' R U' R2 U2 R U R' U R " },

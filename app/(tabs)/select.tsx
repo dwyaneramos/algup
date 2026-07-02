@@ -1,6 +1,6 @@
 import { Text, View, Pressable, FlatList } from 'react-native';
 import { showToast } from '@/utils/toast';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor, FadeIn } from 'react-native-reanimated';
 
 import Fab from '@/components/Fab';
 import { useEffect, useState, useCallback } from 'react';
@@ -11,14 +11,8 @@ import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 
-const newAlgset: AlgSet =
-{
-  name: 'teehee',
-  cases: [
-    { alg: "R U R' U R U2 R'" },
-    { alg: "R U2 R' U' R U' R'" },
-  ]
-}
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
@@ -28,8 +22,10 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   const [scramble, setScramble] = useState<string | null>(null);
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
+  const opacity = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
     transform: [{ translateY: translateY.value }],
     backgroundColor: interpolateColor(
       selected.value,
@@ -37,6 +33,10 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
       ['#ffffff', '#e899f2']
     ),
   }));
+
+  useEffect(() => {
+    opacity.value = withTiming(1, { duration: 300 });
+  }, []);
 
   useEffect(() => {
     getDisplayCaseScramble(algset.name).then(setScramble);
@@ -55,8 +55,6 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     setSelectedAlgSet(algset);
   };
 
-  if (scramble === null) return null;
-
   return (
     <Animated.View
       style={animatedStyle}
@@ -72,7 +70,11 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
             {algset.cases.length} Algorithms
           </Text>
         </View>
-        <DrawScramble scramble={scramble} scale={0.6} />
+        {scramble ? (
+          <DrawScramble scramble={scramble} scale={0.6} />
+        ) : (
+          <View className="h-16 w-16 bg-gray-200 rounded-xl" />
+        )}
       </Pressable>
     </Animated.View>
   );
@@ -82,12 +84,28 @@ export default function Select() {
   const algsets = useAlgSetStore(s => s.algSets);
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
   const addAlgSet = useAlgSetStore(s => s.addAlgSet);
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
       loadAlgSets();
     }, [])
   );
+
+
+  const [lol, setLol] = useState(0);
+
+  const [newAlgset, setNewAlgset] = useState<AlgSet>(
+
+    {
+      name: `teehee ${lol}`,
+      cases: [
+        { alg: "R U R' U R U2 R'" },
+        { alg: "R U2 R' U' R U' R'" },
+      ]
+    }
+  )
+
 
   return (
     <View className="items-center flex-1 justify-start flex-col pt-16">
@@ -96,18 +114,27 @@ export default function Select() {
         <FlatList
           className="w-full flex-1"
           data={algsets}
+          contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 }}
           renderItem={({ item }) => <AlgSetRow algset={item} />}
           keyExtractor={(item) => item.name}
-          contentContainerStyle={{ gap: 12, padding: 12 }}
           initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={10}
-          removeClippedSubviews={false}
+          maxToRenderPerBatch={20}
+          windowSize={20}
         />
       )}
       <Fab onPress={() => {
         addAlgSet(newAlgset);
         showToast(`${newAlgset.name} added!`);
+        setLol(lol + 1);
+        setNewAlgset({
+
+          name: `teehee ${lol + 1}`,
+          cases: [
+            { alg: "R U R' U R U2 R'" },
+            { alg: "R U2 R' U' R U' R'" },
+          ]
+
+        })
       }} />
     </View>
   );

@@ -36,7 +36,6 @@ export default function Algset() {
   );
 
   if (selectedAlgSet === null) return null;
-  console.log(insets)
 
   return (
     <View className="pt-16">
