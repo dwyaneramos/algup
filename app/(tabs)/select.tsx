@@ -1,5 +1,13 @@
 import { Text, View, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
+import Reanimated, {
+  withSpring,
+  ZoomIn,
+  ZoomOut,
+} from 'react-native-reanimated';
+import { COLOR_ACCENT } from '@/utils/constants/colors';
+
+import { IconPlus } from '@tabler/icons-react-native';
 import { useEffect, useState, useCallback } from 'react';
 import { getAlgSets } from '@/src/db/queries';
 import { type AlgSet } from '@/src/logic/algsets';
@@ -66,9 +74,42 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     </Animated.View>
   );
 }
+
+function Fab({ onPress }: { onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Reanimated.View
+      style={{
+        position: 'absolute',
+        bottom: 32,
+        right: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 10,
+      }}
+    >
+      <Reanimated.View style={pressStyle}>
+        <Pressable
+          onPress={onPress}
+          onPressIn={() => { scale.value = withSpring(0.9); }}
+          onPressOut={() => { scale.value = withSpring(1); }}
+          className="w-16 h-16 rounded-full items-center justify-center"
+          style={{ backgroundColor: COLOR_ACCENT }}
+        >
+          <IconPlus color="white" size={26} />
+        </Pressable>
+      </Reanimated.View>
+    </Reanimated.View>
+  );
+}
+
 export default function Algsets() {
   const [algsets, setAlgsets] = useState<AlgSet[]>([])
-
 
   useFocusEffect(
     useCallback(() => {
@@ -77,9 +118,8 @@ export default function Algsets() {
     }, [])
   );
 
-
   return (
-    <View className="items-center flex-1 justify-center">
+    <View className="items-center flex-1 justify-start flex-col pt-16">
       <Text className="text-header mb-10">Select Algorithm Set</Text>
       {algsets.length > 0 &&
         <View className="w-full gap-3 px-3">
@@ -90,12 +130,10 @@ export default function Algsets() {
                   <AlgSetRow algset={algset} />
                 </View>
               )
-
             })}
         </View>
-
-
       }
+      <Fab onPress={() => console.log("AH")} />
     </View>
   );
 }

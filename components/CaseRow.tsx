@@ -39,6 +39,7 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
     toast(`Case ${c.id} is${isFocused ? " no longer" : ""} prioritised`, {
       position: 'bottom-center',
       icon: <></>,
+      duration: 1000,
       animation: { exit: FadeOut.duration(400) },
     });
   }
