@@ -1,15 +1,16 @@
-import { Text, View, Pressable, FlatList } from 'react-native';
+import { Text, View, Pressable, FlatList, StyleSheet } from 'react-native';
 import { showToast } from '@/utils/toast';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
 
 import { Fab } from '@/components/Fab';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -93,17 +94,17 @@ export default function Select() {
   const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
   const insets = useSafeAreaInsets();
 
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
   useFocusEffect(
     useCallback(() => {
       loadAlgSets();
     }, [])
   );
 
-
   const [lol, setLol] = useState(0);
 
   const [newAlgset, setNewAlgset] = useState<AlgSet>(
-
     {
       name: `teehee ${lol}`,
       cases: [
@@ -113,6 +114,13 @@ export default function Select() {
     }
   )
 
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+  }, []);
 
   return (
     <View className="items-center flex-1 justify-start flex-col pt-16">
@@ -129,20 +137,7 @@ export default function Select() {
           windowSize={20}
         />
       )}
-      <Fab onCreate={() => {
-        addAlgSet(newAlgset);
-        showToast(`${newAlgset.name} added!`, TOAST_DURATION);
-        setLol(lol + 1);
-        setNewAlgset({
-
-          name: `teehee ${lol + 1}`,
-          cases: [
-            { alg: "R U R' U R U2 R'" },
-            { alg: "R U2 R' U' R U' R'" },
-          ]
-
-        })
-      }}
+      <Fab onCreate={handlePresentModalPress}
         onEdit={() => {
           console.log('edit')
         }}
@@ -150,15 +145,51 @@ export default function Select() {
           if (selectedAlgSet === null) return;
           const algToDelete = selectedAlgSet.name;
           if (deleteAlgSet(selectedAlgSet)) {
-
             showToast(`${algToDelete} deleted successfully!`, TOAST_DURATION);
           } else {
-
             showToast('Must have at least one algset');
           }
-
         }}
       />
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        onChange={handleSheetChanges}
+      >
+        <BottomSheetView style={styles.contentContainer}>
+          <View className="flex flex-col gap-3">
+
+            <Text>SHEEET</Text>
+            <Pressable
+              onPress={() => {
+                addAlgSet(newAlgset);
+                showToast(`${newAlgset.name} added!`, TOAST_DURATION);
+                setLol(lol + 1);
+                setNewAlgset({
+
+                  name: `teehee ${lol + 1}`,
+                  cases: [
+                    { alg: "R U R' U R U2 R'" },
+                    { alg: "R U2 R' U' R U' R'" },
+                  ]
+
+                })
+
+
+                bottomSheetModalRef.current?.dismiss();
+              }} className="rounded-xl bg-red-400 p-3 cursor-pointer">
+              <Text>click me please</Text>
+            </Pressable>
+          </View>
+        </BottomSheetView>
+      </BottomSheetModal>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    padding: 36,
+    alignItems: 'center',
+  },
+});

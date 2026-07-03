@@ -27,6 +27,7 @@ import { Inter_800ExtraBold_Italic } from '@expo-google-fonts/inter/800ExtraBold
 import { Inter_900Black_Italic } from '@expo-google-fonts/inter/900Black_Italic';
 import { initDB, resetDB } from '@/src/db/schema';
 import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 
@@ -78,11 +79,14 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView>
       <SafeAreaProvider>
+        <BottomSheetModalProvider>
 
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-        <Toaster offset={110} visibleToasts={1} />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+          <Toaster offset={110} visibleToasts={1} />
+        </BottomSheetModalProvider>
+
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
