@@ -10,6 +10,7 @@ import { COLOR_ACCENT } from '@/utils/constants/colors';
 import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
 import { useCallback, useState, ComponentType } from 'react';
 import { useFocusEffect } from 'expo-router';
+
 const SATELLITE_SIZE = 52;
 const MAIN_SIZE = 64;
 const GAP = 12;
