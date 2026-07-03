@@ -13,6 +13,7 @@ import { DrawScramble } from '@/components/DrawScramble';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const TOAST_DURATION = 2500;
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
@@ -130,7 +131,7 @@ export default function Select() {
       )}
       <Fab onCreate={() => {
         addAlgSet(newAlgset);
-        showToast(`${newAlgset.name} added!`);
+        showToast(`${newAlgset.name} added!`, TOAST_DURATION);
         setLol(lol + 1);
         setNewAlgset({
 
@@ -150,7 +151,7 @@ export default function Select() {
           const algToDelete = selectedAlgSet.name;
           if (deleteAlgSet(selectedAlgSet)) {
 
-            showToast(`${algToDelete} deleted successfully!`);
+            showToast(`${algToDelete} deleted successfully!`, TOAST_DURATION);
           } else {
 
             showToast('Must have at least one algset');
