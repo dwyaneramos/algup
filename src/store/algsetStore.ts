@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AlgSet, SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
-import { setSetting, getSetting, getAlgSets } from '@/src/db/queries';
+import { deleteAlgset, setSetting, getSetting, getAlgSets } from '@/src/db/queries';
 
 interface AlgSetStore {
   algSets: AlgSet[];
@@ -8,6 +8,7 @@ interface AlgSetStore {
   setSelectedAlgSet: (algSet: AlgSet) => void;
   loadAlgSets: () => void;
   addAlgSet: (algSet: AlgSet) => void;
+  deleteAlgSet: (algSet: AlgSet) => boolean;
 }
 
 export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
@@ -34,5 +35,21 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
   addAlgSet: (algSet) => {
     insertNewAlgSet(algSet);
     set({ algSets: [...get().algSets, algSet] });
+  },
+
+  deleteAlgSet: (algSet): boolean => {
+    const { algSets } = get();
+
+    if (algSets.length <= 1) return false;
+
+    // check if deleteAlgset is valid name + do error checking
+    deleteAlgset(algSet.name);
+
+    const remaining = algSets.filter((a) => a.name !== algSet.name);
+    const nextSelected = remaining[0];
+
+    set({ algSets: remaining, selectedAlgSet: nextSelected });
+    setSetting(SELECTED_ALGSET_KEY, nextSelected.name);
+    return true;
   },
 }));

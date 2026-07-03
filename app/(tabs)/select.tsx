@@ -1,8 +1,8 @@
 import { Text, View, Pressable, FlatList } from 'react-native';
 import { showToast } from '@/utils/toast';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor, FadeIn } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
 
-import Fab from '@/components/Fab';
+import { Fab } from '@/components/Fab';
 import { useEffect, useState, useCallback } from 'react';
 import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
@@ -87,6 +87,9 @@ export default function Select() {
   const algsets = useAlgSetStore(s => s.algSets);
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
   const addAlgSet = useAlgSetStore(s => s.addAlgSet);
+
+  const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+  const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
   const insets = useSafeAreaInsets();
 
   useFocusEffect(
@@ -143,7 +146,16 @@ export default function Select() {
           console.log('edit')
         }}
         onDelete={() => {
-          console.log('delete')
+          if (selectedAlgSet === null) return;
+          const algToDelete = selectedAlgSet.name;
+          if (deleteAlgSet(selectedAlgSet)) {
+
+            showToast(`${algToDelete} deleted successfully!`);
+          } else {
+
+            showToast('Must have at least one algset');
+          }
+
         }}
       />
     </View>

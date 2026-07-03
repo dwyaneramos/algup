@@ -42,6 +42,26 @@ export function createAlgSet(name: string): void {
   );
 }
 
+export function deleteAlgset(algsetName: string): void {
+  db.withTransactionSync(() => {
+    db.runSync(
+      `DELETE FROM case_progress
+       WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
+      [algsetName]
+    );
+
+    db.runSync(
+      'DELETE FROM cases WHERE algset = ?',
+      [algsetName]
+    );
+
+    db.runSync(
+      'DELETE FROM algsets WHERE name = ?',
+      [algsetName]
+    );
+  });
+}
+
 export function getFirstCase(algsetName: string): Case | null {
   return db.getFirstSync<Case>(
     'SELECT * FROM cases WHERE algset = ? ORDER BY id ASC LIMIT 1',
