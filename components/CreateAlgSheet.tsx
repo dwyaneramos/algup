@@ -2,6 +2,7 @@ import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'reac
 import { Text, View, Pressable, TextInput, StyleSheet } from 'react-native';
 import { BottomSheetModal, BottomSheetView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { type AlgSet } from '@/src/logic/algsets';
+import { useAlgSetStore } from '@/src/store/algsetStore';
 
 export type CreateAlgSetSheetRef = {
   present: () => void;
@@ -19,6 +20,7 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const snapPoints = useMemo(() => ['90%'], []);
 
+    const algsets = useAlgSetStore(s => s.algSets);
     const [name, setName] = useState('');
     const [algsText, setAlgsText] = useState('');
     const [algsInputHeight, setAlgsInputHeight] = useState(MIN_ALGS_HEIGHT);
@@ -39,6 +41,11 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
     };
 
     const handleCreate = () => {
+      if (algsets.some(a => a.name === name.trim())) {
+        alert("Algset name already exists.");
+        return;
+      }
+
       const cases = algsText
         .split('\n')
         .map(line => line.trim())
