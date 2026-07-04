@@ -1,4 +1,5 @@
 import { createAlgSet, insertCases } from "@/src/db/queries";
+import { validateAlgorithm } from "@/src/logic/alg";
 
 export interface Case {
   id?: number;
@@ -10,6 +11,15 @@ export const SELECTED_ALGSET_KEY = "selectedAlgset"
 export interface AlgSet {
   name: string;
   cases: Case[];
+}
+
+export function validateAlgSet(algset: AlgSet): boolean {
+  for (const c of algset.cases) {
+    if (validateAlgorithm(c.alg) === false) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function insertNewAlgSet(algset: AlgSet): boolean {

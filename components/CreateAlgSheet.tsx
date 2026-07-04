@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Text, View, Pressable, TextInput, StyleSheet } from 'react-native';
 import { BottomSheetModal, BottomSheetView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { type AlgSet } from '@/src/logic/algsets';
+import { type AlgSet, validateAlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 
 export type CreateAlgSetSheetRef = {
@@ -55,6 +55,9 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
       if (cases.length === 0 || name.trim().length === 0) return;
 
       const algsetToStore: AlgSet = { name: name.trim(), cases };
+      validateAlgSet(algsetToStore) || alert("One or more algorithms are invalid.");
+      return;
+
       onCreate(algsetToStore);
       reset();
       bottomSheetModalRef.current?.dismiss();

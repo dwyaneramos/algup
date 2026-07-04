@@ -1,4 +1,5 @@
 import { Alg } from 'cubing/alg';
+import { sanitiseAlgorithm } from './alg';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // 54 stickers, 9 per face in this order:
@@ -188,9 +189,12 @@ function applyMove(cube: CubeState, move: string): CubeState {
   const base = move.replace("'", '').replace('2', '');
   const isPrime = move.includes("'");
   const isDouble = move.includes('2');
+  const isTriple = move.includes('3');
   const cycles = MOVES[base];
 
-  const times = isDouble ? 2 : isPrime ? 3 : 1; // 3 clockwise = 1 counter-clockwise
+
+
+  const times = isDouble ? 2 : (isPrime !== isTriple) ? 3 : 1; // 3 clockwise = 1 counter-clockwise
 
   for (let t = 0; t < times; t++) {
     const temp = [...next];
@@ -204,10 +208,6 @@ function applyMove(cube: CubeState, move: string): CubeState {
   return next;
 }
 
-export function sanitiseAlgorithm(alg: string): string {
-  const sanitised = alg.replace(/[()]/g, '');
-  return sanitised;
-}
 
 export function applyScramble(scramble: string): CubeState {
   const sanitised = sanitiseAlgorithm(scramble);
