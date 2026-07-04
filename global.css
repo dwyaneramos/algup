@@ -9,6 +9,9 @@
   .text-subheader {
     @apply text-xl font-inter-semibold;
   }
+  .text-form-header{
+    @apply text-lg font-inter-medium;
+  }
   .text-body {
     @apply text-lg font-inter-regular;
   }

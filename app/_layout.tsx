@@ -80,7 +80,6 @@ export default function RootLayout() {
     <GestureHandlerRootView>
       <SafeAreaProvider>
         <BottomSheetModalProvider>
-
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
