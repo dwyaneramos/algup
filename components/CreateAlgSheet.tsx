@@ -17,15 +17,13 @@ type CreateAlgSetSheetProps = {
 export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSheetProps>(
   function CreateAlgSetSheet({ onCreate }, ref) {
     const { height: screenHeight } = useWindowDimensions();
-    const MAX_ALGS_HEIGHT = screenHeight * 0.9;
-    const MIN_ALGS_HEIGHT = 40;
+    const MIN_ALGS_TEXTAREA_HEIGHT = 40;
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const snapPoints = useMemo(() => ['90%'], []);
 
     const algsets = useAlgSetStore(s => s.algSets);
     const [name, setName] = useState('');
     const [algsText, setAlgsText] = useState('');
-    const [algsInputHeight, setAlgsInputHeight] = useState(MIN_ALGS_HEIGHT);
 
     useImperativeHandle(ref, () => ({
       present: () => bottomSheetModalRef.current?.present(),
@@ -39,7 +37,6 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
     const reset = () => {
       setName('');
       setAlgsText('');
-      setAlgsInputHeight(MIN_ALGS_HEIGHT);
     };
 
     const handleCreate = () => {
@@ -93,7 +90,7 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
               <Text className="text-form-header">Algorithms</Text>
               <BottomSheetTextInput
                 className="border border-gray-400 rounded-lg p-2 w-[80vw]"
-                style={[styles.algsInput, { minHeight: 40, maxHeight: screenHeight * 0.5 }]}
+                style={[styles.algsInput, { minHeight: MIN_ALGS_TEXTAREA_HEIGHT, maxHeight: screenHeight * 0.5 }]}
                 multiline
                 keyboardType="ascii-capable"
                 autoCorrect={false}
