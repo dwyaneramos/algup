@@ -55,9 +55,11 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
       if (cases.length === 0 || name.trim().length === 0) return;
 
       const algsetToStore: AlgSet = { name: name.trim(), cases };
-      validateAlgSet(algsetToStore) || alert("One or more algorithms are invalid.");
-      return;
-
+      if (!validateAlgSet(algsetToStore)) {
+        alert("Invalid algorithm");
+        return;
+      }
+      console.log(algsetToStore);
       onCreate(algsetToStore);
       reset();
       bottomSheetModalRef.current?.dismiss();
