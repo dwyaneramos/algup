@@ -63,7 +63,9 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
     };
 
     const handleSheetChanges = (index: number) => {
-      console.log('handleSheetChanges', index);
+      if (index === -1) {
+        reset();
+      }
     };
 
     return (
