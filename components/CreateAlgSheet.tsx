@@ -74,11 +74,11 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
         onChange={handleSheetChanges}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <View className="flex flex-col gap-3">
-            <Text>SHEEET</Text>
+          <View className="flex flex-col gap-3 items-center">
+            <Text className="text-subheader">Create new Algorithm Set</Text>
 
             <View className="flex flex-col gap-1">
-              <Text className="text-form-header">Algset Name</Text>
+              <Text className="text-form-header">Algorithm Set Name</Text>
               <BottomSheetTextInput
                 className="border border-gray-400 rounded-lg p-2 w-[80vw]"
                 onChangeText={setName}
