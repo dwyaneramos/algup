@@ -13,13 +13,29 @@ export interface AlgSet {
   cases: Case[];
 }
 
-export function validateAlgSet(algset: AlgSet): boolean {
+export function validateAlgSetName(name: string): boolean {
+  name = name.trim()
+  return name.length > 0 && name.length <= 32;
+}
+
+export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): string {
+  if (existingAlgsets.some(a => a.name === algset.name.trim())) {
+    return "Algset name already exists";
+  }
+  if (validateAlgSetName(algset.name) === false) {
+    return "Algset name must be between 1 and 32 characters";
+  }
+
+  if (algset.cases.length === 0) {
+    return "Must include at least one alg"
+  }
+
   for (const c of algset.cases) {
     if (validateAlgorithm(c.alg) === false) {
-      return false;
+      return `Invalid algorithm: "${c.alg}"`;
     }
   }
-  return true;
+  return "";
 }
 
 export function insertNewAlgSet(algset: AlgSet): boolean {

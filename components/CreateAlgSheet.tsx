@@ -41,10 +41,6 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
     };
 
     const handleCreate = () => {
-      if (algsets.some(a => a.name === name.trim())) {
-        alert("Algset name already exists.");
-        return;
-      }
 
       const cases = algsText
         .split('\n')
@@ -52,14 +48,13 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
         .filter(line => line.length > 0)
         .map(alg => ({ alg }));
 
-      if (cases.length === 0 || name.trim().length === 0) return;
 
       const algsetToStore: AlgSet = { name: name.trim(), cases };
-      if (!validateAlgSet(algsetToStore)) {
-        alert("Invalid algorithm");
+      const algsetValidationError = validateAlgSet(algsetToStore, algsets);
+      if (algsetValidationError.length !== 0) {
+        alert(algsetValidationError);
         return;
       }
-      console.log(algsetToStore);
       onCreate(algsetToStore);
       reset();
       bottomSheetModalRef.current?.dismiss();
