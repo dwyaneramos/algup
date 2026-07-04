@@ -186,7 +186,7 @@ const MOVES: Record<string, number[][]> = {
 
 function applyMove(cube: CubeState, move: string): CubeState {
   const next = [...cube];
-  const base = move.replace("'", '').replace('2', '');
+  const base = move.replace("'", '').replace('2', '').replace('3', '');
   const isPrime = move.includes("'");
   const isDouble = move.includes('2');
   const isTriple = move.includes('3');
