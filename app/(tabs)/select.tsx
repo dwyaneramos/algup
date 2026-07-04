@@ -1,7 +1,9 @@
-import { Text, View, Pressable, FlatList, StyleSheet, TextInput } from 'react-native';
-import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
+import { Text, View, Pressable, FlatList } from 'react-native';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { showToast } from '@/utils/toast';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withTiming, interpolateColor,
+} from 'react-native-reanimated';
 
 import { Fab } from '@/components/Fab';
 import { type AlgSet } from '@/src/logic/algsets';
@@ -13,14 +15,18 @@ import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+//TODO: scramble displayed is just the inverse of the fetched algorithm
+
+
 const TOAST_DURATION = 2500;
 
-//TODO: scramble displayed is just the inverse of the fetched algorithm
+const COLOR_TRANSITION_DURATION = 150;
 
 function AlgSetRow({ algset }: { algset: AlgSet }) {
   const isSelected = useAlgSetStore(s => s.selectedAlgSet?.name === algset.name);
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
   const [scramble, setScramble] = useState<string | null>(null);
+
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
   const opacity = useSharedValue(0);
@@ -28,11 +34,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ translateY: translateY.value }],
-    backgroundColor: interpolateColor(
-      selected.value,
-      [0, 1],
-      ['#ffffff', '#e899f2']
-    ),
+    backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
   }));
 
   useFocusEffect(
@@ -47,12 +49,15 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   }, [algset.name]);
 
   useEffect(() => {
-    selected.value = withTiming(isSelected ? 1 : 0, { duration: 150 });
-  }, [isSelected]);
+    if (isSelected) {
+      selected.value = withTiming(1, { duration: COLOR_TRANSITION_DURATION })
+    } else {
+      selected.value = withTiming(0, { duration: COLOR_TRANSITION_DURATION });
+    }
 
+  }, [isSelected]);
   const handlePress = () => {
     if (isSelected) return;
-    selected.value = withTiming(1, { duration: 150 });
     translateY.value = withTiming(-10, { duration: 200 }, () => {
       translateY.value = withTiming(0, { duration: 350 });
     });
@@ -60,10 +65,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   };
 
   return (
-    <Animated.View
-      style={animatedStyle}
-      className="w-full p-3 flex flex-row justify-between rounded-xl"
-    >
+    <Animated.View style={animatedStyle} className="w-full p-3 flex flex-row justify-between rounded-xl">
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
         <View className="flex flex-col justify-center">
           <Text className="font-inter-semibold text-xl">{algset.name}</Text>
