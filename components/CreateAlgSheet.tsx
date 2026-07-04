@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { Text, View, Pressable, TextInput, StyleSheet } from 'react-native';
+import { Text, View, Pressable, TextInput, StyleSheet, useWindowDimensions } from 'react-native';
 import { BottomSheetModal, BottomSheetView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { type AlgSet, validateAlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
@@ -13,10 +13,12 @@ type CreateAlgSetSheetProps = {
   onCreate: (algset: AlgSet) => void;
 };
 
-const MIN_ALGS_HEIGHT = 40;
 
 export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSheetProps>(
   function CreateAlgSetSheet({ onCreate }, ref) {
+    const { height: screenHeight } = useWindowDimensions();
+    const MAX_ALGS_HEIGHT = screenHeight * 0.9;
+    const MIN_ALGS_HEIGHT = 40;
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const snapPoints = useMemo(() => ['90%'], []);
 
@@ -89,7 +91,7 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
               <Text className="text-form-header">Algorithms</Text>
               <BottomSheetTextInput
                 className="border border-gray-400 rounded-lg p-2 w-[80vw]"
-                style={[styles.algsInput, { minHeight: algsInputHeight }]}
+                style={[styles.algsInput, { minHeight: 40, maxHeight: screenHeight * 0.5 }]}
                 multiline
                 keyboardType="ascii-capable"
                 autoCorrect={false}
@@ -97,9 +99,6 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
                 placeholder="One alg per line"
                 onChangeText={handleAlgsChange}
                 value={algsText}
-                onContentSizeChange={(e) =>
-                  setAlgsInputHeight(Math.max(MIN_ALGS_HEIGHT, e.nativeEvent.contentSize.height))
-                }
               />
             </View>
 
