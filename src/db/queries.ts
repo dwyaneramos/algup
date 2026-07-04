@@ -2,7 +2,14 @@ import { AlgSet, Case } from '@/src/logic/algsets';
 import { type CaseWithProgress, type CaseState } from '@/src/logic/caseQueue';
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabaseSync('algup.db');
+let _db: SQLite.SQLiteDatabase | null = null;
+
+function getDb() {
+  if (!_db) {
+    _db = SQLite.openDatabaseSync('algup.db');
+  }
+  return _db;
+}
 
 export interface AlgSetProgress {
   total: number;
@@ -13,6 +20,7 @@ export interface AlgSetProgress {
 }
 
 export function getAlgSet(name: string): AlgSet | null {
+  const db = getDb();
   const algset = db.getFirstSync<{ name: string }>(
     'SELECT * FROM algsets WHERE name = ?', [name]
   );
@@ -24,6 +32,7 @@ export function getAlgSet(name: string): AlgSet | null {
 }
 
 export function insertCases(algset: AlgSet): void {
+  const db = getDb();
   db.withTransactionSync(() => {
     for (const c of algset.cases) {
       db.runSync(
@@ -36,6 +45,7 @@ export function insertCases(algset: AlgSet): void {
 
 
 export function createAlgSet(name: string): void {
+  const db = getDb();
   db.runSync(
     'INSERT OR IGNORE INTO algsets (name) VALUES (?)',
     [name]
@@ -43,6 +53,7 @@ export function createAlgSet(name: string): void {
 }
 
 export function deleteAlgset(algsetName: string): void {
+  const db = getDb();
   db.withTransactionSync(() => {
     db.runSync(
       `DELETE FROM case_progress
@@ -63,6 +74,7 @@ export function deleteAlgset(algsetName: string): void {
 }
 
 export function getFirstCase(algsetName: string): Case | null {
+  const db = getDb();
   return db.getFirstSync<Case>(
     'SELECT * FROM cases WHERE algset = ? ORDER BY id ASC LIMIT 1',
     [algsetName]
@@ -71,6 +83,7 @@ export function getFirstCase(algsetName: string): Case | null {
 
 
 export function getAlgSetProgress(algset: string): AlgSetProgress {
+  const db = getDb();
   const result = db.getFirstSync<{
     total: number;
     learning: number;
@@ -92,6 +105,7 @@ export function getAlgSetProgress(algset: string): AlgSetProgress {
 }
 
 export function getAlgSets(): AlgSet[] {
+  const db = getDb();
   const algsets = db.getAllSync<{ id: string; name: string }>('SELECT * FROM algsets');
   return algsets.map(a => ({
     ...a,
@@ -100,6 +114,7 @@ export function getAlgSets(): AlgSet[] {
 }
 
 export function getOverallFluency(algsetName: string): number {
+  const db = getDb();
   const result = db.getFirstSync<{ avg: number }>(`
     SELECT AVG(COALESCE(cp.fluency, 1.0)) as avg
     FROM cases c
@@ -110,11 +125,13 @@ export function getOverallFluency(algsetName: string): number {
 }
 
 export function getCases(algsetName: string): Case[] {
+  const db = getDb();
   const cases = db.getAllSync<{ id: number; alg: string }>('SELECT * FROM cases WHERE algset = ?', [algsetName]);
   return cases;
 }
 
 export async function getCasesWithProgress(algset: string): Promise<CaseWithProgress[]> {
+  const db = getDb();
   return db.getAllAsync<CaseWithProgress>(`
     SELECT c.*, 
       COALESCE(cp.fluency, 1.0) AS fluency,
@@ -128,6 +145,7 @@ export async function getCasesWithProgress(algset: string): Promise<CaseWithProg
 
 
 export function saveCaseFluency(caseId: string, fluency: number) {
+  const db = getDb();
   db.runSync(`
     INSERT OR REPLACE INTO case_progress (case_id, fluency)
     VALUES (?, ?)
@@ -135,6 +153,7 @@ export function saveCaseFluency(caseId: string, fluency: number) {
 }
 
 export function toggleCaseFocus(caseId: number) {
+  const db = getDb();
   db.runSync(
     `INSERT INTO case_progress (case_id, is_focused)
      VALUES (?, 1)
@@ -145,6 +164,7 @@ export function toggleCaseFocus(caseId: number) {
 }
 
 export function getWorstCases(algsetName: string, n: number): CaseWithProgress[] {
+  const db = getDb();
   return db.getAllSync<CaseWithProgress>(`
     SELECT c.*, 
       COALESCE(cp.fluency, 1.0) AS fluency,
@@ -161,6 +181,7 @@ export function getWorstCases(algsetName: string, n: number): CaseWithProgress[]
 
 
 export function getSetting(key: string): string | null {
+  const db = getDb();
   const result = db.getFirstSync<{ value: string }>(
     'SELECT value FROM settings WHERE key = ?', [key]
   );
@@ -168,6 +189,7 @@ export function getSetting(key: string): string | null {
 }
 
 export function setSetting(key: string, value: string): void {
+  const db = getDb();
   db.runSync(
     'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
     [key, value]
@@ -177,6 +199,7 @@ export function setSetting(key: string, value: string): void {
 
 
 export function updateCaseProgress(caseId: number, fluency: number, state: CaseState) {
+  const db = getDb();
   db.runSync(`
     INSERT INTO case_progress (case_id, fluency, state)
     VALUES (?, ?, ?)
@@ -187,6 +210,7 @@ export function updateCaseProgress(caseId: number, fluency: number, state: CaseS
 }
 
 export function introduceNextCase(algset: string): void {
+  const db = getDb();
   const nextLocked = db.getFirstSync<{ id: number }>(`
     SELECT c.id
     FROM cases c

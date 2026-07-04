@@ -18,21 +18,26 @@ export function validateAlgSetName(name: string): boolean {
   return name.length > 0 && name.length <= 32;
 }
 
+export const algsetAlreadyExistsError = "Algset name already exists";
+export const algsetNameLengthError = "Algset name must be between 1 and 32 characters";
+export const algsetNoCasesError = "Must include at least one alg";
+export const invalidAlgError = (alg: string) => `Invalid algorithm: "${alg}"`;
+
 export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): string {
   if (existingAlgsets.some(a => a.name === algset.name.trim())) {
-    return "Algset name already exists";
+    return algsetAlreadyExistsError;
   }
   if (validateAlgSetName(algset.name) === false) {
-    return "Algset name must be between 1 and 32 characters";
+    return algsetNameLengthError;
   }
 
   if (algset.cases.length === 0) {
-    return "Must include at least one alg"
+    return algsetNoCasesError
   }
 
   for (const c of algset.cases) {
     if (validateAlgorithm(c.alg) === false) {
-      return `Invalid algorithm: "${c.alg}"`;
+      return invalidAlgError(c.alg);
     }
   }
   return "";
