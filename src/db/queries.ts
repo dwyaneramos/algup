@@ -31,18 +31,6 @@ export function getAlgSet(name: string): AlgSet | null {
   };
 }
 
-export function insertCases(algset: AlgSet): void {
-  const db = getDb();
-  db.withTransactionSync(() => {
-    for (const c of algset.cases) {
-      db.runSync(
-        'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
-        [algset.name, c.alg]
-      );
-    }
-  });
-}
-
 
 export function createAlgSet(name: string): void {
   const db = getDb();
@@ -81,6 +69,45 @@ export function getFirstCase(algsetName: string): Case | null {
   );
 }
 
+function deleteCasesInternal(db: SQLite.SQLiteDatabase, caseIds: number[]): void {
+  if (caseIds.length === 0) return;
+  const placeholders = caseIds.map(() => '?').join(', ');
+  db.runSync(`DELETE FROM case_progress WHERE case_id IN (${placeholders});`, caseIds);
+  db.runSync(`DELETE FROM cases WHERE id IN (${placeholders});`, caseIds);
+}
+
+function insertCasesInternal(db: SQLite.SQLiteDatabase, algset: AlgSet): void {
+  for (const c of algset.cases) {
+    db.runSync(
+      'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
+      [algset.name, c.alg]
+    );
+  }
+}
+
+export function deleteCases(caseIds: number[]): void {
+  const db = getDb();
+  db.withTransactionSync(() => deleteCasesInternal(db, caseIds));
+}
+
+export function insertCases(algset: AlgSet): void {
+  const db = getDb();
+  db.withTransactionSync(() => insertCasesInternal(db, algset));
+}
+
+export function applyAlgSetCaseChanges(
+  caseIdsToDelete: number[],
+  algsetNameForInsert: string,
+  casesToInsert: Case[]
+): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    deleteCasesInternal(db, caseIdsToDelete);
+    if (casesToInsert.length > 0) {
+      insertCasesInternal(db, { name: algsetNameForInsert, cases: casesToInsert });
+    }
+  });
+}
 
 export function getAlgSetProgress(algset: string): AlgSetProgress {
   const db = getDb();

@@ -1,5 +1,6 @@
 import { Text, View, Pressable, FlatList } from 'react-native';
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { editAlgset } from '@/src/logic/algsets';
 import { showToast } from '@/utils/toast';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, interpolateColor,
@@ -10,6 +11,7 @@ import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { CreateAlgSetSheet, CreateAlgSetSheetRef } from '@/components/CreateAlgSheet';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
+import { EditAlgSetSheet, EditAlgSetSheetRef } from '@/components/EditAlgSetSheet';
 import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
@@ -98,6 +100,7 @@ export default function Select() {
 
   const insets = useSafeAreaInsets();
   const createSheetRef = useRef<CreateAlgSetSheetRef>(null);
+  const editSheetRef = useRef<EditAlgSetSheetRef>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -105,9 +108,14 @@ export default function Select() {
     }, [])
   );
 
-  const handlePresentModalPress = useCallback(() => {
+  const displayCreateAlgSetSheet = useCallback(() => {
     createSheetRef.current?.present();
   }, []);
+
+  const displayEditAlgSetSheet = useCallback(() => {
+    if (selectedAlgSet === null) return;
+    editSheetRef.current?.present();
+  }, [selectedAlgSet]);
 
   return (
     <View className="items-center flex-1 justify-start flex-col pt-16">
@@ -125,10 +133,9 @@ export default function Select() {
         />
       )}
       <Fab
-        onCreate={handlePresentModalPress}
-        onEdit={() => {
-          console.log('edit');
-        }}
+        onCreate={displayCreateAlgSetSheet}
+        onEdit={displayEditAlgSetSheet}
+
         onDelete={() => {
           if (selectedAlgSet === null) return;
           const algToDelete = selectedAlgSet.name;
@@ -137,6 +144,14 @@ export default function Select() {
           } else {
             showToast('Must have at least one algset');
           }
+        }}
+      />
+      <EditAlgSetSheet
+        algset={selectedAlgSet!}
+        ref={editSheetRef}
+        onEdit={(algset: AlgSet, editedAlgset: AlgSet) => {
+          editAlgset(algset, editedAlgset)
+          showToast(`${algset.name} edited successfully!`, TOAST_DURATION);
         }}
       />
 

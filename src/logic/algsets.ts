@@ -1,4 +1,4 @@
-import { createAlgSet, insertCases } from "@/src/db/queries";
+import { createAlgSet, insertCases, deleteCases, applyAlgSetCaseChanges } from "@/src/db/queries";
 import { validateAlgorithm } from "@/src/logic/alg";
 
 export interface Case {
@@ -49,6 +49,28 @@ export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): strin
     }
   }
   return "";
+}
+
+export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
+  try {
+    const casesToDelete = old.cases.filter(
+      c => !edited.cases.some(ec => ec.alg.trim() === c.alg.trim())
+    );
+    const caseIDs = casesToDelete
+      .filter((c: Case): c is Case & { id: number } => c.id !== undefined)
+      .map(c => c.id);
+
+    const casesToInsert = edited.cases.filter(
+      ec => !old.cases.some(c => c.alg.trim() === ec.alg.trim())
+    );
+
+
+    applyAlgSetCaseChanges(caseIDs, edited.name, casesToInsert);
+    return true;
+  } catch (error) {
+    console.error(`Failed to edit algset "${edited.name}":`, error);
+    return false;
+  }
 }
 
 export function insertNewAlgSet(algset: AlgSet): boolean {
