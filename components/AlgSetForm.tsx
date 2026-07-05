@@ -23,12 +23,9 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
   );
   const numAlgsEntered = useRef(initialAlgSet?.cases.length ?? 0);
 
-  useEffect(() => {
-    numAlgsEntered.current = algsText.split('\n').filter(line => line.trim().length > 0).length;
-  }, [algsText]);
-
   const handleAlgsChange = (text: string) => {
     setAlgsText(text.replace(/[’‘]/g, "'"));
+    numAlgsEntered.current = text.split('\n').filter(line => line.trim().length > 0).length;
   };
 
   const handleSubmit = () => {
