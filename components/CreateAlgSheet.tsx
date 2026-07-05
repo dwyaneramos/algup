@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState, useEffect } from 'react';
 import { Text, View, Pressable, TextInput, StyleSheet, useWindowDimensions } from 'react-native';
 import { BottomSheetModal, BottomSheetView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { type AlgSet, validateAlgSet } from '@/src/logic/algsets';
@@ -24,6 +24,11 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
     const algsets = useAlgSetStore(s => s.algSets);
     const [name, setName] = useState('');
     const [algsText, setAlgsText] = useState('');
+    const numAlgsEntered = useRef(0);
+
+    useEffect(() => {
+      numAlgsEntered.current = algsText.split('\n').filter(line => line.trim().length > 0).length;
+    }, [algsText]);
 
     useImperativeHandle(ref, () => ({
       present: () => bottomSheetModalRef.current?.present(),
@@ -75,7 +80,7 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
       >
         <BottomSheetView style={styles.contentContainer}>
           <View className="flex flex-col gap-3 items-center">
-            <Text className="text-subheader">Create new Algorithm Set</Text>
+            <Text className="text-subheader w-[80vw]">Create new Algorithm Set</Text>
 
             <View className="flex flex-col gap-1">
               <Text className="text-form-header">Algorithm Set Name</Text>
@@ -87,7 +92,10 @@ export const CreateAlgSetSheet = forwardRef<CreateAlgSetSheetRef, CreateAlgSetSh
             </View>
 
             <View className="flex flex-col gap-1">
-              <Text className="text-form-header">Algorithms</Text>
+              <View className="flex flex-row justify-between w-[80vw] items-end gap-2">
+                <Text className="text-form-header">Algorithms</Text>
+                <Text className="text-muted">{numAlgsEntered.current} alg{numAlgsEntered.current !== 1 ? "s" : ""}</Text>
+              </View>
               <BottomSheetTextInput
                 className="border border-gray-400 rounded-lg p-2 w-[80vw]"
                 style={[styles.algsInput, { minHeight: MIN_ALGS_TEXTAREA_HEIGHT, maxHeight: screenHeight * 0.5 }]}
