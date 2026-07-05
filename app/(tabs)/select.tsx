@@ -168,8 +168,11 @@ export default function Select() {
         ref={createSheetRef}
         onCreate={(algset) => {
           addAlgSet(algset);
+          const refreshed = getAlgSet(algset.name);
+          if (refreshed) {
+            setSelectedAlgSet(refreshed);
+          }
           showToast(`${algset.name} added!`, TOAST_DURATION);
-          setSelectedAlgSet(algset);
         }}
       />
     </View>
