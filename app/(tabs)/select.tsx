@@ -1,4 +1,5 @@
 import { Text, View, Pressable, FlatList } from 'react-native';
+import { getAlgSet } from '@/src/db/queries';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { editAlgset } from '@/src/logic/algsets';
 import { showToast } from '@/utils/toast';
@@ -48,7 +49,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
 
   useEffect(() => {
     getDisplayCaseScramble(algset.name).then(setScramble);
-  }, [algset.name]);
+  }, [algset]);
 
   useEffect(() => {
     if (isSelected) {
@@ -150,9 +151,17 @@ export default function Select() {
         algset={selectedAlgSet!}
         ref={editSheetRef}
         onEdit={(algset: AlgSet, editedAlgset: AlgSet) => {
-          editAlgset(algset, editedAlgset)
-          showToast(`${algset.name} edited successfully!`, TOAST_DURATION);
-        }}
+          const editSuccessful = editAlgset(algset, editedAlgset)
+          if (editSuccessful) {
+            loadAlgSets();
+            const refreshed = getAlgSet(editedAlgset.name);
+            if (refreshed) {
+              setSelectedAlgSet(refreshed);
+            }
+            showToast(`${algset.name} edited successfully!`, TOAST_DURATION);
+          }
+        }
+        }
       />
 
       <CreateAlgSetSheet
