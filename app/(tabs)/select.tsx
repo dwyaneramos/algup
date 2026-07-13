@@ -17,6 +17,7 @@ import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sheet, SheetRef } from '@/components/Sheet'
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
@@ -102,6 +103,7 @@ export default function Select() {
   const insets = useSafeAreaInsets();
   const createSheetRef = useRef<CreateAlgSetSheetRef>(null);
   const editSheetRef = useRef<EditAlgSetSheetRef>(null);
+  const deleteConfirmSheetRef = useRef<SheetRef>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -116,6 +118,11 @@ export default function Select() {
   const displayEditAlgSetSheet = useCallback(() => {
     if (selectedAlgSet === null) return;
     editSheetRef.current?.present();
+  }, [selectedAlgSet]);
+
+  const displayConfirmDeleteSheet = useCallback(() => {
+    if (selectedAlgSet === null) return;
+    deleteConfirmSheetRef.current?.present();
   }, [selectedAlgSet]);
 
   return (
@@ -138,13 +145,7 @@ export default function Select() {
         onEdit={displayEditAlgSetSheet}
 
         onDelete={() => {
-          if (selectedAlgSet === null) return;
-          const algToDelete = selectedAlgSet.name;
-          if (deleteAlgSet(selectedAlgSet)) {
-            showToast(`${algToDelete} deleted successfully!`, TOAST_DURATION);
-          } else {
-            showToast('Must have at least one algset');
-          }
+          displayConfirmDeleteSheet()
         }}
       />
       <EditAlgSetSheet
@@ -175,6 +176,29 @@ export default function Select() {
           showToast(`${algset.name} added!`, TOAST_DURATION);
         }}
       />
+
+      <Sheet ref={deleteConfirmSheetRef} snapPoints={['20%']}>
+        <View className="flex flex-col gap-4 items-center ">
+          <Text className="text-form-header">Are you sure you want to delete {selectedAlgSet?.name}?</Text>
+          <Pressable className="rounded-full bg-red-500 p-4"
+            onPress={() => {
+              if (selectedAlgSet === null) return;
+              const algToDelete = selectedAlgSet.name;
+              if (deleteAlgSet(selectedAlgSet)) {
+                showToast(`${algToDelete} deleted successfully!`, TOAST_DURATION);
+              } else {
+                showToast('Must have at least one algset');
+              }
+              deleteConfirmSheetRef.current?.dismiss();
+            }
+            }
+          >
+            <Text className="text-white ">Confirm</Text>
+
+          </Pressable>
+        </View>
+
+      </Sheet>
     </View>
   );
 }
