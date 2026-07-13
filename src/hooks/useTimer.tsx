@@ -1,18 +1,21 @@
 import { useState, useRef } from 'react';
 // Generated with Claude Code Sonnet 4.6
 
+
 export function useTimer() {
   const [time, setTime] = useState(0);
   const [running, setRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   const start = () => {
     if (running) return;
     clearInterval(intervalRef.current!);
     resetTime();
     setRunning(true);
+    startTimeRef.current = Date.now();
     intervalRef.current = setInterval(() => {
-      setTime(prev => prev + 10);
+      setTime(Date.now() - startTimeRef.current);
     }, 10);
   };
 
@@ -31,7 +34,7 @@ export function useTimer() {
 
   const resetTime = () => {
     setTime(0);
-  }
+  };
 
   return { time, running, start, stop, formatted, resetTime };
 }
