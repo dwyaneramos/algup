@@ -10,7 +10,7 @@ import Animated, {
 import { Fab } from '@/components/Fab';
 import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { CreateAlgSetSheet, CreateAlgSetSheetRef } from '@/components/CreateAlgSheet';
+import { CreateAlgSetSheet, CreateAlgSetSheetRef } from '@/components/CreateAlgSetSheet';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { EditAlgSetSheet, EditAlgSetSheetRef } from '@/components/EditAlgSetSheet';
 import { useFocusEffect } from 'expo-router';
