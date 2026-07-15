@@ -3,12 +3,13 @@ import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing } from 'react-native-reanimated';
 import { useState, useEffect } from "react";
+import { IconReload, IconXboxX, IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
 import { PulsatingLoadingText } from '@/components/PulsatingLoadingText';
-import { IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
+import { COLOR_ACCENT } from '@/utils/constants/colors';
 
 
 const ICON_SIZE = 48;
@@ -116,6 +117,12 @@ export default function MainScreen() {
               <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
               <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
               <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
+              <View className="w-1 h-8 bg-gray-300 -mx-6" />
+              <GradeButton onPress={() => {
+
+                setAttemptDone(false);
+                resetTime();
+              }} icon={IconReload} color={COLOR_ACCENT} />
             </Animated.View>
           )}
 
