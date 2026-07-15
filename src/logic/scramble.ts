@@ -238,6 +238,11 @@ export async function generateScrambleFromAlg(algString: string): Promise<Scramb
     body: JSON.stringify({ alg: cleanAlg }),
   });
 
+  console.log("#######")
+
+  console.log(res.json())
+  console.log("#######")
+
   return await res.json();
 }
 
