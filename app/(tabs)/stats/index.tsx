@@ -45,7 +45,6 @@ export default function Stats() {
 
       <View className="flex flex-row justify-center items-center gap-3 mb-5">
         <Link href="/stats/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
-        <Link href="/stats/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
       </View>
 
       <View className="px-3">
