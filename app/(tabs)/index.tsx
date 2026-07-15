@@ -1,18 +1,19 @@
 import { View, Text, Pressable, Button } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing } from 'react-native-reanimated';
 import { useState, useEffect } from "react";
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
+import { PulsatingLoadingText } from '@/components/PulsatingLoadingText';
 import { IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 
 
 const ICON_SIZE = 48;
 const DEFAULT_TIME_STRING = '0.00';
-
+const DEFAULT_SCRAMBLE_MESSAGE = "Loading scramble..."
 
 export default function MainScreen() {
   const [attemptDone, setAttemptDone] = useState(false);
@@ -24,6 +25,8 @@ export default function MainScreen() {
   const overallFluency = selectedAlgSet
     ? getAlgSetFluencyPercentage(selectedAlgSet.name)
     : 0;
+
+  const isLoadingScramble = !scramble;
 
   async function handleStopAttempt(): Promise<void> {
     setAttemptDone(true);
@@ -40,6 +43,7 @@ export default function MainScreen() {
   }
 
   function toggleDisplayMode() {
+    if (isLoadingScramble) return;
     setShowScrambleOrSolution((prev) => prev === 'scramble' ? 'solution' : 'scramble');
   }
 
@@ -61,18 +65,26 @@ export default function MainScreen() {
           <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
           <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
-            <Animated.Text
-              key={showScrambleOrSolution}
-              entering={FadeIn.duration(200)}
-              className="text-center text-body font-inter-medium"
-            >
-              {showScrambleOrSolution === 'solution' ? solution : scramble}
-            </Animated.Text>
+            {isLoadingScramble ? (
+              <PulsatingLoadingText message={DEFAULT_SCRAMBLE_MESSAGE} />
+            ) : (
+              <Animated.Text
+                key={showScrambleOrSolution}
+                entering={FadeIn.duration(200)}
+                className="text-center text-body font-inter-medium"
+              >
+                {showScrambleOrSolution === 'solution' ? solution : scramble}
+              </Animated.Text>
+            )}
           </View>
 
-          <Pressable className="bg-accent rounded-3xl w-48 p-3 mt-3" onPress={toggleDisplayMode}>
+          <Pressable
+            className="bg-accent rounded-3xl w-48 p-3 mt-3 disabled:opacity-50"
+            onPress={toggleDisplayMode}
+            disabled={isLoadingScramble}
+            style={{ opacity: isLoadingScramble ? 0.5 : 1 }}
+          >
             <Text className="text-white text-center">Show {showScrambleOrSolution === 'solution' ? "Scramble" : "Solution"}</Text>
-
           </Pressable>
 
 
