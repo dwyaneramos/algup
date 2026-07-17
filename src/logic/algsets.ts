@@ -1,4 +1,4 @@
-import { createAlgSet, insertCases, deleteCases, applyAlgSetCaseChanges } from "@/src/db/queries";
+import { createAlgSet, insertCases, deleteCases, applyAlgSetCaseChanges, clearScrambleQueue } from "@/src/db/queries";
 import { validateAlgorithm } from "@/src/logic/alg";
 
 export interface Case {
@@ -66,6 +66,7 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
 
 
     applyAlgSetCaseChanges(caseIDs, edited.name, casesToInsert);
+    clearScrambleQueue(edited.name);
     return true;
   } catch (error) {
     console.error(`Failed to edit algset "${edited.name}":`, error);

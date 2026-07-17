@@ -241,4 +241,22 @@ export async function generateScrambleFromAlg(algString: string): Promise<Scramb
   return await res.json();
 }
 
+export interface BatchScrambleResult {
+  alg: string;
+  scramble: string;
+  solution: string;
+}
+
+export async function generateScrambleBatch(algs: string[]): Promise<BatchScrambleResult[]> {
+  const cleanAlgs = algs.map(a => a.replace(/[()]/g, ''));
+  const res = await fetch(`${API_URL}/scramble/batch`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ algs: cleanAlgs }),
+  });
+
+  const data = await res.json();
+  return data.results ?? [];
+}
+
 

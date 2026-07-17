@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AlgSet, SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
-import { deleteAlgset, setSetting, getSetting, getAlgSets } from '@/src/db/queries';
+import { deleteAlgset, setSetting, getSetting, getAlgSets, clearScrambleQueue } from '@/src/db/queries';
 
 interface AlgSetStore {
   algSets: AlgSet[];
@@ -44,6 +44,7 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
 
     // check if deleteAlgset is valid name + do error checking
     deleteAlgset(algSet.name);
+    clearScrambleQueue(algSet.name);
 
     const remaining = algSets.filter((a) => a.name !== algSet.name);
     const nextSelected = remaining[0];

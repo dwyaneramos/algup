@@ -257,3 +257,57 @@ export function introduceNextCase(algset: string): void {
       state = 'learning'
   `, [nextLocked.id]);
 }
+
+export interface ScrambleQueueItem {
+  caseId: number;
+  alg: string;
+  scramble: string;
+  solution: string;
+}
+
+export function insertScrambleQueueItems(algset: string, items: ScrambleQueueItem[]): void {
+  if (items.length === 0) return;
+  const db = getDb();
+  db.withTransactionSync(() => {
+    for (const item of items) {
+      db.runSync(
+        'INSERT INTO scramble_queue (algset, case_id, alg, scramble, solution) VALUES (?, ?, ?, ?, ?)',
+        [algset, item.caseId, item.alg, item.scramble, item.solution]
+      );
+    }
+  });
+}
+
+export function dequeueNextScramble(algset: string): ScrambleQueueItem | null {
+  const db = getDb();
+  const row = db.getFirstSync<ScrambleQueueItem & { id: number }>(
+    'SELECT id, case_id as caseId, alg, scramble, solution FROM scramble_queue WHERE algset = ? ORDER BY id ASC LIMIT 1',
+    [algset]
+  );
+  if (!row) return null;
+  db.runSync('DELETE FROM scramble_queue WHERE id = ?', [row.id]);
+  return { caseId: row.caseId, alg: row.alg, scramble: row.scramble, solution: row.solution };
+}
+
+export function getScrambleQueueSize(algset: string): number {
+  const db = getDb();
+  const result = db.getFirstSync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM scramble_queue WHERE algset = ?',
+    [algset]
+  );
+  return result?.count ?? 0;
+}
+
+export function clearScrambleQueue(algset: string): void {
+  const db = getDb();
+  db.runSync('DELETE FROM scramble_queue WHERE algset = ?', [algset]);
+}
+
+export function peekScrambleQueue(algset: string): ScrambleQueueItem[] {
+  const db = getDb();
+  return db.getAllSync<ScrambleQueueItem>(
+    'SELECT case_id as caseId, alg, scramble, solution FROM scramble_queue WHERE algset = ? ORDER BY id ASC',
+    [algset]
+  );
+}
+

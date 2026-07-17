@@ -20,14 +20,14 @@ export default function MainScreen() {
   const [attemptDone, setAttemptDone] = useState(false);
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const { running, start, stop, formatted, resetTime } = useTimer();
-  const { scramble, submitGrade, solution } = useTrainingSession(selectedAlgSet?.name ?? '');
+  const { scramble, submitGrade, solution, isLoading } = useTrainingSession(selectedAlgSet?.name ?? '');
   const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<string>('scramble');
 
   const overallFluency = selectedAlgSet
     ? getAlgSetFluencyPercentage(selectedAlgSet.name)
     : 0;
 
-  const isLoadingScramble = !scramble;
+  const isLoadingScramble = isLoading || !scramble;
 
   async function handleStopAttempt(): Promise<void> {
     setAttemptDone(true);
@@ -93,7 +93,7 @@ export default function MainScreen() {
       )}
       <View className="mt-3">
         <Timer
-          disabled={attemptDone}
+          disabled={attemptDone || isLoadingScramble}
           formatted={formatted()}
           running={running}
           onStart={start}

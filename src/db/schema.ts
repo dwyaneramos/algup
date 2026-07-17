@@ -15,6 +15,7 @@ function seedAlgSets() {
 }
 
 export function resetDB() {
+  db.execSync('DROP TABLE IF EXISTS scramble_queue');
   db.execSync('DROP TABLE IF EXISTS case_progress');
   db.execSync('DROP TABLE IF EXISTS cases');
   db.execSync('DROP TABLE IF EXISTS algsets');
@@ -45,6 +46,20 @@ export function initDB() {
       fluency REAL DEFAULT 1.0,
       state TEXT DEFAULT 'locked',
       is_focused BOOLEAN DEFAULT false,
+      FOREIGN KEY (case_id) REFERENCES cases(id)
+    );
+  `);
+
+  db.execSync('DROP TABLE IF EXISTS scramble_queue');
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS scramble_queue (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      algset TEXT NOT NULL,
+      case_id INTEGER NOT NULL,
+      alg TEXT NOT NULL,
+      scramble TEXT NOT NULL,
+      solution TEXT NOT NULL,
+      FOREIGN KEY (algset) REFERENCES algsets(name),
       FOREIGN KEY (case_id) REFERENCES cases(id)
     );
   `);
