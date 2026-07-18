@@ -5,6 +5,7 @@ import Reanimated, {
   withSpring,
   withTiming,
   Easing,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
 import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
@@ -69,6 +70,7 @@ type SatelliteButtonProps = {
   onPress: () => void;
   distance: number;
   isOpen: boolean;
+  isOpenSV: SharedValue<boolean>;
   backgroundColor?: string;
 };
 
@@ -77,21 +79,23 @@ function SatelliteButton({
   onPress,
   distance,
   isOpen,
+  isOpenSV,
   backgroundColor = COLOR_ACCENT,
 }: SatelliteButtonProps) {
   const { style: pressStyle, onPressIn, onPressOut } = usePressScale();
 
   const containerStyle = useAnimatedStyle(() => {
-    const config = isOpen ? OPEN_SPRING : CLOSE_SPRING;
+    const open = isOpenSV.value;
+    const config = open ? OPEN_SPRING : CLOSE_SPRING;
     return {
-      opacity: withTiming(isOpen ? 1 : 0, {
-        duration: isOpen ? FADE_IN_DURATION : FADE_OUT_DURATION,
+      opacity: withTiming(open ? 1 : 0, {
+        duration: open ? FADE_IN_DURATION : FADE_OUT_DURATION,
         easing: Easing.out(Easing.ease),
       }),
       transform: [
-        { translateY: withSpring(isOpen ? -distance : 0, config) },
+        { translateY: withSpring(open ? -distance : 0, config) },
         { translateX: -HORIZONTAL_CENTER_OFFSET },
-        { scale: withSpring(isOpen ? 1 : 0, config) },
+        { scale: withSpring(open ? 1 : 0, config) },
       ],
     };
   });
@@ -128,25 +132,40 @@ function SatelliteButton({
 
 export function Fab({ onCreate, onEdit, onDelete }: FabProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const isOpenSV = useSharedValue(false);
   const rotation = useSharedValue(0);
-  const { style: pressStyle, onPressIn, onPressOut } = usePressScale();
+  const mainScale = useSharedValue(1);
 
-  const rotateStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
+  const onPressIn = useCallback(() => {
+    mainScale.value = withSpring(PRESS_SCALE);
+  }, [mainScale]);
+
+  const onPressOut = useCallback(() => {
+    mainScale.value = withSpring(1);
+  }, [mainScale]);
+
+  // Scale + rotate both write to `transform`, so they must share one
+  // useAnimatedStyle — splitting them across two hooks means whichever
+  // fires last (e.g. onPressOut's scale reset) wipes out the other's
+  // transform entry, which is why rotation was snapping back.
+  const mainStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: mainScale.value },
+      { rotate: `${rotation.value}deg` },
+    ],
   }));
 
-  const close = useCallback(() => {
-    setIsOpen(false);
-    rotation.value = withTiming(0, { duration: ROTATION_DURATION });
-  }, [rotation]);
-
   const toggle = useCallback(() => {
-    setIsOpen((prev) => {
-      const next = !prev;
-      rotation.value = withTiming(next ? 45 : 0, { duration: ROTATION_DURATION });
-      return next;
-    });
-  }, [rotation]);
+    const next = !isOpen;
+    isOpenSV.value = next;
+    rotation.value = withTiming(next ? 45 : 0, { duration: ROTATION_DURATION });
+    setIsOpen(next);
+  }, [isOpen, isOpenSV, rotation]);
+  const close = useCallback(() => {
+    isOpenSV.value = false;
+    rotation.value = withTiming(0, { duration: ROTATION_DURATION });
+    setIsOpen(false);
+  }, [isOpenSV, rotation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -177,11 +196,12 @@ export function Fab({ onCreate, onEdit, onDelete }: FabProps) {
           onPress={() => handleSatellitePress(onPress)}
           distance={(SATELLITE_SIZE + GAP) * (index + 1)}
           isOpen={isOpen}
+          isOpenSV={isOpenSV}
           backgroundColor={backgroundColor}
         />
       ))}
 
-      <Reanimated.View style={[styles.mainWrapper, pressStyle, rotateStyle]}>
+      <Reanimated.View style={[styles.mainWrapper, mainStyle]}>
         <Pressable
           onPress={toggle}
           onPressIn={onPressIn}

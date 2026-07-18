@@ -1,6 +1,6 @@
 import { Tabs, useRouter } from 'expo-router';
 import { View, Text, Pressable, LayoutChangeEvent } from 'react-native';
-import { IconChartDots2, IconCards, IconStopwatch } from '@tabler/icons-react-native';
+import { IconChartDots2, IconCards, IconStopwatch, IconLink } from '@tabler/icons-react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useEffect } from 'react';
 import Reanimated, {
@@ -154,6 +154,13 @@ export default function TabLayout() {
         options={{
           title: 'Stats',
           tabBarIcon: ({ color, size }) => <IconChartDots2 color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="links"
+        options={{
+          title: 'Links',
+          tabBarIcon: ({ color, size }) => <IconLink color={color} size={size} />,
         }}
       />
       <Tabs.Screen

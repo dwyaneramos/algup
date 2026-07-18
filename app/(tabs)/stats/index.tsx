@@ -2,7 +2,7 @@ import { Text, View, Button, FlatList } from 'react-native';
 import { useFocusEffect, Link } from 'expo-router';
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { useCallback, useState } from 'react';
-import { getAlgSetProgress, getDailyStreak, getAlgsetDaysPracticed } from '@/src/db/queries';
+import { getAlgSetProgress, getDailyStreak } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
 import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
@@ -18,7 +18,6 @@ export default function Stats() {
   const [loading, setLoading] = useState(true);
   const [worstCases, setWorstCases] = useState<CaseWithProgress[]>([]);
   const [dailyStreak, setDailyStreak] = useState(0);
-  const [daysPracticed, setDaysPracticed] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -30,7 +29,6 @@ export default function Stats() {
         const progress = getAlgSetProgress(selectedAlgSet.name);
         setAlgSetProgress(progress);
         setDailyStreak(getDailyStreak());
-        setDaysPracticed(getAlgsetDaysPracticed(selectedAlgSet.name));
         getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(cases => {
           setWorstCases(cases);
           setLoading(false);
@@ -53,7 +51,7 @@ export default function Stats() {
 
       <View className="flex-row justify-around w-full px-4 mb-6">
         <StatCard label="Streak" value={`${dailyStreak}`} sub="days" />
-        <StatCard label="Practiced" value={`${daysPracticed}`} sub="days" />
+        <StatCard label="Count" value={`${algSetProgress.total}`} sub="algorithms" />
       </View>
 
       <View className="px-3">
@@ -133,9 +131,9 @@ function ProgressBarLegendTitle({ color, numCases, category }: { color: string, 
 
 function StatCard({ label, value, sub }: { label: string, value: string, sub: string }) {
   return (
-    <View className="items-center bg-white rounded-2xl px-5 py-3 shadow-sm">
-      <Text className="font-inter-bold text-lg text-header">{value}</Text>
+    <View className="items-center w-32 bg-white rounded-2xl px-5 py-3 shadow-sm">
       <Text className="font-inter-medium text-xs text-gray-500">{label}</Text>
+      <Text className="font-inter-bold text-lg text-header">{value}</Text>
       {sub ? <Text className="text-[10px] text-gray-400">{sub}</Text> : null}
     </View>
   );
