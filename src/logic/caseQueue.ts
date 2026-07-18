@@ -7,6 +7,7 @@ export interface CaseWithProgress {
   fluency: number;
   is_focused: boolean;
   state: CaseState;
+  last_practiced: string | null;
 }
 
 // TODO: tweak value
@@ -26,6 +27,27 @@ const fluency_THRESHOLDS = {
   toReviewing: 3.0,
   toMastered: 4.5,
 };
+
+const DECAY_FACTOR = 0.95;
+const DECAY_MIN_DAYS = 2;
+
+export function applyDecay(cases: CaseWithProgress[]): CaseWithProgress[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return cases.map(c => {
+    if (!c.last_practiced || c.state === 'locked') return c;
+
+    const practiced = new Date(c.last_practiced);
+    practiced.setHours(0, 0, 0, 0);
+    const daysSince = Math.floor((today.getTime() - practiced.getTime()) / 86400000);
+
+    if (daysSince < DECAY_MIN_DAYS) return c;
+
+    const newFluency = Math.max(1, +(c.fluency * Math.pow(DECAY_FACTOR, daysSince)).toFixed(1));
+    return { ...c, fluency: newFluency };
+  });
+}
 
 let available = []
 

@@ -2,7 +2,7 @@ import { Text, View, Button, FlatList } from 'react-native';
 import { useFocusEffect, Link } from 'expo-router';
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { useCallback, useState } from 'react';
-import { getAlgSetProgress } from '@/src/db/queries';
+import { getAlgSetProgress, getDailyStreak, getAlgsetDaysPracticed } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
 import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
@@ -17,6 +17,8 @@ export default function Stats() {
   const [algSetProgress, setAlgSetProgress] = useState<AlgSetProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [worstCases, setWorstCases] = useState<CaseWithProgress[]>([]);
+  const [dailyStreak, setDailyStreak] = useState(0);
+  const [daysPracticed, setDaysPracticed] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -25,8 +27,10 @@ export default function Stats() {
       setWorstCases([]);
 
       const id = setTimeout(() => {
-        const progress = getAlgSetProgress(selectedAlgSet.name); // sync
+        const progress = getAlgSetProgress(selectedAlgSet.name);
         setAlgSetProgress(progress);
+        setDailyStreak(getDailyStreak());
+        setDaysPracticed(getAlgsetDaysPracticed(selectedAlgSet.name));
         getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(cases => {
           setWorstCases(cases);
           setLoading(false);
@@ -45,6 +49,11 @@ export default function Stats() {
 
       <View className="flex flex-row justify-center items-center gap-3 mb-5">
         <Link href="/stats/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
+      </View>
+
+      <View className="flex-row justify-around w-full px-4 mb-6">
+        <StatCard label="Streak" value={`${dailyStreak}`} sub="days" />
+        <StatCard label="Practiced" value={`${daysPracticed}`} sub="days" />
       </View>
 
       <View className="px-3">
@@ -120,5 +129,14 @@ function ProgressBarLegendTitle({ color, numCases, category }: { color: string, 
     </View>
 
   )
+}
 
+function StatCard({ label, value, sub }: { label: string, value: string, sub: string }) {
+  return (
+    <View className="items-center bg-white rounded-2xl px-5 py-3 shadow-sm">
+      <Text className="font-inter-bold text-lg text-header">{value}</Text>
+      <Text className="font-inter-medium text-xs text-gray-500">{label}</Text>
+      {sub ? <Text className="text-[10px] text-gray-400">{sub}</Text> : null}
+    </View>
+  );
 }

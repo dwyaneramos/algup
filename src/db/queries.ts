@@ -163,7 +163,8 @@ export async function getCasesWithProgress(algset: string): Promise<CaseWithProg
     SELECT c.*, 
       COALESCE(cp.fluency, 1.0) AS fluency,
       COALESCE(cp.state, 'locked') AS state,
-      COALESCE(cp.is_focused, 0) AS is_focused
+      COALESCE(cp.is_focused, 0) AS is_focused,
+      cp.last_practiced
     FROM cases c
     LEFT JOIN case_progress cp ON c.id = cp.case_id
     WHERE c.algset = ?
@@ -196,7 +197,8 @@ export function getWorstCases(algsetName: string, n: number): CaseWithProgress[]
     SELECT c.*, 
       COALESCE(cp.fluency, 1.0) AS fluency,
       COALESCE(cp.state, 'locked') AS state,
-      COALESCE(cp.is_focused, 0) AS is_focused
+      COALESCE(cp.is_focused, 0) AS is_focused,
+      cp.last_practiced
     FROM cases c
     LEFT JOIN case_progress cp ON c.id = cp.case_id
     WHERE c.algset = ?
@@ -309,5 +311,75 @@ export function peekScrambleQueue(algset: string): ScrambleQueueItem[] {
     'SELECT case_id as caseId, alg, scramble, solution FROM scramble_queue WHERE algset = ? ORDER BY id ASC',
     [algset]
   );
+}
+
+export function recordPractice(algset: string): void {
+  const db = getDb();
+  db.runSync(
+    "INSERT INTO practice_log (algset, practiced_at) VALUES (?, date('now'))",
+    [algset]
+  );
+}
+
+export function updateLastPracticed(caseId: number): void {
+  const db = getDb();
+  db.runSync(
+    "UPDATE case_progress SET last_practiced = date('now') WHERE case_id = ?",
+    [caseId]
+  );
+}
+
+export function getDailyStreak(): number {
+  const db = getDb();
+  const rows = db.getAllSync<{ d: string }>(
+    "SELECT DISTINCT date(practiced_at) AS d FROM practice_log ORDER BY d DESC"
+  );
+  if (rows.length === 0) return 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let streak = 0;
+  let expected = today.getTime();
+
+  for (const row of rows) {
+    const rowTime = new Date(row.d + 'T00:00:00').getTime();
+    if (rowTime === expected) {
+      streak++;
+      expected -= 86400000;
+    } else if (rowTime === expected - 86400000) {
+      // today hasn't been practiced yet, start from yesterday
+      expected = rowTime;
+      streak++;
+      expected -= 86400000;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+export function getAlgsetDaysPracticed(algset: string): number {
+  const db = getDb();
+  const result = db.getFirstSync<{ count: number }>(
+    "SELECT COUNT(DISTINCT date(practiced_at)) AS count FROM practice_log WHERE algset = ?",
+    [algset]
+  );
+  return result?.count ?? 0;
+}
+
+export function getAlgsetDaysSinceLast(algset: string): number | null {
+  const db = getDb();
+  const result = db.getFirstSync<{ d: string }>(
+    "SELECT MAX(practiced_at) AS d FROM practice_log WHERE algset = ?",
+    [algset]
+  );
+  if (!result?.d) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const last = new Date(result.d + 'T00:00:00');
+  last.setHours(0, 0, 0, 0);
+  return Math.floor((today.getTime() - last.getTime()) / 86400000);
 }
 

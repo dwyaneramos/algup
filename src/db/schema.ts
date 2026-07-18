@@ -46,11 +46,25 @@ export function initDB() {
       fluency REAL DEFAULT 1.0,
       state TEXT DEFAULT 'locked',
       is_focused BOOLEAN DEFAULT false,
+      last_practiced TEXT,
       FOREIGN KEY (case_id) REFERENCES cases(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS practice_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      algset TEXT NOT NULL,
+      practiced_at TEXT NOT NULL,
+      FOREIGN KEY (algset) REFERENCES algsets(name)
     );
   `);
 
-  db.execSync('DROP TABLE IF EXISTS scramble_queue');
+  const queueColumns = db.getAllSync<{ name: string }>(
+    "PRAGMA table_info(scramble_queue)"
+  );
+  const hasAlg = queueColumns.some(c => c.name === 'alg');
+  if (!hasAlg) {
+    db.execSync('DROP TABLE IF EXISTS scramble_queue');
+  }
   db.execSync(`
     CREATE TABLE IF NOT EXISTS scramble_queue (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { getCasesWithProgress, updateCaseProgress, introduceNextCase } from '@/src/db/queries';
-import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedFluency } from '@/src/logic/caseQueue';
+import { getCasesWithProgress, updateCaseProgress, introduceNextCase, recordPractice, updateLastPracticed } from '@/src/db/queries';
+import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedFluency, applyDecay } from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/logic/scramble';
 import {
   fetchAndEnqueueBatch,
@@ -25,7 +25,7 @@ export function useTrainingSession(algset: string) {
   useEffect(() => {
     if (!algset) return;
     (async () => {
-      let initial = await getCasesWithProgress(algset);
+      let initial = applyDecay(await getCasesWithProgress(algset));
       const hasActive = initial.some(c => c.state !== 'locked');
       if (!hasActive) {
         introduceNextCase(algset);
@@ -92,6 +92,8 @@ export function useTrainingSession(algset: string) {
     const newFluency = getUpdatedFluency(currentCase.fluency, grade);
     const newState = getNextState(currentCase.state, newFluency);
     updateCaseProgress(currentCase.id, newFluency, newState);
+    updateLastPracticed(currentCase.id);
+    recordPractice(algset);
     currentItem.current = null;
 
     let updatedCases = cases.map(c =>
@@ -102,7 +104,7 @@ export function useTrainingSession(algset: string) {
 
     if (shouldIntroduceNewCase(updatedCases)) {
       introduceNextCase(algset);
-      updatedCases = await getCasesWithProgress(algset);
+      updatedCases = applyDecay(await getCasesWithProgress(algset));
     }
 
     setCases(updatedCases);

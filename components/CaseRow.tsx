@@ -54,6 +54,14 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
           <Text className="text-muted">
             Fluency: {convertScoreToPercentage(c.fluency).toFixed(2)}%
           </Text>
+          {c.last_practiced ? (
+            <Text className="text-gray-400 text-xs">
+              {(() => {
+                const days = Math.floor((Date.now() - new Date(c.last_practiced + 'T00:00:00').getTime()) / 86400000);
+                return days === 0 ? 'Practiced today' : days === 1 ? 'Practiced 1d ago' : `Practiced ${days}d ago`;
+              })()}
+            </Text>
+          ) : null}
         </View>
 
         <View className="flex-shrink-0">

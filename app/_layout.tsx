@@ -25,13 +25,13 @@ import { Inter_600SemiBold_Italic } from '@expo-google-fonts/inter/600SemiBold_I
 import { Inter_700Bold_Italic } from '@expo-google-fonts/inter/700Bold_Italic';
 import { Inter_800ExtraBold_Italic } from '@expo-google-fonts/inter/800ExtraBold_Italic';
 import { Inter_900Black_Italic } from '@expo-google-fonts/inter/900Black_Italic';
-import { initDB } from '@/src/db/schema';
+import { initDB, resetDB } from '@/src/db/schema';
 import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 
-
+resetDB();
 initDB();
 export default function RootLayout() {
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
