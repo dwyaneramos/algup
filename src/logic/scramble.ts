@@ -1,6 +1,7 @@
 import { Alg } from 'cubing/alg';
 import { sanitiseAlgorithm } from './alg';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_SECRET = process.env.EXPO_PUBLIC_API_SECRET;
 
 // 54 stickers, 9 per face in this order:
 // U(0-8) R(9-17) F(18-26) D(27-35) L(36-44) B(45-53)
@@ -234,7 +235,7 @@ export async function generateScrambleFromAlg(algString: string): Promise<Scramb
   const cleanAlg = algString.replace(/[()]/g, '');
   const res = await fetch(`${API_URL}/scramble`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
     body: JSON.stringify({ alg: cleanAlg }),
   });
 
@@ -251,7 +252,7 @@ export async function generateScrambleBatch(algs: string[]): Promise<BatchScramb
   const cleanAlgs = algs.map(a => a.replace(/[()]/g, ''));
   const res = await fetch(`${API_URL}/scramble/batch`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
     body: JSON.stringify({ algs: cleanAlgs }),
   });
 
