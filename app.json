@@ -35,7 +35,14 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.algup"
-    }
+      "package": "com.algup.cubealgtrainer"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "70083407-6ccb-4245-8388-73bf2fe24a89"
+      }
+    },
+    "owner": "dwyaneramos"
   }
 }

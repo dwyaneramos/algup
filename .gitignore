@@ -3,6 +3,8 @@ node_modules/
 dist/
 npm-debug.*
 *.jks
+*.keystore
+credentials.json
 *.p8
 *.p12
 *.key
