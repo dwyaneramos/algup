@@ -1,14 +1,17 @@
-import { View, Text, FlatList, Pressable } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAllCasesWithProgress } from '@/src/logic/case';
 import { CaseRow, SkeletonCaseRow } from '@/components/CaseRow';
+import { HeaderButton } from '@/components/HeaderButton';
 import type { CaseWithProgress } from '@/src/logic/caseQueue';
-import { Link, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { IconArrowLeft, IconSortAscending, IconSortDescending } from '@tabler/icons-react-native';
 
 export default function Algset() {
+  const router = useRouter();
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [sortAsc, setSortAsc] = useState(false);
@@ -39,13 +42,22 @@ export default function Algset() {
 
   return (
     <View className="pt-16">
-      <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
-      <View className="flex flex-row justify-center items-center gap-3 mb-1">
-        <Link href="/stats" className="w-48 bg-accent text-white rounded-xl p-2 text-center">Back to Overview</Link>
-        <Pressable className="w-48 bg-accent text-white rounded-xl p-2"
-          onPress={() => setSortAsc(prev => !prev)}>
-          <Text className="text-white text-center">Fluency {sortAsc ? "↓" : "↑"}</Text>
-        </Pressable>
+      <View className="flex-row items-center justify-between px-4 mb-4">
+        <HeaderButton onPress={() => router.replace('/stats')}>
+          <IconArrowLeft size={20} color="white" />
+        </HeaderButton>
+
+        <View className="items-center">
+          <Text className="font-inter-bold text-header">{selectedAlgSet.name}</Text>
+        </View>
+
+        <HeaderButton onPress={() => setSortAsc(prev => !prev)}>
+          {sortAsc ? (
+            <IconSortAscending size={20} color="white" />
+          ) : (
+            <IconSortDescending size={20} color="white" />
+          )}
+        </HeaderButton>
       </View>
       {loading ? (
         <FlatList

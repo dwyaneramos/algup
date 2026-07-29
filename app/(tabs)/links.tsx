@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Linking } from 'react-native';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { IconBrandGithub, IconCoffee } from '@tabler/icons-react-native';
+import { IconBrandGithub, IconCoffee, IconMail, IconChevronRight } from '@tabler/icons-react-native';
+import { COLOR_ACCENT } from '@/utils/constants/colors';
 
 const LINKS = [
   {
@@ -14,6 +15,12 @@ const LINKS = [
     url: 'https://buymeacoffee.com/dwyaneramos',
     icon: IconCoffee,
     color: '#FFDD00',
+  },
+  {
+    label: 'Contact',
+    url: 'mailto:ramosdt55@gmail.com',
+    icon: IconMail,
+    color: '#4A90D9',
   },
 ];
 
@@ -37,13 +44,13 @@ function LinkCard({ label, url, icon: Icon, color }: {
     >
       <Animated.View
         style={animatedStyle}
-        className="flex-row items-center gap-4 bg-white rounded-2xl p-4 shadow-sm"
+        className="flex-row items-center gap-4 bg-white rounded-2xl p-4 border border-black/5"
       >
         <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: `${color}15` }}>
           <Icon size={24} color={color} />
         </View>
         <Text className="font-inter-semibold text-lg flex-1">{label}</Text>
-        <Text className="text-accent text-sm font-inter-medium">Open</Text>
+        <IconChevronRight size={20} color={COLOR_ACCENT} />
       </Animated.View>
     </Pressable>
   );

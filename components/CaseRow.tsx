@@ -43,8 +43,10 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
   return (
     <Pressable onPress={onPress}>
       <Animated.View
-        style={[{ borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor }, jumpStyle]}
-        className={`w-full border-l-4 bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20`}
+        style={[{
+          borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor,
+        }, jumpStyle]}
+        className={`w-full border border-black/5 border-l-4 bg-white py-3 rounded-2xl justify-between items-center flex flex-row px-3 min-h-20`}
       >
         <View className="flex-1 mr-3">
 
@@ -88,7 +90,7 @@ export function SkeletonCaseRow() {
   return (
     <Animated.View
       style={animatedStyle}
-      className="w-full bg-white py-3 rounded-xl justify-between items-center flex flex-row px-3 min-h-20"
+      className="w-full bg-white py-3 rounded-2xl border border-black/5 justify-between items-center flex flex-row px-3 min-h-20"
     >
       <View className="flex-1 mr-3 gap-2">
         <View className="h-4 bg-gray-200 rounded-full w-3/4" />

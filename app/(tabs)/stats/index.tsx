@@ -1,23 +1,45 @@
-import { Text, View, Button, FlatList } from 'react-native';
-import { useFocusEffect, Link } from 'expo-router';
+import { Text, View, FlatList, Pressable } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { useCallback, useState } from 'react';
-import { getAlgSetProgress, getDailyStreak } from '@/src/db/queries';
+import { getAlgSetProgress, getDailyStreak, getLearningFluency } from '@/src/db/queries';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { type AlgSetProgress } from '@/src/db/queries';
 import { SkeletonCaseRow, CaseRow } from '@/components/CaseRow';
 import type { CaseWithProgress } from '@/src/logic/caseQueue';
 import { getNWorstCases } from '@/src/logic/case';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { convertScoreToPercentage } from '@/src/logic/fluency';
+import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+function CaseStatsButton({ onPress }: { onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => { scale.value = withSpring(0.97); }}
+      onPressOut={() => { scale.value = withSpring(1); }}
+    >
+      <Animated.View
+        style={animatedStyle}
+        className="items-center bg-accent rounded-full pl-7 pr-6 py-3"
+      >
+        <Text className="font-inter-semibold text-white text-sm">See Case Stats</Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
 
 export default function Stats() {
   const NUM_WORST_CASES = 5;
 
+  const router = useRouter();
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const [algSetProgress, setAlgSetProgress] = useState<AlgSetProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [worstCases, setWorstCases] = useState<CaseWithProgress[]>([]);
   const [dailyStreak, setDailyStreak] = useState(0);
+  const [learningFluency, setLearningFluency] = useState<number | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -29,6 +51,7 @@ export default function Stats() {
         const progress = getAlgSetProgress(selectedAlgSet.name);
         setAlgSetProgress(progress);
         setDailyStreak(getDailyStreak());
+        setLearningFluency(getLearningFluency(selectedAlgSet.name));
         getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(cases => {
           setWorstCases(cases);
           setLoading(false);
@@ -45,13 +68,21 @@ export default function Stats() {
 
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
-      <View className="flex flex-row justify-center items-center gap-3 mb-5">
-        <Link href="/stats/algset" className="w-48 bg-accent text-white rounded-xl p-2 text-center">See Case Stats</Link>
+      <View className="px-4 mb-6 w-full">
+        <StatsRow
+          items={[
+            { value: `${dailyStreak}`, label: 'Day Streak' },
+            { value: `${algSetProgress.total}`, label: 'Algorithms' },
+            {
+              value: learningFluency === null ? '--' : `${convertScoreToPercentage(learningFluency).toFixed(0)}%`,
+              label: 'Learning Fluency',
+            },
+          ]}
+        />
       </View>
 
-      <View className="flex-row justify-around w-full px-4 mb-6">
-        <StatCard label="Streak" value={`${dailyStreak}`} sub="days" />
-        <StatCard label="Count" value={`${algSetProgress.total}`} sub="algorithms" />
+      <View className="mb-6">
+        <CaseStatsButton onPress={() => router.push('/stats/algset')} />
       </View>
 
       <View className="px-3">
@@ -74,6 +105,11 @@ export default function Stats() {
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
+            ListEmptyComponent={
+              <View className="items-center py-8">
+                <Text className="text-muted">No cases are currently being practiced</Text>
+              </View>
+            }
           />
         </Animated.View>
       )}
@@ -129,12 +165,18 @@ function ProgressBarLegendTitle({ color, numCases, category }: { color: string, 
   )
 }
 
-function StatCard({ label, value, sub }: { label: string, value: string, sub: string }) {
+function StatsRow({ items }: { items: { value: string; label: string }[] }) {
   return (
-    <View className="items-center w-32 bg-white rounded-2xl px-5 py-3 shadow-sm">
-      <Text className="font-inter-medium text-xs text-gray-500">{label}</Text>
-      <Text className="font-inter-bold text-lg text-header">{value}</Text>
-      {sub ? <Text className="text-[10px] text-gray-400">{sub}</Text> : null}
+    <View className="flex-row w-full bg-white rounded-2xl border border-black/5 py-4">
+      {items.map((item, i) => (
+        <View
+          key={item.label}
+          className={`flex-1 items-center ${i > 0 ? 'border-l border-black/5' : ''}`}
+        >
+          <Text className="font-inter-bold text-xl text-header">{item.value}</Text>
+          <Text className="text-[11px] text-gray-500 mt-1">{item.label}</Text>
+        </View>
+      ))}
     </View>
   );
 }

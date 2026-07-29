@@ -151,6 +151,17 @@ export function getOverallFluency(algsetName: string): number {
   return result?.avg ?? 1.0;
 }
 
+export function getLearningFluency(algsetName: string): number | null {
+  const db = getDb();
+  const result = db.getFirstSync<{ avg: number | null }>(`
+    SELECT AVG(cp.fluency) as avg
+    FROM cases c
+    JOIN case_progress cp ON c.id = cp.case_id
+    WHERE c.algset = ? AND cp.state = 'learning'
+  `, [algsetName]);
+  return result?.avg ?? null;
+}
+
 export function getCases(algsetName: string): Case[] {
   const db = getDb();
   const cases = db.getAllSync<{ id: number; alg: string }>('SELECT * FROM cases WHERE algset = ?', [algsetName]);
@@ -336,14 +347,15 @@ export function getDailyStreak(): number {
   );
   if (rows.length === 0) return 0;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 
   let streak = 0;
-  let expected = today.getTime();
+  let expected = todayUTC;
 
   for (const row of rows) {
-    const rowTime = new Date(row.d + 'T00:00:00').getTime();
+    const [y, m, d] = row.d.split('-').map(Number);
+    const rowTime = Date.UTC(y, m - 1, d);
     if (rowTime === expected) {
       streak++;
       expected -= 86400000;

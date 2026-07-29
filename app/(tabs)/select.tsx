@@ -69,7 +69,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
   };
 
   return (
-    <Animated.View style={animatedStyle} className="w-full p-3 flex flex-row justify-between rounded-xl">
+    <Animated.View style={animatedStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
         <View className="flex flex-col justify-center">
           <Text className="font-inter-semibold text-xl">{algset.name}</Text>
