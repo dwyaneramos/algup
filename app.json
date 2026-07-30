@@ -13,7 +13,16 @@
     "plugins": [
       "expo-router",
       "react-native-bottom-tabs",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
