@@ -4,7 +4,8 @@
   "main": "expo-router/entry",
   "private": true,
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/server/"]
   },
   "scripts": {
     "android": "expo run:android",
