@@ -1,6 +1,6 @@
 import { Tabs, useRouter } from 'expo-router';
 import { View, Text, Pressable, LayoutChangeEvent } from 'react-native';
-import { IconChartDots2, IconCards, IconStopwatch, IconLink } from '@tabler/icons-react-native';
+import { IconChartDots2, IconCards, IconStopwatch, IconSettings } from '@tabler/icons-react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useEffect } from 'react';
 import Reanimated, {
@@ -9,9 +9,11 @@ import Reanimated, {
   withSpring,
 } from 'react-native-reanimated';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
+import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 
 const FAB_SIZE = 56;
 const GAP = 12;
+const BASE_BOTTOM_OFFSET = 24;
 const SPRING_CONFIG = { damping: 16, stiffness: 140, mass: 0.7 };
 
 type TabItemProps = {
@@ -54,6 +56,7 @@ function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   const currentRoute = state.routes[state.index];
   const isOnSelectScreen = currentRoute.name.startsWith('select');
+  const navBarShift = useNavBarShift();
 
   // Drives the tab bar's shrink only. FAB animates independently on mount/unmount.
   const progress = useSharedValue(0);
@@ -75,7 +78,8 @@ function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   return (
     <View
-      className="absolute bottom-6 left-6 right-6 flex-row items-center"
+      className="absolute left-6 right-6 flex-row items-center"
+      style={{ bottom: BASE_BOTTOM_OFFSET + navBarShift }}
       onLayout={onContainerLayout}
     >
       <Reanimated.View
@@ -157,10 +161,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="links"
+        name="settings"
         options={{
-          title: 'Links',
-          tabBarIcon: ({ color, size }) => <IconLink color={color} size={size} />,
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => <IconSettings color={color} size={size} />,
         }}
       />
       <Tabs.Screen

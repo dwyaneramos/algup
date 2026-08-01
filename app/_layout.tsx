@@ -30,6 +30,7 @@ import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { useSettingsStore } from '@/src/store/settingsStore';
 
 initDB();
 export default function RootLayout() {
@@ -49,6 +50,9 @@ export default function RootLayout() {
 
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
   loadAlgSets();
+
+  const loadSettings = useSettingsStore(s => s.loadSettings);
+  loadSettings();
 
   let [fontsLoaded] = useFonts({
     Inter_100Thin,

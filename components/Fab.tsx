@@ -45,6 +45,7 @@ type FabProps = {
   onCreate: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  bottomOffset?: number;
 };
 
 function usePressScale() {
@@ -130,7 +131,7 @@ function SatelliteButton({
   );
 }
 
-export function Fab({ onCreate, onEdit, onDelete }: FabProps) {
+export function Fab({ onCreate, onEdit, onDelete, bottomOffset = 0 }: FabProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isOpenSV = useSharedValue(false);
   const rotation = useSharedValue(0);
@@ -188,7 +189,7 @@ export function Fab({ onCreate, onEdit, onDelete }: FabProps) {
   ];
 
   return (
-    <Reanimated.View style={styles.container}>
+    <Reanimated.View style={[styles.container, { bottom: styles.container.bottom + bottomOffset }]}>
       {actions.map(({ key, icon, onPress, backgroundColor }, index) => (
         <SatelliteButton
           key={key}

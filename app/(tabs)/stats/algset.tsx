@@ -9,6 +9,7 @@ import type { CaseWithProgress } from '@/src/logic/caseQueue';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconArrowLeft, IconSortAscending, IconSortDescending } from '@tabler/icons-react-native';
+import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 
 export default function Algset() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function Algset() {
   const [sortAsc, setSortAsc] = useState(false);
   const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
+  const navBarShift = useNavBarShift();
 
   useFocusEffect(
     useCallback(() => {
@@ -72,7 +74,7 @@ export default function Algset() {
             data={sortedCases}
             renderItem={({ item }) => <CaseRow c={item} />}
             keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 210 }}
+            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 210 + navBarShift }}
             initialNumToRender={20}
             maxToRenderPerBatch={10}
             windowSize={10}

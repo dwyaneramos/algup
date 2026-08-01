@@ -18,6 +18,7 @@ import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sheet, SheetRef } from '@/components/Sheet'
+import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
@@ -101,6 +102,7 @@ export default function Select() {
   const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
 
   const insets = useSafeAreaInsets();
+  const navBarShift = useNavBarShift();
   const createSheetRef = useRef<CreateAlgSetSheetRef>(null);
   const editSheetRef = useRef<EditAlgSetSheetRef>(null);
   const deleteConfirmSheetRef = useRef<SheetRef>(null);
@@ -132,7 +134,7 @@ export default function Select() {
         <FlatList
           className="w-full flex-1"
           data={algsets}
-          contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 }}
+          contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 + navBarShift }}
           renderItem={({ item }) => <AlgSetRow algset={item} />}
           keyExtractor={(item) => item.name}
           initialNumToRender={10}
@@ -143,7 +145,7 @@ export default function Select() {
       <Fab
         onCreate={displayCreateAlgSetSheet}
         onEdit={displayEditAlgSetSheet}
-
+        bottomOffset={navBarShift}
         onDelete={() => {
           displayConfirmDeleteSheet()
         }}

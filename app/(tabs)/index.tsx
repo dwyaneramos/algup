@@ -72,7 +72,7 @@ export default function MainScreen() {
               <Animated.Text
                 key={showScrambleOrSolution}
                 entering={FadeIn.duration(200)}
-                className="text-center text-body font-inter-medium"
+                className={`text-center text-body font-inter-medium ${formatted() !== DEFAULT_TIME_STRING ? "text-muted " : ""} `}
               >
                 {showScrambleOrSolution === 'solution' ? solution : scramble}
               </Animated.Text>
