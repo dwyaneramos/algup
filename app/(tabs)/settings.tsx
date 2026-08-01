@@ -131,17 +131,9 @@ function SettingsGroup({ children }: { children: ReactNode }) {
       {rows.map((row, i) => (
         <View key={row.key ?? i}>
           {row}
-          {i < rows.length - 1 && <View className="h-px bg-black/[0.06] ml-[72px]" />}
+          {i < rows.length - 1 && <View className="h-px bg-black/[0.06]" />}
         </View>
       ))}
-    </View>
-  );
-}
-
-function SectionHeader({ title }: { title: string; }) {
-  return (
-    <View className="mb-3">
-      <Text className="font-inter-bold text-xl">{title}</Text>
     </View>
   );
 }
@@ -162,7 +154,7 @@ export default function Settings() {
       contentContainerStyle={{ paddingTop: 64, paddingBottom: insets.bottom + 96 + navBarShift }}
     >
       <Animated.View entering={FadeIn.duration(300)}>
-        <Text className="text-header mb-4">Settings</Text>
+        <Text className="text-header mb-2 text-center">Settings</Text>
 
         <View className="mb-6">
           <SettingsGroup>
@@ -194,7 +186,7 @@ export default function Settings() {
         </View>
 
         <View>
-          <SectionHeader title="Links" />
+          <Text className="text-subheader mb-2 text-center">Links</Text>
           <SettingsGroup>
             {LINKS.map((link) => (
               <LinkRow key={link.label} {...link} />
