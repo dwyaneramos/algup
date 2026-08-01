@@ -83,7 +83,7 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
-          <Toaster offset={110} visibleToasts={1} />
+          <Toaster offset={110} visibleToasts={1} theme="light" />
         </BottomSheetModalProvider>
 
       </SafeAreaProvider>
