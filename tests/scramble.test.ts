@@ -7,12 +7,9 @@ vi.mock('cubing/search', () => ({
   experimentalSolve3x3x3IgnoringCenters: mockSolve,
 }));
 
-import app from '../src/index.js';
+import app from '../server/src/index.js';
 
 const AUTH_HEADER = { 'x-api-secret': 'test-secret' };
-// Long enough that after experimentalSimplify merges it with any random prefix/AUF,
-// the combined scramble is guaranteed >= the route's minimumScrambleLength (19),
-// so the do/while loop always terminates on its first iteration.
 const LONG_SOLUTION = Array.from({ length: 15 }, () => 'R U').join(' ');
 
 beforeAll(() => {
@@ -26,7 +23,10 @@ describe('auth middleware', () => {
   });
 
   it('rejects requests with the wrong x-api-secret header', async () => {
-    const res = await request(app).post('/scramble').set('x-api-secret', 'wrong').send({ alg: 'R U' });
+    const res = await request(app)
+      .post('/scramble')
+      .set('x-api-secret', 'wrong')
+      .send({ alg: 'R U' });
     expect(res.status).toBe(401);
   });
 
@@ -91,7 +91,10 @@ describe('POST /scramble/batch', () => {
 
   it('500s when the solver throws', async () => {
     mockSolve.mockRejectedValue(new Error('solve failed'));
-    const res = await request(app).post('/scramble/batch').set(AUTH_HEADER).send({ algs: ["R U R' U'"] });
+    const res = await request(app)
+      .post('/scramble/batch')
+      .set(AUTH_HEADER)
+      .send({ algs: ["R U R' U'"] });
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ error: 'Failed to generate scramble batch' });
   });

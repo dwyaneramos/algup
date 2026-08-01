@@ -7,7 +7,8 @@
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "<rootDir>/server/"
+      "<rootDir>/server/",
+      "<rootDir>/tests/scramble.test.ts"
     ]
   },
   "scripts": {
