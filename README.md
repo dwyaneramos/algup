@@ -81,21 +81,6 @@ _Below are instructions for how you can clone and run a development build of the
    npm run dev
    ```
 
-<!-- BACK LOG -->
-
-# Backlog
-
-- [ ] Able to add new alg sets
-- [ ] Able to edit existing alg sets
-  - [ ] Add new algorithms
-  - [ ] Delete algorithms
-  - [ ] Edit algorithms
-- [ ] Backtrack to previous case
-- [ ] fetch cases on select and use store
-- [x] Show solution
-- [x] Draw scramble
-- [x] View confidence for each individual algset (can you edit it from there?)
-  - [x] SVG generated for the particular case
 
 <!-- WIREFRAMES / MOCKUPS -->
 
