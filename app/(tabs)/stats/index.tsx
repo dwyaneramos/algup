@@ -10,6 +10,8 @@ import type { CaseWithProgress } from '@/src/logic/caseQueue';
 import { getNWorstCases } from '@/src/logic/case';
 import { convertScoreToPercentage } from '@/src/logic/fluency';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 function CaseStatsButton({ onPress }: { onPress: () => void }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -40,6 +42,8 @@ export default function Stats() {
   const [worstCases, setWorstCases] = useState<CaseWithProgress[]>([]);
   const [dailyStreak, setDailyStreak] = useState(0);
   const [learningFluency, setLearningFluency] = useState<number | null>(null);
+  const insets = useSafeAreaInsets();
+  const navBarShift = useNavBarShift();
 
   useFocusEffect(
     useCallback(() => {
@@ -101,7 +105,7 @@ export default function Stats() {
             data={worstCases}
             renderItem={({ item }) => <CaseRow c={item} />}
             keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={{ gap: 12, padding: 12 }}
+            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 + navBarShift }}
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
