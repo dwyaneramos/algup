@@ -147,10 +147,10 @@ function AlgProgressBar({ algSetProgress }: {
         ))}
       </View>
       <View className="flex-row justify-between mt-1">
-        {ALG_CATEGORIES.filter(({ key }) => counts[key] > 0).map(({ key, color, header }) => (
+        {ALG_CATEGORIES.filter(({ key }) => counts[key] > 0).map(({ key, bgColor, header }) => (
           <ProgressBarLegendTitle
             key={key}
-            color={color}
+            color={bgColor}
             numCases={counts[key]}
             category={header}
           />
@@ -162,7 +162,7 @@ function AlgProgressBar({ algSetProgress }: {
 function ProgressBarLegendTitle({ color, numCases, category }: { color: string, numCases: number, category: string }) {
   return (
     <View className="flex flex-row gap-3 items-center">
-      <View className={` ${color} h-2 w-2 rounded-full `} />
+      <View className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
       <Text className="text-xs text-gray-400">{numCases} {category}</Text>
     </View>
 
