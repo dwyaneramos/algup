@@ -10,9 +10,8 @@ export interface CaseWithProgress {
   last_practiced: string | null;
 }
 
-// TODO: tweak value
-const MAX_ACTIVE = 5;
-const MAX_LEARNING = 3;
+export const DEFAULT_MAX_ACTIVE = 5;
+export const DEFAULT_MAX_LEARNING = 3;
 
 const FOCUSED_WEIGHT = 10;
 
@@ -71,14 +70,18 @@ export function getUpdatedFluency(current: number, grade: number, alpha: number 
   return Math.max(1, Math.min(5, rounded));
 }
 
-export function shouldIntroduceNewCase(cases: CaseWithProgress[]): boolean {
+export function shouldIntroduceNewCase(
+  cases: CaseWithProgress[],
+  maxActive: number = DEFAULT_MAX_ACTIVE,
+  maxLearning: number = DEFAULT_MAX_LEARNING
+): boolean {
   const learningOrReviewing = cases.filter(c =>
     !c.is_focused && (c.state === 'learning' || c.state === 'reviewing')
   );
   const learningCases = cases.filter(c =>
     !c.is_focused && c.state === 'learning'
   );
-  return learningOrReviewing.length < MAX_ACTIVE && learningCases.length < MAX_LEARNING;
+  return learningOrReviewing.length < maxActive && learningCases.length < maxLearning;
 }
 
 export function getNumberOfAlgsPracticing(): number {

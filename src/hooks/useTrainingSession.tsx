@@ -12,8 +12,11 @@ import {
   REFILL_THRESHOLD,
 } from '@/src/logic/scrambleQueue';
 import { ScrambleQueueItem } from '@/src/db/queries';
+import { useSettingsStore } from '@/src/store/settingsStore';
 
 export function useTrainingSession(algset: string) {
+  const maxActive = useSettingsStore(s => s.maxActive);
+  const maxLearning = useSettingsStore(s => s.maxLearning);
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [currentCase, setCurrentCase] = useState<CaseWithProgress | null>(null);
   const [scramble, setScramble] = useState('');
@@ -102,7 +105,7 @@ export function useTrainingSession(algset: string) {
         : c
     );
 
-    if (shouldIntroduceNewCase(updatedCases)) {
+    if (shouldIntroduceNewCase(updatedCases, maxActive, maxLearning)) {
       introduceNextCase(algset);
       updatedCases = applyDecay(await getCasesWithProgress(algset));
     }
