@@ -18,16 +18,19 @@ const ICON_SIZE = 28;
 const LINKS = [
   {
     label: 'GitHub',
+    subtitle: 'Star my repo to show support',
     url: 'https://github.com/dwyaneramos/algup',
     icon: IconBrandGithub,
   },
   {
     label: 'Buy Me a Coffee',
+    subtitle: 'Funds go towards an iOS version',
     url: 'https://buymeacoffee.com/dwyaneramos',
     icon: IconCoffee,
   },
   {
     label: 'Contact',
+    subtitle: 'Let me know of any issues',
     url: 'mailto:ramosdt55@gmail.com',
     icon: IconMail,
   },
@@ -41,8 +44,18 @@ function RowIcon({ icon: Icon, color }: { icon: React.ComponentType<{ size: numb
   );
 }
 
-function LinkRow({ label, url, icon }: {
+function RowLabel({ label, subtitle }: { label: string; subtitle: string }) {
+  return (
+    <View className="flex-1">
+      <Text className="font-inter-medium text-base">{label}</Text>
+      <Text className="font-inter-regular text-sm text-muted">{subtitle}</Text>
+    </View>
+  );
+}
+
+function LinkRow({ label, subtitle, url, icon }: {
   label: string;
+  subtitle: string;
   url: string;
   icon: React.ComponentType<{ size: number; color: string }>;
 }) {
@@ -60,23 +73,24 @@ function LinkRow({ label, url, icon }: {
     >
       <Animated.View style={animatedStyle} className="flex-row items-center gap-4 px-4 py-3.5">
         <RowIcon icon={icon} color={COLOR_ACCENT} />
-        <Text className="font-inter-medium text-base flex-1">{label}</Text>
+        <RowLabel label={label} subtitle={subtitle} />
         <IconChevronRight size={18} color={COLOR_ACCENT} />
       </Animated.View>
     </Pressable>
   );
 }
 
-function SwitchRow({ icon, label, value, onValueChange }: {
+function SwitchRow({ icon, label, subtitle, value, onValueChange }: {
   icon: React.ComponentType<{ size: number; color: string }>;
   label: string;
+  subtitle: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
 }) {
   return (
     <View className="flex-row items-center gap-4 px-4 py-3.5">
       <RowIcon icon={icon} color={COLOR_ACCENT} />
-      <Text className="font-inter-medium text-base">{label}</Text>
+      <RowLabel label={label} subtitle={subtitle} />
       <Switch
         value={value}
         onValueChange={onValueChange}
@@ -87,9 +101,10 @@ function SwitchRow({ icon, label, value, onValueChange }: {
   );
 }
 
-function StepperRow({ icon, label, value, min, max, onValueChange }: {
+function StepperRow({ icon, label, subtitle, value, min, max, onValueChange }: {
   icon: React.ComponentType<{ size: number; color: string }>;
   label: string;
+  subtitle: string;
   value: number;
   min: number;
   max: number;
@@ -98,9 +113,7 @@ function StepperRow({ icon, label, value, min, max, onValueChange }: {
   return (
     <View className="flex-row items-center gap-4 px-4 py-3.5">
       <RowIcon icon={icon} color={COLOR_ACCENT} />
-      <View className="flex-1">
-        <Text className="font-inter-medium text-base">{label}</Text>
-      </View>
+      <RowLabel label={label} subtitle={subtitle} />
       <View className="flex-row items-center gap-3">
         <Pressable
           onPress={() => onValueChange(value - 1)}
@@ -161,6 +174,7 @@ export default function Settings() {
             <StepperRow
               icon={IconStack2}
               label="Max active cases"
+              subtitle="Cases in learning or review at once"
               value={maxActive}
               min={MIN_MAX_ACTIVE}
               max={MAX_MAX_ACTIVE}
@@ -169,6 +183,7 @@ export default function Settings() {
             <StepperRow
               icon={IconSchool}
               label="Max learning cases"
+              subtitle="New cases introduced at once"
               value={maxLearning}
               min={MIN_MAX_LEARNING}
               max={MAX_MAX_LEARNING}
@@ -178,6 +193,7 @@ export default function Settings() {
               <SwitchRow
                 icon={IconArrowBarToUp}
                 label="Shift navbar up"
+                subtitle="Nudge the tab bar above system gestures"
                 value={shiftNavbarUp}
                 onValueChange={setShiftNavbarUp}
               />
