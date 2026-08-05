@@ -11,12 +11,15 @@ import { COLOR_ACCENT } from '@/utils/constants/colors';
 import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
 import { useCallback, useState, ComponentType } from 'react';
 import { useFocusEffect } from 'expo-router';
-
-const SATELLITE_SIZE = 52;
-const MAIN_SIZE = 64;
-const GAP = 12;
-const HORIZONTAL_CENTER_OFFSET = 5;
-const SATELLITE_HIT_SLOP = 12;
+import {
+  SATELLITE_SIZE,
+  MAIN_SIZE,
+  HORIZONTAL_CENTER_OFFSET,
+  SATELLITE_HIT_SLOP,
+  SATELLITE_BOTTOM_OFFSET,
+  getSatelliteDistance,
+  getFabContainerHeight,
+} from './fabLayout';
 
 const OPEN_SPRING = { damping: 15, stiffness: 180, mass: 0.6 };
 const CLOSE_SPRING = { damping: 18, stiffness: 220, mass: 0.5 };
@@ -189,13 +192,22 @@ export function Fab({ onCreate, onEdit, onDelete, bottomOffset = 0 }: FabProps) 
   ];
 
   return (
-    <Reanimated.View style={[styles.container, { bottom: styles.container.bottom + bottomOffset }]}>
+    <Reanimated.View
+      pointerEvents="box-none"
+      style={[
+        styles.container,
+        {
+          bottom: styles.container.bottom + bottomOffset,
+          height: getFabContainerHeight(actions.length),
+        },
+      ]}
+    >
       {actions.map(({ key, icon, onPress, backgroundColor }, index) => (
         <SatelliteButton
           key={key}
           icon={icon}
           onPress={() => handleSatellitePress(onPress)}
-          distance={(SATELLITE_SIZE + GAP) * (index + 1)}
+          distance={getSatelliteDistance(index)}
           isOpen={isOpen}
           isOpenSV={isOpenSV}
           backgroundColor={backgroundColor}
@@ -222,10 +234,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 28,
     right: 16,
+    width: MAIN_SIZE,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
   satelliteWrapper: {
     position: 'absolute',
     right: 0,
+    bottom: SATELLITE_BOTTOM_OFFSET,
     ...SHADOW,
   },
   satelliteButton: {
