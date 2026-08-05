@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Button } from 'react-native';
+import { View, Text, Pressable, Button, StyleSheet } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing } from 'react-native-reanimated';
@@ -93,7 +93,7 @@ export default function MainScreen() {
       )}
       <View className="mt-3">
         <Timer
-          disabled={attemptDone || isLoadingScramble}
+          disabled={!running && (attemptDone || isLoadingScramble)}
           formatted={formatted()}
           running={running}
           onStart={start}
@@ -132,6 +132,14 @@ export default function MainScreen() {
 
 
         </Animated.View>
+      )}
+
+      {running && (
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPressIn={handleStopAttempt}
+          accessibilityLabel="Stop timer"
+        />
       )}
 
     </View>
