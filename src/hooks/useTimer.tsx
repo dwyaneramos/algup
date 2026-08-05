@@ -2,26 +2,32 @@ import { useState, useRef } from 'react';
 // Generated with Claude Code Sonnet 4.6
 
 
+const TICK_INTERVAL = 30;
+
 export function useTimer() {
   const [time, setTime] = useState(0);
   const [running, setRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
+  const runningRef = useRef(false);
 
   const start = () => {
-    if (running) return;
+    if (runningRef.current) return;
+    runningRef.current = true;
     clearInterval(intervalRef.current!);
     resetTime();
     setRunning(true);
     startTimeRef.current = Date.now();
     intervalRef.current = setInterval(() => {
       setTime(Date.now() - startTimeRef.current);
-    }, 10);
+    }, TICK_INTERVAL);
   };
 
   const stop = () => {
-    if (!running) return;
+    if (!runningRef.current) return;
+    runningRef.current = false;
     clearInterval(intervalRef.current!);
+    setTime(Date.now() - startTimeRef.current);
     setRunning(false);
   };
 
