@@ -157,7 +157,7 @@ export function getLearningFluency(algsetName: string): number | null {
     SELECT AVG(cp.fluency) as avg
     FROM cases c
     JOIN case_progress cp ON c.id = cp.case_id
-    WHERE c.algset = ? AND cp.state = 'learning'
+    WHERE c.algset = ? AND cp.state IN ('learning', 'reviewing', 'mastered')
   `, [algsetName]);
   return result?.avg ?? null;
 }
