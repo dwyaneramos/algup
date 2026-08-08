@@ -68,7 +68,7 @@ export default function Stats() {
 
   if (!algSetProgress || selectedAlgSet === null) return null;
   return (
-    <View className="items-center flex-1  pt-16 ">
+    <View className="items-center flex-1 pt-16" style={{ paddingBottom: insets.bottom + navBarShift }}>
 
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
