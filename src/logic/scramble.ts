@@ -239,7 +239,7 @@ export async function generateScrambleFromAlg(algString: string): Promise<Scramb
   const res = await fetch(`${API_URL}/scramble`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
-    body: JSON.stringify({ alg: cleanAlg }),
+    body: JSON.stringify({ alg: cleanAlg, event: "333" }),
   });
 
   return await res.json();

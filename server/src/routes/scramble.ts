@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { experimentalSolve2x2x2 } from 'cubing/search';
 import { generateScrambleForAlg, MAX_BATCH_SIZE } from '../lib/scramble.js';
 
 const router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
-  const { alg } = req.body;
+  console.log("received single scramble request");
+  const { alg, event } = req.body;
 
   if (!alg) {
     res.status(400).json({ error: 'alg is required' });
@@ -13,7 +13,7 @@ router.post('/', async (req: Request, res: Response) => {
   }
 
   try {
-    const { scramble, solution } = await generateScrambleForAlg(alg);
+    const { scramble, solution } = await generateScrambleForAlg(alg, event);
 
     res.status(200).json({ scramble, solution });
 
@@ -24,7 +24,8 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 router.post('/batch', async (req: Request, res: Response) => {
-  const { algs } = req.body;
+  console.log("received batch request");
+  const { algs, event } = req.body;
 
   if (!Array.isArray(algs) || algs.length === 0) {
     res.status(400).json({ error: 'algs array is required' });
@@ -40,7 +41,7 @@ router.post('/batch', async (req: Request, res: Response) => {
     const results = await Promise.all(
       algs.map(async (rawAlg: string) => ({
         alg: rawAlg,
-        ...(await generateScrambleForAlg(rawAlg)),
+        ...(await generateScrambleForAlg(rawAlg, event)),
       }))
     );
 
