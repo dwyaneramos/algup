@@ -2,7 +2,10 @@
   "extends": "../server/tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": ["../*"]
+    }
   },
   "include": ["**/*"]
 }
