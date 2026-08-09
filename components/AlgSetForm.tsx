@@ -1,10 +1,15 @@
 import { useRef, useState, useEffect } from 'react';
 import { Text, View, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { type AlgSet, validateAlgSet } from '@/src/logic/algsets';
+import { type AlgSet, type CubeEvent, validateAlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 
 const MIN_ALGS_TEXTAREA_HEIGHT = 40;
+
+const EVENT_OPTIONS: { value: CubeEvent; label: string }[] = [
+  { value: '333', label: '3x3' },
+  { value: '222', label: '2x2' },
+];
 
 type AlgSetFormProps = {
   title: string;
@@ -18,6 +23,8 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
   const algsets = useAlgSetStore(s => s.algSets);
 
   const [name, setName] = useState(initialAlgSet?.name ?? '');
+  const [event, setEvent] = useState<CubeEvent>(initialAlgSet?.event ?? '333');
+  const isEditing = !!initialAlgSet;
   const [algsText, setAlgsText] = useState(
     initialAlgSet?.cases.map(c => c.alg).join('\n') ?? ''
   );
@@ -35,7 +42,7 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
       .filter(line => line.length > 0)
       .map(alg => ({ alg }));
 
-    const algsetToStore: AlgSet = { name: name.trim(), cases };
+    const algsetToStore: AlgSet = { name: name.trim(), event, cases };
 
     const otherAlgsets = initialAlgSet
       ? algsets.filter(a => a.name !== initialAlgSet.name)
@@ -60,6 +67,24 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
           onChangeText={setName}
           value={name}
         />
+      </View>
+
+      <View className="flex flex-col gap-1">
+        <Text className="text-form-header">Event</Text>
+        <View
+          className={`flex flex-row w-[80vw] rounded-lg border border-gray-400 overflow-hidden ${isEditing ? 'opacity-50' : ''}`}
+        >
+          {EVENT_OPTIONS.map(({ value, label }) => (
+            <Pressable
+              key={value}
+              disabled={isEditing}
+              onPress={() => setEvent(value)}
+              className={`flex-1 p-2 items-center ${event === value ? 'bg-accent' : ''}`}
+            >
+              <Text className={`text-body ${event === value ? 'text-white' : ''}`}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       <View className="flex flex-col gap-1">
