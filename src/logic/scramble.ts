@@ -185,13 +185,23 @@ const MOVES: Record<string, number[][]> = {
 }
 
 
-function applyMove(cube: CubeState, move: string): CubeState {
+// Local sticker positions (index % 9, within a single face's 9-sticker slice)
+// that correspond to a 2x2's corner pieces. A 2x2 has no edge or center
+// pieces, so a cycle only applies to it when every member sits at one of
+// these positions.
+const CORNER_POSITIONS = new Set([0, 2, 6, 8]);
+
+function cornerCyclesOnly(cycles: number[][]): number[][] {
+  return cycles.filter(cycle => cycle.every(i => CORNER_POSITIONS.has(i % 9)));
+}
+
+function applyMove(cube: CubeState, move: string, cornersOnly: boolean): CubeState {
   const next = [...cube];
   const base = move.replace("'", '').replace('2', '').replace('3', '');
   const isPrime = move.includes("'");
   const isDouble = move.includes('2');
   const isTriple = move.includes('3');
-  const cycles = MOVES[base];
+  const cycles = cornersOnly ? cornerCyclesOnly(MOVES[base]) : MOVES[base];
 
 
 
@@ -210,10 +220,10 @@ function applyMove(cube: CubeState, move: string): CubeState {
 }
 
 
-export function applyScramble(scramble: string): CubeState {
+export function applyScramble(scramble: string, cornersOnly: boolean): CubeState {
   const sanitised = sanitiseAlgorithm(scramble);
   const moves = sanitised.trim().split(/\s+/);
-  return moves.reduce((cube, move) => applyMove(cube, move), solvedCube());
+  return moves.reduce((cube, move) => applyMove(cube, move, cornersOnly), solvedCube());
 }
 
 export function solvedCube(): CubeState {

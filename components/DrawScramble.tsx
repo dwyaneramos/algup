@@ -80,10 +80,10 @@ function Face({ cube, faceIndex, cornersOnly }: {
 
 
 export function DrawScramble({ scramble, scale = 1, event }: { scramble: string, scale?: number, event: CubeEvent }) {
-  const cube = scramble ? applyScramble(scramble) : solvedCube();
+  const cornersOnly = event === '222';
+  const cube = scramble ? applyScramble(scramble, cornersOnly) : solvedCube();
   const w = 90 * scale;
   const h = 100 * scale;
-  const cornersOnly = event === '222';
 
   return (
     <Svg width={w} height={h} viewBox="0 0 112 135">
