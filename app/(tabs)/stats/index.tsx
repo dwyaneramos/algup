@@ -103,7 +103,7 @@ export default function Stats() {
         <Animated.View entering={FadeIn.duration(300)} className="flex-1 w-full">
           <FlatList
             data={worstCases}
-            renderItem={({ item }) => <CaseRow c={item} />}
+            renderItem={({ item }) => <CaseRow c={item} event={selectedAlgSet.event} />}
             keyExtractor={(_, index) => index.toString()}
             contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 + navBarShift }}
             initialNumToRender={10}
