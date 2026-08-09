@@ -1,9 +1,10 @@
-import { validateAlgSet, validateAlgSetName, algsetNameLengthError, algsetAlreadyExistsError, algsetNoCasesError, invalidAlgError } from "@/src/logic/algsets";
+import { validateAlgSet, validateAlgSetName, algsetNameLengthError, algsetAlreadyExistsError, algsetNoCasesError, invalidAlgError, ALG_SETS } from "@/src/logic/algsets";
 import { type AlgSet, Case } from '@/src/logic/algsets';
 
 function makeAlgSet(overrides: Partial<AlgSet> = {}): AlgSet {
   return {
     name: 'OLL',
+    event: '333',
     cases: [{ alg: "F R U R' U' F'" } as Case],
     ...overrides,
   } as AlgSet;
@@ -84,5 +85,13 @@ describe('validateAlgSet', () => {
     const algset = makeAlgSet({ name: '' });
     // name === '' matches existing '', so duplicate check fires first
     expect(validateAlgSet(algset, existing)).toBe(algsetAlreadyExistsError);
+  });
+});
+
+describe('ALG_SETS defaults', () => {
+  it('defaults every built-in algset to the 333 event', () => {
+    for (const algset of ALG_SETS) {
+      expect(algset.event).toBe('333');
+    }
   });
 });

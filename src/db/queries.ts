@@ -1,4 +1,4 @@
-import { AlgSet, Case } from '@/src/logic/algsets';
+import { AlgSet, Case, CubeEvent } from '@/src/logic/algsets';
 import { type CaseWithProgress, type CaseState } from '@/src/logic/caseQueue';
 import * as SQLite from 'expo-sqlite';
 
@@ -21,7 +21,7 @@ export interface AlgSetProgress {
 
 export function getAlgSet(name: string): AlgSet | null {
   const db = getDb();
-  const algset = db.getFirstSync<{ name: string }>(
+  const algset = db.getFirstSync<{ name: string; event: CubeEvent }>(
     'SELECT * FROM algsets WHERE name = ?', [name]
   );
   if (!algset) return null;
@@ -32,11 +32,11 @@ export function getAlgSet(name: string): AlgSet | null {
 }
 
 
-export function createAlgSet(name: string): void {
+export function createAlgSet(name: string, event: CubeEvent): void {
   const db = getDb();
   db.runSync(
-    'INSERT OR IGNORE INTO algsets (name) VALUES (?)',
-    [name]
+    'INSERT OR IGNORE INTO algsets (name, event) VALUES (?, ?)',
+    [name, event]
   );
 }
 
@@ -76,7 +76,7 @@ function deleteCasesInternal(db: SQLite.SQLiteDatabase, caseIds: number[]): void
   db.runSync(`DELETE FROM cases WHERE id IN (${placeholders});`, caseIds);
 }
 
-function insertCasesInternal(db: SQLite.SQLiteDatabase, algset: AlgSet): void {
+function insertCasesInternal(db: SQLite.SQLiteDatabase, algset: Pick<AlgSet, 'name' | 'cases'>): void {
   for (const c of algset.cases) {
     db.runSync(
       'INSERT OR IGNORE INTO cases (algset, alg) VALUES (?, ?)',
@@ -133,7 +133,7 @@ export function getAlgSetProgress(algset: string): AlgSetProgress {
 
 export function getAlgSets(): AlgSet[] {
   const db = getDb();
-  const algsets = db.getAllSync<{ id: string; name: string }>('SELECT * FROM algsets');
+  const algsets = db.getAllSync<{ name: string; event: CubeEvent }>('SELECT * FROM algsets');
   return algsets.map(a => ({
     ...a,
     cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [a.name])
