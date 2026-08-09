@@ -47,7 +47,7 @@ export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): strin
   }
 
   for (const c of algset.cases) {
-    if (validateAlgorithm(c.alg) === false) {
+    if (validateAlgorithm(c.alg, algset.event) === false) {
       return invalidAlgError(c.alg);
     }
   }

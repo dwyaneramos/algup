@@ -39,3 +39,30 @@ describe('validateAlgorithm - valid algorithms', () => {
   });
 });
 
+describe('validateAlgorithm - 222 event restricts to base face moves + rotations', () => {
+  it.each([
+    "R U R' U'",
+    "x R2 D2 R U R' D2 R U' R x'",
+    "x' R U' R' D R U R' D' R U R' D R U' R' D' x",
+    "z D' R U' R2 D R' U D' R U' R2 D R' U z'",
+  ])('accepts for 222 (base face moves and rotations only): %s', (alg) => {
+    expect(validateAlgorithm(alg, '222')).toBe(true);
+  });
+
+  it.each([
+    "M2 U' M2 U2 M2 U' M2",
+    "M' U' M2 U' M2 U' M' U2 M2",
+    "l' U R' D2 R U' R' D2 R2 x'",
+    "R2 u R' U R' U' R u' R2 y' R' U R",
+    "U F' U' F R2 u R' U R U' R u' R2",
+    "R' U R' d' R' F' R2 U' R' U R' F R F",
+  ])('rejects for 222 (contains a slice or wide move): %s', (alg) => {
+    expect(validateAlgorithm(alg, '222')).toBe(false);
+  });
+
+  it('still accepts slice and wide moves for 333, both explicit and default', () => {
+    expect(validateAlgorithm("M2 U' M2 U2 M2 U' M2", '333')).toBe(true);
+    expect(validateAlgorithm("R2 u R' U R' U' R u' R2")).toBe(true);
+  });
+});
+
