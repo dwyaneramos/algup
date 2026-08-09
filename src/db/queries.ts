@@ -1,6 +1,5 @@
-import { AlgSet, Case, CubeEvent } from '@/src/logic/algsets';
-import { type CaseWithProgress, type CaseState } from '@/src/logic/caseQueue';
 import * as SQLite from 'expo-sqlite';
+import type { AlgSet, Case, CubeEvent, CaseWithProgress, CaseState, AlgSetProgress, ScrambleQueueItem } from '@/types';
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
@@ -9,14 +8,6 @@ function getDb() {
     _db = SQLite.openDatabaseSync('algup.db');
   }
   return _db;
-}
-
-export interface AlgSetProgress {
-  total: number;
-  learning: number;
-  reviewing: number;
-  mastered: number;
-  locked: number;
 }
 
 export function getAlgSet(name: string): AlgSet | null {
@@ -269,13 +260,6 @@ export function introduceNextCase(algset: string): void {
       fluency = 1.0,
       state = 'learning'
   `, [nextLocked.id]);
-}
-
-export interface ScrambleQueueItem {
-  caseId: number;
-  alg: string;
-  scramble: string;
-  solution: string;
 }
 
 export function insertScrambleQueueItems(algset: string, items: ScrambleQueueItem[]): void {

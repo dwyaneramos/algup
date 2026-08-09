@@ -1,10 +1,4 @@
-export interface AlgCategory {
-  key: "mastered" | "reviewing" | "learning" | "remaining" | "locked" | "focused";
-  header: string;
-  color: string;
-  borderColor: string;
-  bgColor: string;
-}
+import type { AlgCategory } from '@/types';
 
 export const ALG_CATEGORIES: AlgCategory[] = [
   { key: "focused", header: "Focused", color: "bg-amber-400", borderColor: "#F59E0B", bgColor: "#F59E0B" },

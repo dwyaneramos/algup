@@ -1,5 +1,6 @@
 import { Alg } from 'cubing/alg';
 import { sanitiseAlgorithm } from './alg';
+import type { CubeState, ScrambleSolutionPair, BatchScrambleResult } from '@/types';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const API_SECRET = process.env.EXPO_PUBLIC_API_SECRET;
 
@@ -36,9 +37,6 @@ const API_SECRET = process.env.EXPO_PUBLIC_API_SECRET;
 // 45 46 47
 // 48 49 50
 // 51 52 53
-
-export type CubeState = string[];
-
 
 export enum Colour {
   White, Red, Green, Yellow, Orange, Blue
@@ -236,11 +234,6 @@ export function solvedCube(): CubeState {
     ...Array(9).fill('B'),
   ];
 }
-export interface ScrambleSolutionPair {
-  scramble: string,
-  solution: string,
-}
-
 export async function generateScrambleFromAlg(algString: string): Promise<ScrambleSolutionPair> {
   const cleanAlg = algString.replace(/[()]/g, '');
   const res = await fetch(`${API_URL}/scramble`, {
@@ -252,18 +245,12 @@ export async function generateScrambleFromAlg(algString: string): Promise<Scramb
   return await res.json();
 }
 
-export interface BatchScrambleResult {
-  alg: string;
-  scramble: string;
-  solution: string;
-}
-
 export async function generateScrambleBatch(algs: string[]): Promise<BatchScrambleResult[]> {
   const cleanAlgs = algs.map(a => a.replace(/[()]/g, ''));
   const res = await fetch(`${API_URL}/scramble/batch`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
-    body: JSON.stringify({ algs: cleanAlgs }),
+    body: JSON.stringify({ algs: cleanAlgs, event: "333" }),
   });
 
   const data = await res.json();

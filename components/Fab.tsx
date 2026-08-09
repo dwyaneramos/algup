@@ -9,8 +9,9 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
 import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
-import { useCallback, useState, ComponentType } from 'react';
+import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
+import type { IconComponent, SatelliteAction } from '@/types';
 import {
   SATELLITE_SIZE,
   MAIN_SIZE,
@@ -34,15 +35,6 @@ const SHADOW = {
   shadowOpacity: 0.15,
   shadowRadius: 12,
 } as const;
-
-type IconComponent = ComponentType<{ color?: string; size?: number }>;
-
-type SatelliteAction = {
-  key: string;
-  icon: IconComponent;
-  onPress: () => void;
-  backgroundColor?: string;
-};
 
 type FabProps = {
   onCreate: () => void;

@@ -1,13 +1,12 @@
-import { CaseWithProgress } from './caseQueue';
 import {
   insertScrambleQueueItems,
   dequeueNextScramble,
   getScrambleQueueSize,
   peekScrambleQueue as dbPeekScrambleQueue,
   clearScrambleQueue,
-  ScrambleQueueItem,
 } from '@/src/db/queries';
 import { generateScrambleBatch } from './scramble';
+import type { CaseWithProgress, ScrambleQueueItem } from '@/types';
 
 const BATCH_SIZE = 10;
 const REFILL_THRESHOLD = 3;
@@ -23,7 +22,8 @@ const STATE_WEIGHTS: Record<string, number> = {
 
 const pendingItems = new Map<string, ScrambleQueueItem>();
 
-export { ScrambleQueueItem, REFILL_THRESHOLD };
+export type { ScrambleQueueItem };
+export { REFILL_THRESHOLD };
 
 export function selectBatchCases(cases: CaseWithProgress[], count: number): CaseWithProgress[] {
   const active = cases.filter(c => c.state !== 'locked');

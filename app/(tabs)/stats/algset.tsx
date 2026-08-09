@@ -5,7 +5,7 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAllCasesWithProgress } from '@/src/logic/case';
 import { CaseRow, SkeletonCaseRow } from '@/components/CaseRow';
 import { HeaderButton } from '@/components/HeaderButton';
-import type { CaseWithProgress } from '@/src/logic/caseQueue';
+import type { CaseWithProgress } from '@/types';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconArrowLeft, IconSortAscending, IconSortDescending } from '@tabler/icons-react-native';

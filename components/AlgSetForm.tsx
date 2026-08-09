@@ -1,8 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { Text, View, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { type AlgSet, type CubeEvent, validateAlgSet } from '@/src/logic/algsets';
+import { validateAlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import type { AlgSet, CubeEvent } from '@/types';
 
 const MIN_ALGS_TEXTAREA_HEIGHT = 40;
 

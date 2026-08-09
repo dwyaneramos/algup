@@ -8,17 +8,17 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Fab } from '@/components/Fab';
-import { type AlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { CreateAlgSetSheet, CreateAlgSetSheetRef } from '@/components/CreateAlgSetSheet';
+import { CreateAlgSetSheet } from '@/components/CreateAlgSetSheet';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
-import { EditAlgSetSheet, EditAlgSetSheetRef } from '@/components/EditAlgSetSheet';
+import { EditAlgSetSheet } from '@/components/EditAlgSetSheet';
 import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Sheet, SheetRef } from '@/components/Sheet'
+import { Sheet } from '@/components/Sheet'
 import { useNavBarShift } from '@/src/hooks/useNavBarShift';
+import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, SheetRef } from '@/types';
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 

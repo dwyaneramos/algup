@@ -1,11 +1,7 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-
-export type SheetRef = {
-  present: () => void;
-  dismiss: () => void;
-};
+import type { SheetRef } from '@/types';
 
 type SheetProps = {
   children: React.ReactNode;

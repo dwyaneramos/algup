@@ -1,20 +1,8 @@
-import { createAlgSet, insertCases, deleteCases, applyAlgSetCaseChanges, clearScrambleQueue } from "@/src/db/queries";
+import { createAlgSet, insertCases, applyAlgSetCaseChanges, clearScrambleQueue } from "@/src/db/queries";
 import { validateAlgorithm } from "@/src/logic/alg";
-
-export interface Case {
-  id?: number;
-  alg: string;
-}
+import type { Case, AlgSet } from "@/types";
 
 export const SELECTED_ALGSET_KEY = "selectedAlgset"
-
-export type CubeEvent = '222' | '333';
-
-export interface AlgSet {
-  name: string;
-  event: CubeEvent;
-  cases: Case[];
-}
 
 export function validateAlgSetName(name: string): boolean {
   name = name.trim()

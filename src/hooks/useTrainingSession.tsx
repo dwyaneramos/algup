@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getCasesWithProgress, updateCaseProgress, introduceNextCase, recordPractice, updateLastPracticed } from '@/src/db/queries';
-import { pickNextCase, getNextState, shouldIntroduceNewCase, CaseWithProgress, getUpdatedFluency, applyDecay } from '@/src/logic/caseQueue';
+import { pickNextCase, getNextState, shouldIntroduceNewCase, getUpdatedFluency, applyDecay } from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/logic/scramble';
 import {
   fetchAndEnqueueBatch,
@@ -11,8 +11,8 @@ import {
   consumePendingItem,
   REFILL_THRESHOLD,
 } from '@/src/logic/scrambleQueue';
-import { ScrambleQueueItem } from '@/src/db/queries';
 import { useSettingsStore } from '@/src/store/settingsStore';
+import type { CaseWithProgress, ScrambleQueueItem } from '@/types';
 
 export function useTrainingSession(algset: string) {
   const maxActive = useSettingsStore(s => s.maxActive);

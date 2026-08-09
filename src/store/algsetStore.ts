@@ -1,15 +1,7 @@
 import { create } from 'zustand';
-import { AlgSet, SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
+import { SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
 import { deleteAlgset, setSetting, getSetting, getAlgSets, clearScrambleQueue } from '@/src/db/queries';
-
-interface AlgSetStore {
-  algSets: AlgSet[];
-  selectedAlgSet: AlgSet | null;
-  setSelectedAlgSet: (algSet: AlgSet) => void;
-  loadAlgSets: () => void;
-  addAlgSet: (algSet: AlgSet) => void;
-  deleteAlgSet: (algSet: AlgSet) => boolean;
-}
+import type { AlgSetStore } from '@/types';
 
 export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
   algSets: [],

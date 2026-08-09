@@ -1,14 +1,4 @@
-export type CaseState = 'locked' | 'learning' | 'reviewing' | 'mastered';
-
-export interface CaseWithProgress {
-  id: number;
-  alg: string;
-  algset: string;
-  fluency: number;
-  is_focused: boolean;
-  state: CaseState;
-  last_practiced: string | null;
-}
+import type { CaseState, CaseWithProgress } from '@/types';
 
 export const DEFAULT_MAX_ACTIVE = 5;
 export const DEFAULT_MAX_LEARNING = 3;
