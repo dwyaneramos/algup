@@ -9,7 +9,7 @@ function seedAlgSets() {
   if (existing.count > 0) return;
 
   for (const algSet of ALG_SETS) {
-    createAlgSet(algSet.name);
+    createAlgSet(algSet.name, algSet.event);
     insertCases(algSet);
   }
 }
@@ -29,7 +29,8 @@ export function initDB() {
     );
 
     CREATE TABLE IF NOT EXISTS algsets (
-      name TEXT PRIMARY KEY
+      name TEXT PRIMARY KEY,
+      event TEXT NOT NULL DEFAULT '333'
     );
 
     CREATE TABLE IF NOT EXISTS cases (

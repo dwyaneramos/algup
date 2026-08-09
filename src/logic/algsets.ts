@@ -8,8 +8,11 @@ export interface Case {
 
 export const SELECTED_ALGSET_KEY = "selectedAlgset"
 
+export type CubeEvent = '222' | '333';
+
 export interface AlgSet {
   name: string;
+  event: CubeEvent;
   cases: Case[];
 }
 
@@ -76,7 +79,7 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
 
 export function insertNewAlgSet(algset: AlgSet): boolean {
   try {
-    createAlgSet(algset.name);
+    createAlgSet(algset.name, algset.event);
     insertCases(algset);
     return true;
 
@@ -91,6 +94,7 @@ export function insertNewAlgSet(algset: AlgSet): boolean {
 export const ALG_SETS: AlgSet[] = [
   {
     name: 'CMLL',
+    event: '333',
     cases: [
       { alg: "R U2 R' U' R U' R2 U2 R U R' U R " },
       { alg: "r' U r U2 R2 F R F' R " },
@@ -139,6 +143,7 @@ export const ALG_SETS: AlgSet[] = [
 
   {
     name: 'PLL',
+    event: '333',
     cases: [
       { alg: "U2 R2 U' R' U' R U R U R U' R " },
       { alg: "R' U R' U' R' U' R' U R U R2 " },
@@ -170,6 +175,7 @@ export const ALG_SETS: AlgSet[] = [
 
   {
     name: 'OLL',
+    event: '333',
     cases: [
 
 
