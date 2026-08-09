@@ -1,4 +1,5 @@
 import type { CaseWithProgress } from "@/src/logic/caseQueue";
+import type { CubeEvent } from "@/src/logic/algsets";
 import { showToast } from "@/utils/toast";
 import { useEffect, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
@@ -11,7 +12,7 @@ import { ALG_CATEGORIES } from "@/utils/categories";
 import { toggleCaseFocus } from "@/src/db/queries";
 const FOCUSED_COLOR = ALG_CATEGORIES.find((c) => c.key === "focused")?.borderColor ?? "#000000";
 
-export function CaseRow({ c }: { c: CaseWithProgress }) {
+export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
   const translateY = useSharedValue(0);
 
@@ -67,7 +68,7 @@ export function CaseRow({ c }: { c: CaseWithProgress }) {
         </View>
 
         <View className="flex-shrink-0">
-          <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} />
+          <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} event={event} />
         </View>
       </Animated.View>
     </Pressable>

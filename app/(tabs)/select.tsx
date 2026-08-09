@@ -82,7 +82,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
           </Text>
         </View>
         {scramble ? (
-          <DrawScramble scramble={scramble} scale={0.6} />
+          <DrawScramble scramble={scramble} scale={0.6} event={algset.event} />
         ) : (
           <View className="h-16 w-16 bg-gray-200 rounded-xl" />
         )}

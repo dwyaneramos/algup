@@ -1,6 +1,7 @@
 import Svg, { Rect, G } from 'react-native-svg';
 import { applyScramble, solvedCube, Colour } from '@/src/logic/scramble';
 import type { CubeState } from '@/src/logic/scramble';
+import type { CubeEvent } from '@/src/logic/algsets';
 
 const COLORS: Record<string, string> = {
   W: '#ffffff', R: '#ff0000', G: '#00aa00',
@@ -13,11 +14,44 @@ const s = 18;
 // gap
 const g = 1;
 
-function Face({ cube, faceIndex }: {
+// Corner indices within a face's 9-sticker slice: top-left, top-right, bottom-left, bottom-right
+const CORNER_INDICES = [0, 2, 6, 8];
+
+function Face({ cube, faceIndex, cornersOnly }: {
   cube: CubeState,
   faceIndex: number,
+  cornersOnly: boolean,
 }) {
   const offset = faceIndex * 9;
+
+  if (cornersOnly) {
+    // Fills the same bounding box the 3x3 layout occupies (3*s + 2*g),
+    // so the enclosing isometric <G transform> doesn't need to change.
+    const cs = (3 * s + g) / 2;
+    return (
+      <>
+        {CORNER_INDICES.map((i, idx) => {
+          const row = Math.floor(idx / 2);
+          const col = idx % 2;
+          const hex = COLORS[cube[offset + i]];
+          return (
+            <Rect
+              key={i}
+              x={col * (cs + g)}
+              y={row * (cs + g)}
+              rx={2}
+              width={cs}
+              height={cs}
+              fill={hex}
+              stroke="#d4d4d4"
+              strokeWidth={0.5}
+            />
+          );
+        })}
+      </>
+    );
+  }
+
   return (
     <>
       {Array(9).fill(0).map((_, i) => {
@@ -45,22 +79,23 @@ function Face({ cube, faceIndex }: {
 
 
 
-export function DrawScramble({ scramble, scale = 1 }: { scramble: string, scale?: number }) {
+export function DrawScramble({ scramble, scale = 1, event }: { scramble: string, scale?: number, event: CubeEvent }) {
   const cube = scramble ? applyScramble(scramble) : solvedCube();
   const w = 90 * scale;
   const h = 100 * scale;
+  const cornersOnly = event === '222';
 
   return (
     <Svg width={w} height={h} viewBox="0 0 112 135">
       <G transform="translate(0, 2.5)">
         <G transform="translate(56, 0) scale(1.43, 0.81) rotate(45)">
-          <Face cube={cube} faceIndex={Colour.White} />
+          <Face cube={cube} faceIndex={Colour.White} cornersOnly={cornersOnly} />
         </G>
         <G transform="translate(0, 33) skewY(30) scale(1, 1.15)">
-          <Face cube={cube} faceIndex={Colour.Green} />
+          <Face cube={cube} faceIndex={Colour.Green} cornersOnly={cornersOnly} />
         </G>
         <G transform="translate(57, 65) skewY(-30) scale(1, 1.15)">
-          <Face cube={cube} faceIndex={Colour.Red} />
+          <Face cube={cube} faceIndex={Colour.Red} cornersOnly={cornersOnly} />
         </G>
       </G>
     </Svg>

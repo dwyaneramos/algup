@@ -132,7 +132,7 @@ export default function MainScreen() {
             </Animated.View>
           )}
 
-          <DrawScramble scale={2} scramble={scramble} />
+          <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
 
 
 

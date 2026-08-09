@@ -72,7 +72,7 @@ export default function Algset() {
         <Animated.View entering={FadeIn.duration(300)}>
           <FlatList
             data={sortedCases}
-            renderItem={({ item }) => <CaseRow c={item} />}
+            renderItem={({ item }) => <CaseRow c={item} event={selectedAlgSet.event} />}
             keyExtractor={(_, index) => index.toString()}
             contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 210 + navBarShift }}
             initialNumToRender={20}
