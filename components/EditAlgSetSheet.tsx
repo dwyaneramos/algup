@@ -1,13 +1,7 @@
 import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { AlgSetForm } from '@/components/AlgSetForm';
-import { type SheetRef, Sheet } from '@/components/Sheet';
-import { type AlgSet } from '@/src/logic/algsets';
-
-
-export type EditAlgSetSheetRef = {
-  present: () => void;
-  dismiss: () => void;
-};
+import { Sheet } from '@/components/Sheet';
+import type { SheetRef, EditAlgSetSheetRef, AlgSet } from '@/types';
 
 type EditAlgSetSheetProps = {
   algset: AlgSet;

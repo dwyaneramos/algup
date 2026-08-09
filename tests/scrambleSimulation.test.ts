@@ -1,4 +1,5 @@
-import { applyScramble, solvedCube, invertAlgorithm, type CubeState } from '@/src/logic/scramble';
+import { applyScramble, solvedCube, invertAlgorithm } from '@/src/logic/scramble';
+import type { CubeState } from '@/types';
 
 // `cubing/alg`'s package.json only declares an "import" (ESM) export
 // condition for its subpaths, which Jest's CJS-based resolver can't load —

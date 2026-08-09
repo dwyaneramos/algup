@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { getSetting, setSetting } from '@/src/db/queries';
 import { DEFAULT_MAX_ACTIVE, DEFAULT_MAX_LEARNING } from '@/src/logic/caseQueue';
+import type { SettingsStore } from '@/types';
 
 export const SHIFT_NAVBAR_UP_KEY = 'shiftNavbarUp';
 export const MAX_ACTIVE_KEY = 'maxActive';
@@ -10,16 +11,6 @@ export const MIN_MAX_ACTIVE = 1;
 export const MAX_MAX_ACTIVE = 20;
 export const MIN_MAX_LEARNING = 1;
 export const MAX_MAX_LEARNING = 10;
-
-interface SettingsStore {
-  shiftNavbarUp: boolean;
-  maxActive: number;
-  maxLearning: number;
-  loadSettings: () => void;
-  setShiftNavbarUp: (value: boolean) => void;
-  setMaxActive: (value: number) => void;
-  setMaxLearning: (value: number) => void;
-}
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
   shiftNavbarUp: false,

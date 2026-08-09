@@ -1,6 +1,6 @@
 
 
-import type { CubeEvent } from './algsets';
+import type { CubeEvent } from '@/types';
 
 const FACE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'];
 const SLICE_MOVES = ['M', 'E', 'S'];

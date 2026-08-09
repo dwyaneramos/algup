@@ -1,5 +1,5 @@
 import { validateAlgSet, validateAlgSetName, algsetNameLengthError, algsetAlreadyExistsError, algsetNoCasesError, invalidAlgError, ALG_SETS } from "@/src/logic/algsets";
-import { type AlgSet, Case } from '@/src/logic/algsets';
+import type { AlgSet, Case } from '@/types';
 
 function makeAlgSet(overrides: Partial<AlgSet> = {}): AlgSet {
   return {

@@ -1,5 +1,4 @@
-import type { CaseWithProgress } from "@/src/logic/caseQueue";
-import type { CubeEvent } from "@/src/logic/algsets";
+import type { CaseWithProgress, CubeEvent } from "@/types";
 import { showToast } from "@/utils/toast";
 import { useEffect, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
