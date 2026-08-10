@@ -6,7 +6,7 @@ import {
   clearScrambleQueue,
 } from '@/src/db/queries';
 import { generateScrambleBatch } from './scramble';
-import type { CaseWithProgress, ScrambleQueueItem } from '@/types';
+import type { CaseWithProgress, ScrambleQueueItem, CubeEvent } from '@/types';
 
 const BATCH_SIZE = 10;
 const REFILL_THRESHOLD = 3;
@@ -54,13 +54,13 @@ export function selectBatchCases(cases: CaseWithProgress[], count: number): Case
   return selected;
 }
 
-export async function fetchAndEnqueueBatch(algset: string, cases: CaseWithProgress[]): Promise<void> {
+export async function fetchAndEnqueueBatch(algset: string, cases: CaseWithProgress[], event: CubeEvent): Promise<void> {
   const batchCases = selectBatchCases(cases, BATCH_SIZE);
   if (batchCases.length === 0) return;
 
   try {
     const algs = batchCases.map(c => c.alg);
-    const results = await generateScrambleBatch(algs);
+    const results = await generateScrambleBatch(algs, event);
 
     if (!results || results.length === 0) {
       console.warn('Scramble batch returned no results');

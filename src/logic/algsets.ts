@@ -232,6 +232,14 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "R U R' U' M' U R U' r' " },
     ]
   },
+
+  {
+    name: 'CLL',
+    event: '222',
+    cases: [
+      { alg: "R U R' U R U2 R'" },
+    ]
+  },
 ];
 
 

@@ -4,7 +4,6 @@ import { generateScrambleForAlg, MAX_BATCH_SIZE } from '../lib/scramble.js';
 const router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
-  console.log("received single scramble request");
   const { alg, event } = req.body;
 
   if (!alg) {
@@ -24,7 +23,6 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 router.post('/batch', async (req: Request, res: Response) => {
-  console.log("received batch request");
   const { algs, event } = req.body;
 
   if (!Array.isArray(algs) || algs.length === 0) {
