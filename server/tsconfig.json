@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "paths": {
       "@/*": ["../*"],
-      "@/types": ["../types/index.d.ts"]
+      "@/types": ["../types/algset.d.ts"]
     }
   },
   "include": ["src/**/*"]
