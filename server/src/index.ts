@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(requireApiSecret);
 app.use('/scramble', scrambleRouter);
 
-if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
