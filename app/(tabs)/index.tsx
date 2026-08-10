@@ -62,83 +62,83 @@ export default function MainScreen() {
         className="flex-1 flex-col items-center justify-start"
         style={{ transform: [{ translateY: -navBarShift }] }}
       >
-      {!running && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(200)}
-          className="gap-0 flex pt-16 px-3 flex-col items-center"
-        >
-          <Text className="font-inter-bold text-center text-header">{selectedAlgSet?.name}</Text>
-          <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
-
-          <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
-            {isLoadingScramble ? (
-              <PulsatingLoadingText message={DEFAULT_SCRAMBLE_MESSAGE} />
-            ) : (
-              <Animated.Text
-                key={showScrambleOrSolution}
-                entering={FadeIn.duration(200)}
-                className={`text-center text-body font-inter-medium ${formatted() !== DEFAULT_TIME_STRING ? "text-muted " : ""} `}
-              >
-                {showScrambleOrSolution === 'solution' ? solution : scramble}
-              </Animated.Text>
-            )}
-          </View>
-
-          <Pressable
-            className="bg-accent rounded-3xl w-48 p-3 mt-3 disabled:opacity-50"
-            onPress={toggleDisplayMode}
-            disabled={isLoadingScramble}
-            style={{ opacity: isLoadingScramble ? 0.5 : 1 }}
+        {!running && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            className="gap-0 flex pt-16 px-3 flex-col items-center"
           >
-            <Text className="text-white text-center">Show {showScrambleOrSolution === 'solution' ? "Scramble" : "Solution"}</Text>
-          </Pressable>
+            <Text className="font-inter-bold text-center text-header">{selectedAlgSet?.name}</Text>
+            <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
+            <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
+              {isLoadingScramble ? (
+                <PulsatingLoadingText message={DEFAULT_SCRAMBLE_MESSAGE} />
+              ) : (
+                <Animated.Text
+                  key={showScrambleOrSolution}
+                  entering={FadeIn.duration(200)}
+                  className={`text-center text-body font-inter-medium ${formatted() !== DEFAULT_TIME_STRING ? "text-muted " : ""} `}
+                >
+                  {showScrambleOrSolution === 'solution' ? solution : scramble}
+                </Animated.Text>
+              )}
+            </View>
 
-        </Animated.View>
-      )}
-      <View className="mt-3">
-        <Timer
-          disabled={!running && (attemptDone || isLoadingScramble)}
-          formatted={formatted()}
-          running={running}
-          onStart={start}
-          onStop={handleStopAttempt}
-        />
-      </View>
-
-      {!running && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(200)}
-          className="flex flex-col items-center relative justify-center"
-        >
-          {formatted() !== DEFAULT_TIME_STRING && (
-            <Animated.View
-              entering={FadeIn.duration(200)}
-              exiting={FadeOut.duration(200)}
-              className="absolute left-0 right-0 top-0 flex-row justify-center items-center gap-10"
-              style={{ transform: [{ translateY: -80 }] }}
+            <Pressable
+              className="bg-accent rounded-3xl w-48 p-3 mt-3 disabled:opacity-50"
+              onPress={toggleDisplayMode}
+              disabled={isLoadingScramble}
+              style={{ opacity: isLoadingScramble ? 0.5 : 1 }}
             >
-              <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
-              <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
-              <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
-              <View className="w-1 h-8 bg-gray-300 -mx-6" />
-              <GradeButton onPress={() => {
-
-                setAttemptDone(false);
-                resetTime();
-              }} icon={IconReload} color={COLOR_ACCENT} />
-            </Animated.View>
-          )}
-
-          <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
+              <Text className="text-white text-center">Show {showScrambleOrSolution === 'solution' ? "Scramble" : "Solution"}</Text>
+            </Pressable>
 
 
+          </Animated.View>
+        )}
+        <View className="mt-3 w-full">
+          <Timer
+            disabled={!running && (attemptDone || isLoadingScramble)}
+            formatted={formatted()}
+            running={running}
+            onStart={start}
+            onStop={handleStopAttempt}
+          />
+        </View>
+
+        {!running && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            className="flex flex-col items-center relative justify-center"
+          >
+            {formatted() !== DEFAULT_TIME_STRING && (
+              <Animated.View
+                entering={FadeIn.duration(200)}
+                exiting={FadeOut.duration(200)}
+                className="absolute left-0 right-0 top-0 flex-row justify-center items-center gap-10"
+                style={{ transform: [{ translateY: -80 }] }}
+              >
+                <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
+                <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
+                <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
+                <View className="w-1 h-8 bg-gray-300 -mx-6" />
+                <GradeButton onPress={() => {
+
+                  setAttemptDone(false);
+                  resetTime();
+                }} icon={IconReload} color={COLOR_ACCENT} />
+              </Animated.View>
+            )}
+
+            <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
 
 
-        </Animated.View>
-      )}
+
+
+          </Animated.View>
+        )}
       </View>
 
       {running && (

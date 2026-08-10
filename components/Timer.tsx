@@ -24,13 +24,13 @@ export function Timer({ formatted, running, onStart, onStop, disabled }: TimerPr
   }, [running]);
 
   return (
-    <Animated.View className="relative  items-center justify-center pb-2">
+    <Animated.View className="relative bg-red-500  items-center justify-center mt-8">
       <Pressable
         disabled={disabled}
         onPress={running ? onStop : onStart}
         onPressIn={() => { scale.value = withSpring(baseScale.current + 0.2); }}
         onPressOut={() => { scale.value = withSpring(baseScale.current); }}
-        className={running ? ' h-full items-center justify-center' : 'w-full py-14'}
+        className={running ? ' h-full items-center justify-center ' : 'w-full pb-16 pt-8'}
       >
         <Animated.Text
           style={[{ fontVariant: ['tabular-nums'] }, animatedStyle]}
