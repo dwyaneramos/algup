@@ -53,7 +53,7 @@ export default function Stats() {
       const id = setTimeout(() => {
         const progress = getAlgSetProgress(selectedAlgSet.name);
         setAlgSetProgress(progress);
-        setDailyStreak(getDailyStreak());
+        setDailyStreak(getDailyStreak(selectedAlgSet.name));
         setLearningFluency(getLearningFluency(selectedAlgSet.name));
         getNWorstCases(selectedAlgSet.name, NUM_WORST_CASES).then(cases => {
           setWorstCases(cases);

@@ -324,10 +324,11 @@ export function updateLastPracticed(caseId: number): void {
   );
 }
 
-export function getDailyStreak(): number {
+export function getDailyStreak(algset: string): number {
   const db = getDb();
   const rows = db.getAllSync<{ d: string }>(
-    "SELECT DISTINCT date(practiced_at) AS d FROM practice_log ORDER BY d DESC"
+    "SELECT DISTINCT date(practiced_at) AS d FROM practice_log WHERE algset = ? ORDER BY d DESC",
+    [algset]
   );
   if (rows.length === 0) return 0;
 
