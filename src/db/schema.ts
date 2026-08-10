@@ -19,6 +19,7 @@ export function resetDB() {
   db.execSync('DROP TABLE IF EXISTS case_progress');
   db.execSync('DROP TABLE IF EXISTS cases');
   db.execSync('DROP TABLE IF EXISTS algsets');
+  db.execSync('DROP TABLE IF EXISTS practice_log');
 }
 
 export function initDB() {

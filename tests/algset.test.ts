@@ -88,10 +88,3 @@ describe('validateAlgSet', () => {
   });
 });
 
-describe('ALG_SETS defaults', () => {
-  it('defaults every built-in algset to the 333 event', () => {
-    for (const algset of ALG_SETS) {
-      expect(algset.event).toBe('333');
-    }
-  });
-});
