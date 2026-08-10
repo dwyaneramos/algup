@@ -64,8 +64,10 @@ export async function generateScrambleForAlg(rawAlg: string, event: CubeEvent): 
     const parsed = new Alg(`${prefix} ${alg}`);
     const pattern = kpuzzle.algToTransformation(parsed).toKPattern();
     const solution = await solver(pattern);
+    console.log(`Generated solution: ${solution.toString()} for alg: ${alg} with prefix: ${prefix}`);
     scramble = simplifyAlg(`${solution.toString()} ${prefix}`, event);
   } while (scramble.split(' ').length < maxLength);
+
 
   return { scramble, solution: simplifyAlg(alg, event) };
 }
