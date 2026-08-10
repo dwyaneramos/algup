@@ -12,11 +12,13 @@ import {
   REFILL_THRESHOLD,
 } from '@/src/logic/scrambleQueue';
 import { useSettingsStore } from '@/src/store/settingsStore';
+import { useAlgSetStore } from '@/src/store/algsetStore';
 import type { CaseWithProgress, ScrambleQueueItem } from '@/types';
 
 export function useTrainingSession(algset: string) {
   const maxActive = useSettingsStore(s => s.maxActive);
   const maxLearning = useSettingsStore(s => s.maxLearning);
+  const event = useAlgSetStore(s => s.selectedAlgSet?.event ?? '333');
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [currentCase, setCurrentCase] = useState<CaseWithProgress | null>(null);
   const [scramble, setScramble] = useState('');
@@ -65,7 +67,7 @@ export function useTrainingSession(algset: string) {
         setCurrentCase(firstCase);
         if (firstCase) {
           setIsLoading(true);
-          const { scramble: s, solution: sol } = await generateScrambleFromAlg(firstCase.alg);
+          const { scramble: s, solution: sol } = await generateScrambleFromAlg(firstCase.alg, event);
           setScramble(s);
           setSolution(sol);
           setIsLoading(false);
@@ -75,7 +77,7 @@ export function useTrainingSession(algset: string) {
       const currentQueueSize = getQueueSize(algset);
       if (currentQueueSize <= REFILL_THRESHOLD && !batchInFlight.current) {
         batchInFlight.current = true;
-        fetchAndEnqueueBatch(algset, initial).finally(() => {
+        fetchAndEnqueueBatch(algset, initial, event).finally(() => {
           batchInFlight.current = false;
         });
       }
@@ -127,7 +129,7 @@ export function useTrainingSession(algset: string) {
       setCurrentCase(nextCase);
       if (nextCase) {
         setIsLoading(true);
-        const { scramble: s, solution: sol } = await generateScrambleFromAlg(nextCase.alg);
+        const { scramble: s, solution: sol } = await generateScrambleFromAlg(nextCase.alg, event);
         setScramble(s);
         setSolution(sol);
         setIsLoading(false);
@@ -137,7 +139,7 @@ export function useTrainingSession(algset: string) {
     const currentQueueSize = getQueueSize(algset);
     if (currentQueueSize <= REFILL_THRESHOLD && !batchInFlight.current) {
       batchInFlight.current = true;
-      fetchAndEnqueueBatch(algset, updatedCases).finally(() => {
+      fetchAndEnqueueBatch(algset, updatedCases, event).finally(() => {
         batchInFlight.current = false;
       });
     }

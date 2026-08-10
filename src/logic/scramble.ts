@@ -1,6 +1,6 @@
 import { Alg } from 'cubing/alg';
 import { sanitiseAlgorithm } from './alg';
-import type { CubeState, ScrambleSolutionPair, BatchScrambleResult } from '@/types';
+import type { CubeState, ScrambleSolutionPair, BatchScrambleResult, CubeEvent } from '@/types';
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const API_SECRET = process.env.EXPO_PUBLIC_API_SECRET;
 
@@ -234,23 +234,30 @@ export function solvedCube(): CubeState {
     ...Array(9).fill('B'),
   ];
 }
-export async function generateScrambleFromAlg(algString: string): Promise<ScrambleSolutionPair> {
+export async function generateScrambleFromAlg(algString: string, event: CubeEvent): Promise<ScrambleSolutionPair> {
   const cleanAlg = algString.replace(/[()]/g, '');
+  console.log('-----------------------')
+  console.log('getting scramble for event:', event, 'alg:', cleanAlg)
+  console.log('-----------------------')
   const res = await fetch(`${API_URL}/scramble`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
-    body: JSON.stringify({ alg: cleanAlg, event: "333" }),
+    body: JSON.stringify({ alg: cleanAlg, event: event }),
   });
 
   return await res.json();
 }
 
-export async function generateScrambleBatch(algs: string[]): Promise<BatchScrambleResult[]> {
+export async function generateScrambleBatch(algs: string[], event: CubeEvent): Promise<BatchScrambleResult[]> {
   const cleanAlgs = algs.map(a => a.replace(/[()]/g, ''));
+  console.log('-----------------------')
+  console.log('getting scramble for event:', event)
+  console.log('-----------------------')
+
   const res = await fetch(`${API_URL}/scramble/batch`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
-    body: JSON.stringify({ algs: cleanAlgs, event: "333" }),
+    body: JSON.stringify({ algs: cleanAlgs, event: event }),
   });
 
   const data = await res.json();
