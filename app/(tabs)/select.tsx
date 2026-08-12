@@ -16,6 +16,7 @@ import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { invertAlgorithm } from '@/src/logic/scramble';
 import { Sheet } from '@/components/Sheet'
 import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, SheetRef } from '@/types';
@@ -82,7 +83,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
           </Text>
         </View>
         {scramble ? (
-          <DrawScramble scramble={scramble} scale={0.6} event={algset.event} />
+          <DrawScramble scramble={invertAlgorithm(scramble)} scale={0.6} event={algset.event} />
         ) : (
           <View className="h-16 w-16 bg-gray-200 rounded-xl" />
         )}
