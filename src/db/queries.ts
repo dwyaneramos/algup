@@ -250,6 +250,14 @@ export function updateCaseProgress(caseId: number, fluency: number, state: CaseS
   `, [caseId, fluency, state]);
 }
 
+export function markCaseMastered(caseId: number) {
+  updateCaseProgress(caseId, 5, 'mastered');
+}
+
+export function unmarkCaseMastered(caseId: number) {
+  updateCaseProgress(caseId, 1, 'learning');
+}
+
 export function introduceNextCase(algset: string): void {
   const db = getDb();
   const nextLocked = db.getFirstSync<{ id: number }>(`

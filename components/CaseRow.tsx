@@ -1,76 +1,137 @@
-import type { CaseWithProgress, CubeEvent } from "@/types";
+import type { CaseWithProgress, CubeEvent, SheetRef } from "@/types";
 import { showToast } from "@/utils/toast";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing, withSequence, withSpring } from "react-native-reanimated";
+import { Sheet } from "./Sheet";
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing } from "react-native-reanimated";
 import { invertAlgorithm } from "@/src/logic/scramble";
 import { sanitiseAlgorithm } from "@/src/logic/alg";
 import { Text, View, Pressable } from "react-native";
 import { convertScoreToPercentage } from "@/src/logic/fluency";
 import { ALG_CATEGORIES } from "@/utils/categories";
-import { toggleCaseFocus } from "@/src/db/queries";
+import { toggleCaseFocus, markCaseMastered, unmarkCaseMastered } from "@/src/db/queries";
+
 const FOCUSED_COLOR = ALG_CATEGORIES.find((c) => c.key === "focused")?.borderColor ?? "#000000";
 
 export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
-  const translateY = useSharedValue(0);
+  const [state, setState] = useState(c.state);
+  const [fluency, setFluency] = useState(c.fluency);
+  const sheetRef = useRef<SheetRef>(null);
 
-  const jumpStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
   useEffect(() => {
     setIsFocused(!!c.is_focused);
   }, [c.is_focused]);
 
+  useEffect(() => {
+    setState(c.state);
+  }, [c.state]);
+
+  useEffect(() => {
+    setFluency(c.fluency);
+  }, [c.fluency]);
+
   if (c.alg === undefined) return;
 
-  const categoryAttributes = ALG_CATEGORIES.find((cat) => cat.key === c.state)
+  const categoryAttributes = ALG_CATEGORIES.find((cat) => cat.key === state)
 
   if (categoryAttributes === undefined) return;
 
-  function onPress() {
+  const isMastered = state === 'mastered';
+
+  function onPrioritise() {
     toggleCaseFocus(c.id);
     setIsFocused(prev => !prev);
-    translateY.value = withSequence(
-      withTiming(-10, { duration: 150, easing: Easing.out(Easing.ease) }),
-      withTiming(0, { duration: 250, easing: Easing.in(Easing.ease) }),
-    );
     // isFocused at this point would be its inverse as state isn't updated
     showToast(`Case ${c.id} is${isFocused ? " no longer" : ""} prioritised`)
+    sheetRef.current?.dismiss();
   }
 
+  function onToggleMastered() {
+    if (isMastered) {
+      unmarkCaseMastered(c.id);
+      setState('learning');
+      setFluency(1);
+      showToast(`Case ${c.id} progress reset`);
+    } else {
+      markCaseMastered(c.id);
+      setState('mastered');
+      setFluency(5);
+      showToast(`Case ${c.id} marked as mastered!`);
+    }
+    sheetRef.current?.dismiss();
+  }
 
   return (
-    <Pressable onPress={onPress}>
-      <Animated.View
-        style={[{
-          borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor,
-        }, jumpStyle]}
-        className={`w-full border border-black/5 border-l-4 bg-white py-3 rounded-2xl justify-between items-center flex flex-row px-3 min-h-20`}
-      >
-        <View className="flex-1 mr-3">
+    <>
+      <Pressable onPress={() => sheetRef.current?.present()}>
+        <Animated.View
+          style={{
+            borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor,
+          }}
+          className={`w-full border border-black/5 border-l-4 bg-white py-3 rounded-2xl justify-between items-center flex flex-row px-3 min-h-20`}
+        >
+          <View className="flex-1 mr-3">
 
-          <Text className="font-inter-semibold">
-            {c.alg}
-          </Text>
-          <Text className="text-muted">
-            Fluency: {convertScoreToPercentage(c.fluency).toFixed(2)}%
-          </Text>
-          {c.last_practiced ? (
-            <Text className="text-gray-400 text-xs">
-              {(() => {
-                const days = Math.floor((Date.now() - new Date(c.last_practiced + 'T00:00:00').getTime()) / 86400000);
-                return days === 0 ? 'Practiced today' : days === 1 ? 'Practiced 1d ago' : `Practiced ${days}d ago`;
-              })()}
+            <Text className="font-inter-semibold">
+              {c.alg}
             </Text>
-          ) : null}
-        </View>
+            <Text className="text-muted">
+              Fluency: {convertScoreToPercentage(fluency).toFixed(2)}%
+            </Text>
+            {c.last_practiced ? (
+              <Text className="text-gray-400 text-xs">
+                {(() => {
+                  const days = Math.floor((Date.now() - new Date(c.last_practiced + 'T00:00:00').getTime()) / 86400000);
+                  return days === 0 ? 'Practiced today' : days === 1 ? 'Practiced 1d ago' : `Practiced ${days}d ago`;
+                })()}
+              </Text>
+            ) : null}
+          </View>
 
-        <View className="flex-shrink-0">
-          <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} event={event} />
+          <View className="flex-shrink-0">
+            <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} event={event} />
+          </View>
+        </Animated.View>
+      </Pressable>
+
+      <Sheet ref={sheetRef} snapPoints={['40%']}>
+        <View className="w-full">
+          <Text className="text-form-header text-center">{c.alg}</Text>
+          <Text className="text-muted text-center text-xs mt-1 mb-5">
+            {categoryAttributes.header} · {convertScoreToPercentage(fluency).toFixed(0)}% fluency
+          </Text>
+
+          <View className="w-full flex flex-col gap-3">
+            <Pressable
+              className="w-full rounded-full py-4 items-center"
+              style={{ backgroundColor: FOCUSED_COLOR }}
+              onPress={onPrioritise}
+            >
+              <Text className="font-inter-semibold text-base text-white">
+                {isFocused ? "Remove priority" : "Prioritise this case"}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              className="w-full rounded-full bg-accent py-4 items-center"
+              onPress={onToggleMastered}
+            >
+              <Text className="font-inter-semibold text-base text-white">
+                {isMastered ? "Reset progress" : "I'm fluent in this case"}
+              </Text>
+            </Pressable>
+          </View>
+
+          <Pressable
+            className="w-full rounded-full bg-gray-100 items-center py-4 mt-3"
+            onPress={() => sheetRef.current?.dismiss()}
+          >
+            <Text className="font-inter-semibold text-base text-muted">Cancel</Text>
+          </Pressable>
         </View>
-      </Animated.View>
-    </Pressable>
+      </Sheet>
+    </>
   )
 
 }
