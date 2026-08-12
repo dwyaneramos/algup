@@ -245,7 +245,11 @@ export async function generateScrambleFromAlg(algString: string, event: CubeEven
     body: JSON.stringify({ alg: cleanAlg, event: event }),
   });
 
-  return await res.json();
+  const data = await res.json();
+  if (!res.ok) {
+    console.error(`/scramble responded ${res.status} for alg "${cleanAlg}" (${event}):`, data);
+  }
+  return data;
 }
 
 export async function generateScrambleBatch(algs: string[], event: CubeEvent): Promise<BatchScrambleResult[]> {
@@ -261,6 +265,9 @@ export async function generateScrambleBatch(algs: string[], event: CubeEvent): P
   });
 
   const data = await res.json();
+  if (!res.ok) {
+    console.error(`/scramble/batch responded ${res.status} for ${cleanAlgs.length} algs (${event}):`, data);
+  }
   return data.results ?? [];
 }
 

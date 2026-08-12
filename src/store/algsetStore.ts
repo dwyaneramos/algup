@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
-import { deleteAlgset, setSetting, getSetting, getAlgSets, clearScrambleQueue } from '@/src/db/queries';
+import { deleteAlgset, setSetting, getSetting, getAlgSets } from '@/src/db/queries';
+import { clearScrambleQueue } from '@/src/logic/pendingScramble';
 import type { AlgSetStore } from '@/types';
 
 export const useAlgSetStore = create<AlgSetStore>((set, get) => ({

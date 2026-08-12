@@ -1,4 +1,5 @@
-import { createAlgSet, insertCases, applyAlgSetCaseChanges, clearScrambleQueue, renameAlgSet } from "@/src/db/queries";
+import { createAlgSet, insertCases, applyAlgSetCaseChanges, renameAlgSet } from "@/src/db/queries";
+import { clearScrambleQueue } from "@/src/logic/pendingScramble";
 import { validateAlgorithm } from "@/src/logic/alg";
 import type { Case, AlgSet } from "@/types";
 
