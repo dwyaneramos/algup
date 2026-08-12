@@ -9,9 +9,9 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
 import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
-import { useCallback, useState } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import type { IconComponent, SatelliteAction } from '@/types';
+import type { FabRef, IconComponent, SatelliteAction } from '@/types';
 import {
   SATELLITE_SIZE,
   MAIN_SIZE,
@@ -126,7 +126,10 @@ function SatelliteButton({
   );
 }
 
-export function Fab({ onCreate, onEdit, onDelete, bottomOffset = 0 }: FabProps) {
+export const Fab = forwardRef<FabRef, FabProps>(function Fab(
+  { onCreate, onEdit, onDelete, bottomOffset = 0 },
+  ref
+) {
   const [isOpen, setIsOpen] = useState(false);
   const isOpenSV = useSharedValue(false);
   const rotation = useSharedValue(0);
@@ -162,6 +165,8 @@ export function Fab({ onCreate, onEdit, onDelete, bottomOffset = 0 }: FabProps) 
     rotation.value = withTiming(0, { duration: ROTATION_DURATION });
     setIsOpen(false);
   }, [isOpenSV, rotation]);
+
+  useImperativeHandle(ref, () => ({ close }), [close]);
 
   useFocusEffect(
     useCallback(() => {
@@ -219,7 +224,7 @@ export function Fab({ onCreate, onEdit, onDelete, bottomOffset = 0 }: FabProps) 
       </Reanimated.View>
     </Reanimated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

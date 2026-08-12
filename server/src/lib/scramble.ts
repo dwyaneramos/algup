@@ -8,6 +8,7 @@ import type { KPattern, KPuzzle } from 'cubing/kpuzzle';
 export const MAX_BATCH_SIZE = 15;
 
 const PREFIX_LENGTH = 4;
+const MIN_PREFIX_AND_ALG_LENGTH = 12;
 const MIN_333_SCRAMBLE_LENGTH = 19;
 const MIN_222_SCRAMBLE_LENGTH = 12;
 const POSSIBLE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'];
@@ -44,6 +45,20 @@ function generateMoveList(n: number): string {
 
 function generateAUF(): string {
   return POSSIBLE_AUFS[Math.floor(Math.random() * POSSIBLE_AUFS.length)];
+}
+
+function countMoves(alg: string): number {
+  return alg.split(/\s+/).filter(Boolean).length;
+}
+
+// A short alg (e.g. a single move) barely scrambles the cube once combined
+// with a fixed 4-move prefix, so the solver's shortest solution is almost
+// always too short to reach the target scramble length — the retry loop
+// below can then spin dozens or hundreds of times before a long-enough one
+// turns up. Growing the prefix for short algs keeps prefix+alg long enough
+// that a solve is very likely to hit the target on the first try.
+function choosePrefixLength(alg: string): number {
+  return Math.max(PREFIX_LENGTH, MIN_PREFIX_AND_ALG_LENGTH - countMoves(alg));
 }
 
 // `experimentalSimplify`'s `puzzleLoader` option (which lets it fully cancel
@@ -119,8 +134,8 @@ function withCentersHome(kpuzzle: KPuzzle, alg: string): string {
   return correction ? `${correction} ${alg}` : alg;
 }
 
-async function generateCandidateScramble(kpuzzle: KPuzzle, solver: Solver, alg: string, event: CubeEvent): Promise<string> {
-  const prefix = generateMoveList(PREFIX_LENGTH);
+async function generateCandidateScramble(kpuzzle: KPuzzle, solver: Solver, alg: string, event: CubeEvent, prefixLength: number): Promise<string> {
+  const prefix = generateMoveList(prefixLength);
   const pattern = kpuzzle.algToTransformation(new Alg(`${prefix} ${alg}`)).toKPattern();
   const solution = await solver(pattern);
   console.log(`Generated solution: ${solution.toString()} for alg: ${alg} with prefix: ${prefix}`);
@@ -130,13 +145,14 @@ async function generateCandidateScramble(kpuzzle: KPuzzle, solver: Solver, alg: 
 export async function generateScrambleForAlg(rawAlg: string, event: CubeEvent): Promise<{ scramble: string; solution: string }> {
   const kpuzzle = await cube3x3x3.kpuzzle();
   const alg = withCentersHome(kpuzzle, `${generateAUF()} ${rawAlg} ${generateAUF()}`);
+  const prefixLength = choosePrefixLength(alg);
 
   const solver = event === "333" ? experimentalSolve3x3x3IgnoringCenters : experimentalSolve2x2x2;
   const minLength = event === "333" ? MIN_333_SCRAMBLE_LENGTH : MIN_222_SCRAMBLE_LENGTH;
 
-  let scramble = await generateCandidateScramble(kpuzzle, solver, alg, event);
+  let scramble = await generateCandidateScramble(kpuzzle, solver, alg, event, prefixLength);
   while (scramble.split(' ').length < minLength) {
-    scramble = await generateCandidateScramble(kpuzzle, solver, alg, event);
+    scramble = await generateCandidateScramble(kpuzzle, solver, alg, event, prefixLength);
   }
 
   return { scramble, solution: simplifyAlg(alg, event) };

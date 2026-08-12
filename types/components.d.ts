@@ -5,6 +5,10 @@ export type SheetRef = {
   dismiss: () => void;
 };
 
+export type FabRef = {
+  close: () => void;
+};
+
 export type EditAlgSetSheetRef = {
   present: () => void;
   dismiss: () => void;
