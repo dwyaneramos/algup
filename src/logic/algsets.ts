@@ -1,4 +1,4 @@
-import { createAlgSet, insertCases, applyAlgSetCaseChanges, clearScrambleQueue } from "@/src/db/queries";
+import { createAlgSet, insertCases, applyAlgSetCaseChanges, clearScrambleQueue, renameAlgSet } from "@/src/db/queries";
 import { validateAlgorithm } from "@/src/logic/alg";
 import type { Case, AlgSet } from "@/types";
 
@@ -55,6 +55,9 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
       ec => !old.cases.some(c => c.alg.trim() === ec.alg.trim())
     );
 
+    if (old.name !== edited.name) {
+      renameAlgSet(old.name, edited.name);
+    }
 
     applyAlgSetCaseChanges(caseIDs, edited.name, casesToInsert);
     clearScrambleQueue(edited.name);
