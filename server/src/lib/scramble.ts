@@ -147,8 +147,8 @@ export async function generateScrambleForAlg(rawAlg: string, event: CubeEvent): 
   const alg = withCentersHome(kpuzzle, `${generateAUF()} ${rawAlg} ${generateAUF()}`);
   const prefixLength = choosePrefixLength(alg);
 
-  const solver = event === "333" ? experimentalSolve3x3x3IgnoringCenters : experimentalSolve2x2x2;
-  const minLength = event === "333" ? MIN_333_SCRAMBLE_LENGTH : MIN_222_SCRAMBLE_LENGTH;
+  const solver = event === "222" ? experimentalSolve2x2x2 : experimentalSolve3x3x3IgnoringCenters;
+  const minLength = event === "222" ? MIN_222_SCRAMBLE_LENGTH : MIN_333_SCRAMBLE_LENGTH;
 
   let scramble = await generateCandidateScramble(kpuzzle, solver, alg, event, prefixLength);
   while (scramble.split(' ').length < minLength) {
