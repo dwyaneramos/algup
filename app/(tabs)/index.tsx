@@ -67,10 +67,7 @@ export default function MainScreen() {
 
   return (
     <View className="flex-1">
-      <View
-        className="flex-1 flex-col items-center justify-start"
-        style={{ transform: [{ translateY: -navBarShift }] }}
-      >
+      <View className="flex-1 flex-col items-center justify-start">
         {!running && (
           <Animated.View
             className="gap-0 flex pt-16 px-3 flex-col items-center"
@@ -119,6 +116,7 @@ export default function MainScreen() {
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
             className="flex flex-col items-center relative justify-center"
+            style={{ transform: [{ translateY: -navBarShift }] }}
           >
             {formatted() !== DEFAULT_TIME_STRING && (
               <Animated.View
