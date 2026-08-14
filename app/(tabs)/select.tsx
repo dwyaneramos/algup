@@ -16,9 +16,10 @@ import { useFocusEffect } from 'expo-router';
 import { getDisplayCaseScramble } from '@/src/logic/case';
 import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { invertAlgorithm } from '@/src/logic/scramble';
 import { Sheet } from '@/components/Sheet'
 import { useNavBarShift } from '@/src/hooks/useNavBarShift';
-import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, SheetRef } from '@/types';
+import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, FabRef, SheetRef } from '@/types';
 
 //TODO: scramble displayed is just the inverse of the fetched algorithm
 
@@ -82,7 +83,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
           </Text>
         </View>
         {scramble ? (
-          <DrawScramble scramble={scramble} scale={0.6} event={algset.event} />
+          <DrawScramble scramble={invertAlgorithm(scramble)} scale={0.6} event={algset.event} />
         ) : (
           <View className="h-16 w-16 bg-gray-200 rounded-xl" />
         )}
@@ -106,6 +107,7 @@ export default function Select() {
   const createSheetRef = useRef<CreateAlgSetSheetRef>(null);
   const editSheetRef = useRef<EditAlgSetSheetRef>(null);
   const deleteConfirmSheetRef = useRef<SheetRef>(null);
+  const fabRef = useRef<FabRef>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -128,7 +130,10 @@ export default function Select() {
   }, [selectedAlgSet]);
 
   return (
-    <View className="items-center flex-1 justify-start flex-col pt-16">
+    <View
+      className="items-center flex-1 justify-start flex-col pt-16"
+      onTouchStart={() => fabRef.current?.close()}
+    >
       <Text className="text-header mb-2">Select Algorithm Set</Text>
       {algsets.length > 0 && (
         <FlatList
@@ -143,6 +148,7 @@ export default function Select() {
         />
       )}
       <Fab
+        ref={fabRef}
         onCreate={displayCreateAlgSetSheet}
         onEdit={displayEditAlgSetSheet}
         bottomOffset={navBarShift}
@@ -182,7 +188,7 @@ export default function Select() {
       <Sheet ref={deleteConfirmSheetRef} snapPoints={['20%']}>
         <View className="flex flex-col gap-4 items-center ">
           <Text className="text-form-header">Are you sure you want to delete {selectedAlgSet?.name}?</Text>
-          <Pressable className="rounded-full bg-red-500 p-4"
+          <Pressable className="rounded-full p-4"
             onPress={() => {
               if (selectedAlgSet === null) return;
               const algToDelete = selectedAlgSet.name;

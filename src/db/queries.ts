@@ -86,6 +86,16 @@ export function insertCases(algset: AlgSet): void {
   db.withTransactionSync(() => insertCasesInternal(db, algset));
 }
 
+export function renameAlgSet(oldName: string, newName: string): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    db.runSync('UPDATE algsets SET name = ? WHERE name = ?', [newName, oldName]);
+    db.runSync('UPDATE cases SET algset = ? WHERE algset = ?', [newName, oldName]);
+    db.runSync('UPDATE practice_log SET algset = ? WHERE algset = ?', [newName, oldName]);
+    db.runSync('UPDATE scramble_queue SET algset = ? WHERE algset = ?', [newName, oldName]);
+  });
+}
+
 export function applyAlgSetCaseChanges(
   caseIdsToDelete: number[],
   algsetNameForInsert: string,
@@ -238,6 +248,14 @@ export function updateCaseProgress(caseId: number, fluency: number, state: CaseS
       fluency = excluded.fluency,
       state = excluded.state
   `, [caseId, fluency, state]);
+}
+
+export function markCaseMastered(caseId: number) {
+  updateCaseProgress(caseId, 5, 'mastered');
+}
+
+export function unmarkCaseMastered(caseId: number) {
+  updateCaseProgress(caseId, 1, 'learning');
 }
 
 export function introduceNextCase(algset: string): void {

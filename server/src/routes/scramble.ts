@@ -18,6 +18,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     console.log(`Generated scramble for alg "${alg}" with length ${scramble.split(' ').length}: ${scramble}`);
   } catch (err) {
+    console.error(`Failed to generate scramble for alg "${alg}" (${event}):`, err);
     res.status(500).json({ error: 'Failed to generate scramble' });
   }
 });
@@ -46,6 +47,7 @@ router.post('/batch', async (req: Request, res: Response) => {
     console.log(`Generated scramble batch of length ${results.length}`);
     res.status(200).json({ results });
   } catch (err) {
+    console.error(`Failed to generate scramble batch for ${algs.length} algs (${event}):`, err);
     res.status(500).json({ error: 'Failed to generate scramble batch' });
   }
 });

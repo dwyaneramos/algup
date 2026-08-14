@@ -30,6 +30,13 @@ export default function MainScreen() {
     : 0;
 
   const isLoadingScramble = isLoading || !scramble;
+  const panelOpacity = useSharedValue(1);
+  const panelAnimatedStyle = useAnimatedStyle(() => ({ opacity: panelOpacity.value }));
+
+  function handleStart() {
+    panelOpacity.value = 0;
+    start();
+  }
 
   async function handleStopAttempt(): Promise<void> {
     setAttemptDone(true);
@@ -39,6 +46,7 @@ export default function MainScreen() {
   function handleGrade(grade: number) {
     setShowScrambleOrSolution('scramble')
     submitGrade(grade);
+    panelOpacity.value = withTiming(1, { duration: 300 });
     setTimeout(() => {
       setAttemptDone(false);
       resetTime();
@@ -54,47 +62,43 @@ export default function MainScreen() {
     setAttemptDone(false)
     setShowScrambleOrSolution('scramble')
     resetTime();
+    panelOpacity.value = 1;
   }, [selectedAlgSet])
 
   return (
     <View className="flex-1">
-      <View
-        className="flex-1 flex-col items-center justify-start"
-        style={{ transform: [{ translateY: -navBarShift }] }}
-      >
+      <View className="flex-1 flex-col items-center justify-start">
         {!running && (
           <Animated.View
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(200)}
             className="gap-0 flex pt-16 px-3 flex-col items-center"
           >
             <Text className="font-inter-bold text-center text-header">{selectedAlgSet?.name}</Text>
             <Text className="mb-3 text-center">Fluency: {overallFluency.toFixed(2)}%</Text>
 
-            <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full  items-center justify-center">
-              {isLoadingScramble ? (
-                <PulsatingLoadingText message={DEFAULT_SCRAMBLE_MESSAGE} />
-              ) : (
-                <Animated.Text
-                  key={showScrambleOrSolution}
-                  entering={FadeIn.duration(200)}
-                  className={`text-center text-body font-inter-medium ${formatted() !== DEFAULT_TIME_STRING ? "text-muted " : ""} `}
-                >
-                  {showScrambleOrSolution === 'solution' ? solution : scramble}
-                </Animated.Text>
-              )}
-            </View>
+            <Animated.View style={[{ opacity: attemptDone ? 0 : 1 }, panelAnimatedStyle]} className="w-full items-center">
+              <View className="bg-white p-2 px-5 rounded-3xl min-h-32 max-h-32 min-w-full max-w-full items-center justify-center">
+                {isLoadingScramble ? (
+                  <PulsatingLoadingText message={DEFAULT_SCRAMBLE_MESSAGE} />
+                ) : (
+                  <Animated.Text
+                    key={showScrambleOrSolution}
+                    entering={FadeIn.duration(200)}
+                    className="text-center text-body font-inter-medium"
+                  >
+                    {showScrambleOrSolution === 'solution' ? solution : scramble}
+                  </Animated.Text>
+                )}
+              </View>
 
-            <Pressable
-              className="bg-accent rounded-3xl w-48 p-3 mt-3 disabled:opacity-50"
-              onPress={toggleDisplayMode}
-              disabled={isLoadingScramble}
-              style={{ opacity: isLoadingScramble ? 0.5 : 1 }}
-            >
-              <Text className="text-white text-center">Show {showScrambleOrSolution === 'solution' ? "Scramble" : "Solution"}</Text>
-            </Pressable>
-
-
+              <Pressable
+                className="bg-accent rounded-3xl w-48 p-3 mt-3 disabled:opacity-50"
+                onPress={toggleDisplayMode}
+                disabled={formatted() !== DEFAULT_TIME_STRING}
+                style={{ opacity: isLoadingScramble ? 0.5 : 1 }}
+              >
+                <Text className="text-white text-center">Show {showScrambleOrSolution === 'solution' ? "Scramble" : "Solution"}</Text>
+              </Pressable>
+            </Animated.View>
           </Animated.View>
         )}
         <View className="mt-3 w-full">
@@ -102,7 +106,7 @@ export default function MainScreen() {
             disabled={!running && (attemptDone || isLoadingScramble)}
             formatted={formatted()}
             running={running}
-            onStart={start}
+            onStart={handleStart}
             onStop={handleStopAttempt}
           />
         </View>
@@ -112,6 +116,7 @@ export default function MainScreen() {
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
             className="flex flex-col items-center relative justify-center"
+            style={{ transform: [{ translateY: -navBarShift }] }}
           >
             {formatted() !== DEFAULT_TIME_STRING && (
               <Animated.View
@@ -125,7 +130,7 @@ export default function MainScreen() {
                 <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
                 <View className="w-1 h-8 bg-gray-300 -mx-6" />
                 <GradeButton onPress={() => {
-
+                  panelOpacity.value = 1;
                   setAttemptDone(false);
                   resetTime();
                 }} icon={IconReload} color={COLOR_ACCENT} />

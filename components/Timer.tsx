@@ -24,7 +24,7 @@ export function Timer({ formatted, running, onStart, onStop, disabled }: TimerPr
   }, [running]);
 
   return (
-    <Animated.View className="relative bg-red-500  items-center justify-center mt-8">
+    <Animated.View className="relative items-center justify-center mt-8">
       <Pressable
         disabled={disabled}
         onPress={running ? onStop : onStart}

@@ -3,9 +3,14 @@ import {
   dequeueNextScramble,
   getScrambleQueueSize,
   peekScrambleQueue as dbPeekScrambleQueue,
-  clearScrambleQueue,
 } from '@/src/db/queries';
 import { generateScrambleBatch } from './scramble';
+import {
+  setPendingItem,
+  consumePendingItem,
+  hasPendingItem,
+  clearScrambleQueue,
+} from './pendingScramble';
 import type { CaseWithProgress, ScrambleQueueItem, CubeEvent } from '@/types';
 
 const BATCH_SIZE = 10;
@@ -20,10 +25,8 @@ const STATE_WEIGHTS: Record<string, number> = {
   mastered: 1,
 };
 
-const pendingItems = new Map<string, ScrambleQueueItem>();
-
 export type { ScrambleQueueItem };
-export { REFILL_THRESHOLD };
+export { REFILL_THRESHOLD, setPendingItem, consumePendingItem, hasPendingItem, clearScrambleQueue };
 
 export function selectBatchCases(cases: CaseWithProgress[], count: number): CaseWithProgress[] {
   const active = cases.filter(c => c.state !== 'locked');
@@ -99,19 +102,3 @@ export function getQueueSize(algset: string): number {
 export function peekQueue(algset: string): ScrambleQueueItem[] {
   return dbPeekScrambleQueue(algset);
 }
-
-export function setPendingItem(algset: string, item: ScrambleQueueItem): void {
-  pendingItems.set(algset, item);
-}
-
-export function consumePendingItem(algset: string): ScrambleQueueItem | null {
-  const item = pendingItems.get(algset) ?? null;
-  if (item) pendingItems.delete(algset);
-  return item;
-}
-
-export function hasPendingItem(algset: string): boolean {
-  return pendingItems.has(algset);
-}
-
-export { clearScrambleQueue };
