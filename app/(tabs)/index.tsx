@@ -101,7 +101,7 @@ export default function MainScreen() {
             </Animated.View>
           </Animated.View>
         )}
-        <View className="mt-3 w-full">
+        <View className="mt-3 w-full relative">
           <Timer
             disabled={!running && (attemptDone || isLoadingScramble)}
             formatted={formatted()}
@@ -109,6 +109,24 @@ export default function MainScreen() {
             onStart={handleStart}
             onStop={handleStopAttempt}
           />
+
+          {!running && formatted() !== DEFAULT_TIME_STRING && (
+            <Animated.View
+              entering={FadeIn.duration(200)}
+              exiting={FadeOut.duration(200)}
+              className="absolute bottom-2 left-0 right-0 flex-row justify-center items-center gap-10"
+            >
+              <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
+              <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
+              <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
+              <View className="w-1 h-8 bg-gray-300 -mx-6" />
+              <GradeButton onPress={() => {
+                panelOpacity.value = 1;
+                setAttemptDone(false);
+                resetTime();
+              }} icon={IconReload} color={COLOR_ACCENT} />
+            </Animated.View>
+          )}
         </View>
 
         {!running && (
@@ -118,30 +136,7 @@ export default function MainScreen() {
             className="flex flex-col items-center relative justify-center"
             style={{ transform: [{ translateY: -navBarShift }] }}
           >
-            {formatted() !== DEFAULT_TIME_STRING && (
-              <Animated.View
-                entering={FadeIn.duration(200)}
-                exiting={FadeOut.duration(200)}
-                className="absolute left-0 right-0 top-0 flex-row justify-center items-center gap-10"
-                style={{ transform: [{ translateY: -80 }] }}
-              >
-                <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
-                <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
-                <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
-                <View className="w-1 h-8 bg-gray-300 -mx-6" />
-                <GradeButton onPress={() => {
-                  panelOpacity.value = 1;
-                  setAttemptDone(false);
-                  resetTime();
-                }} icon={IconReload} color={COLOR_ACCENT} />
-              </Animated.View>
-            )}
-
             <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
-
-
-
-
           </Animated.View>
         )}
       </View>
