@@ -7,7 +7,6 @@ import { IconReload, IconXboxX, IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizz
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
-import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 import { DrawScramble } from '@/components/DrawScramble';
 import { PulsatingLoadingText } from '@/components/PulsatingLoadingText';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
@@ -23,7 +22,6 @@ export default function MainScreen() {
   const { running, start, stop, formatted, resetTime } = useTimer();
   const { scramble, submitGrade, solution, isLoading } = useTrainingSession(selectedAlgSet?.name ?? '');
   const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<string>('scramble');
-  const navBarShift = useNavBarShift();
 
   const overallFluency = selectedAlgSet
     ? getAlgSetFluencyPercentage(selectedAlgSet.name)
@@ -134,7 +132,6 @@ export default function MainScreen() {
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
             className="flex flex-col items-center relative justify-center"
-            style={{ transform: [{ translateY: -navBarShift }] }}
           >
             <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
           </Animated.View>

@@ -10,7 +10,6 @@ import {
   MIN_MAX_LEARNING,
   MAX_MAX_LEARNING,
 } from '@/src/store/settingsStore';
-import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ICON_SIZE = 28;
@@ -158,13 +157,12 @@ export default function Settings() {
   const setMaxActive = useSettingsStore((s) => s.setMaxActive);
   const maxLearning = useSettingsStore((s) => s.maxLearning);
   const setMaxLearning = useSettingsStore((s) => s.setMaxLearning);
-  const navBarShift = useNavBarShift();
   const insets = useSafeAreaInsets();
 
   return (
     <ScrollView
       className="flex-1 px-4"
-      contentContainerStyle={{ paddingTop: 64, paddingBottom: insets.bottom + 96 + navBarShift }}
+      contentContainerStyle={{ paddingTop: 64, paddingBottom: insets.bottom + 96 }}
     >
       <Animated.View entering={FadeIn.duration(300)}>
         <Text className="text-header mb-2 text-center">Settings</Text>
