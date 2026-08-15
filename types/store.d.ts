@@ -5,7 +5,7 @@ export interface AlgSetStore {
   selectedAlgSet: AlgSet | null;
   setSelectedAlgSet: (algSet: AlgSet) => void;
   loadAlgSets: () => void;
-  addAlgSet: (algSet: AlgSet) => void;
+  addAlgSet: (algSet: AlgSet) => boolean;
   deleteAlgSet: (algSet: AlgSet) => boolean;
 }
 

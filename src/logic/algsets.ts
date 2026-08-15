@@ -1,4 +1,4 @@
-import { createAlgSet, insertCases, applyAlgSetCaseChanges, renameAlgSet } from "@/src/db/queries";
+import { createAlgSetWithCases, applyAlgSetCaseChanges, renameAlgSet } from "@/src/db/queries";
 import { clearScrambleQueue } from "@/src/logic/pendingScramble";
 import { validateAlgorithm } from "@/src/logic/alg";
 import type { Case, AlgSet } from "@/types";
@@ -71,8 +71,7 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
 
 export function insertNewAlgSet(algset: AlgSet): boolean {
   try {
-    createAlgSet(algset.name, algset.event);
-    insertCases(algset);
+    createAlgSetWithCases(algset.name, algset.event, algset.cases);
     return true;
 
   } catch (error) {

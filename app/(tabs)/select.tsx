@@ -176,7 +176,11 @@ export default function Select() {
       <CreateAlgSetSheet
         ref={createSheetRef}
         onCreate={(algset) => {
-          addAlgSet(algset);
+          const created = addAlgSet(algset);
+          if (!created) {
+            showToast(`Failed to create ${algset.name}`, TOAST_DURATION);
+            return;
+          }
           const refreshed = getAlgSet(algset.name);
           if (refreshed) {
             setSelectedAlgSet(refreshed);

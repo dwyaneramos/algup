@@ -25,9 +25,12 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
     set({ selectedAlgSet: restored ?? algSets[0] });
   },
 
-  addAlgSet: (algSet) => {
-    insertNewAlgSet(algSet);
-    set({ algSets: [...get().algSets, algSet] });
+  addAlgSet: (algSet): boolean => {
+    const success = insertNewAlgSet(algSet);
+    if (success) {
+      set({ algSets: [...get().algSets, algSet] });
+    }
+    return success;
   },
 
   deleteAlgSet: (algSet): boolean => {
