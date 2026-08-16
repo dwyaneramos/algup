@@ -2,7 +2,8 @@ import { View, Text, Pressable, Button, StyleSheet } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing } from 'react-native-reanimated';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 import { IconReload, IconXboxX, IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
@@ -10,6 +11,7 @@ import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
 import { PulsatingLoadingText } from '@/components/PulsatingLoadingText';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 const ICON_SIZE = 48;
@@ -17,6 +19,7 @@ const DEFAULT_TIME_STRING = '0.00';
 const DEFAULT_SCRAMBLE_MESSAGE = "Loading scramble..."
 
 export default function MainScreen() {
+  const insets = useSafeAreaInsets();
   const [attemptDone, setAttemptDone] = useState(false);
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
   const { running, start, stop, formatted, resetTime } = useTimer();
@@ -63,9 +66,25 @@ export default function MainScreen() {
     panelOpacity.value = 1;
   }, [selectedAlgSet])
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        if (running || attemptDone) {
+          stop();
+          setAttemptDone(false);
+          resetTime();
+          panelOpacity.value = 1;
+        }
+      };
+    }, [running, attemptDone])
+  );
+
   return (
     <View className="flex-1">
-      <View className="flex-1 flex-col items-center justify-start">
+      <View
+        className="flex-1 flex-col items-center justify-start"
+        style={{ paddingBottom: insets.bottom + 75 }}
+      >
         {!running && (
           <Animated.View
             className="gap-0 flex pt-16 px-3 flex-col items-center"
