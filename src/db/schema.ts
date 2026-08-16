@@ -58,6 +58,14 @@ export function initDB() {
     );
   `);
 
+  const algsetColumns = db.getAllSync<{ name: string }>(
+    "PRAGMA table_info(algsets)"
+  );
+  const hasEvent = algsetColumns.some(c => c.name === 'event');
+  if (!hasEvent) {
+    db.execSync("ALTER TABLE algsets ADD COLUMN event TEXT NOT NULL DEFAULT '333'");
+  }
+
   const queueColumns = db.getAllSync<{ name: string }>(
     "PRAGMA table_info(scramble_queue)"
   );
