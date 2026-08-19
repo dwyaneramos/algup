@@ -192,7 +192,7 @@ export default function Settings() {
             <SwitchRow
               icon={IconArrowsDiagonalMinimize2}
               label="Mini scramble"
-              subtitle="Show a smaller scramble diagram while training"
+              subtitle="Shrink the draw scramble"
               value={miniScramble}
               onValueChange={setMiniScramble}
             />

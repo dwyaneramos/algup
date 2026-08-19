@@ -2,7 +2,7 @@ import { View, Text, Pressable, Button, StyleSheet } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing } from 'react-native-reanimated';
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useFocusEffect } from "expo-router";
 import { IconReload, IconXboxX, IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 import { useAlgSetStore } from '@/src/store/algsetStore';
@@ -68,17 +68,24 @@ export default function MainScreen() {
     panelOpacity.value = 1;
   }, [selectedAlgSet])
 
+  const runningRef = useRef(running);
+  const attemptDoneRef = useRef(attemptDone);
+  useEffect(() => {
+    runningRef.current = running;
+    attemptDoneRef.current = attemptDone;
+  }, [running, attemptDone]);
+
   useFocusEffect(
     useCallback(() => {
       return () => {
-        if (running || attemptDone) {
+        if (runningRef.current || attemptDoneRef.current) {
           stop();
           setAttemptDone(false);
           resetTime();
           panelOpacity.value = 1;
         }
       };
-    }, [running, attemptDone])
+    }, [])
   );
 
   return (
@@ -152,7 +159,7 @@ export default function MainScreen() {
           <Animated.View
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
-            className="flex flex-col items-center relative justify-center"
+            className="flex-1 flex-col items-center justify-center relative"
           >
             <DrawScramble scale={miniScramble ? 1.7 : 2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
           </Animated.View>
