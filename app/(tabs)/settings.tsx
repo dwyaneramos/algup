@@ -1,7 +1,7 @@
 import { Children, isValidElement, ReactNode } from 'react';
 import { View, Text, Pressable, Linking, Switch, Platform, ScrollView } from 'react-native';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { IconBrandGithub, IconCoffee, IconMail, IconChevronRight, IconArrowBarToUp, IconMinus, IconPlus, IconStack2, IconSchool } from '@tabler/icons-react-native';
+import { IconBrandGithub, IconCoffee, IconMail, IconChevronRight, IconArrowBarToUp, IconMinus, IconPlus, IconStack2, IconSchool, IconArrowsDiagonalMinimize2 } from '@tabler/icons-react-native';
 import { COLOR_ACCENT, COLOR_ACCENT_LIGHT } from '@/utils/constants/colors';
 import {
   useSettingsStore,
@@ -157,6 +157,8 @@ export default function Settings() {
   const setMaxActive = useSettingsStore((s) => s.setMaxActive);
   const maxLearning = useSettingsStore((s) => s.maxLearning);
   const setMaxLearning = useSettingsStore((s) => s.setMaxLearning);
+  const miniScramble = useSettingsStore((s) => s.miniScramble);
+  const setMiniScramble = useSettingsStore((s) => s.setMiniScramble);
   const insets = useSafeAreaInsets();
 
   return (
@@ -186,6 +188,13 @@ export default function Settings() {
               min={MIN_MAX_LEARNING}
               max={MAX_MAX_LEARNING}
               onValueChange={setMaxLearning}
+            />
+            <SwitchRow
+              icon={IconArrowsDiagonalMinimize2}
+              label="Mini scramble"
+              subtitle="Show a smaller scramble diagram while training"
+              value={miniScramble}
+              onValueChange={setMiniScramble}
             />
             {Platform.OS === 'android' && (
               <SwitchRow

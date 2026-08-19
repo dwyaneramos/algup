@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { IconReload, IconXboxX, IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { useSettingsStore } from '@/src/store/settingsStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
 import { DrawScramble } from '@/components/DrawScramble';
@@ -22,6 +23,7 @@ export default function MainScreen() {
   const insets = useSafeAreaInsets();
   const [attemptDone, setAttemptDone] = useState(false);
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+  const miniScramble = useSettingsStore(s => s.miniScramble);
   const { running, start, stop, formatted, resetTime } = useTimer();
   const { scramble, submitGrade, solution, isLoading } = useTrainingSession(selectedAlgSet?.name ?? '');
   const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<string>('scramble');
@@ -152,7 +154,7 @@ export default function MainScreen() {
             exiting={FadeOut.duration(200)}
             className="flex flex-col items-center relative justify-center"
           >
-            <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
+            <DrawScramble scale={miniScramble ? 1.7 : 2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
           </Animated.View>
         )}
       </View>

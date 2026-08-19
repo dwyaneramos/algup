@@ -6,6 +6,7 @@ import type { SettingsStore } from '@/types';
 export const SHIFT_NAVBAR_UP_KEY = 'shiftNavbarUp';
 export const MAX_ACTIVE_KEY = 'maxActive';
 export const MAX_LEARNING_KEY = 'maxLearning';
+export const MINI_SCRAMBLE_KEY = 'miniScramble';
 
 export const MIN_MAX_ACTIVE = 1;
 export const MAX_MAX_ACTIVE = 20;
@@ -16,6 +17,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   shiftNavbarUp: false,
   maxActive: DEFAULT_MAX_ACTIVE,
   maxLearning: DEFAULT_MAX_LEARNING,
+  miniScramble: false,
 
   loadSettings: () => {
     const storedMaxActive = getSetting(MAX_ACTIVE_KEY);
@@ -24,6 +26,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       shiftNavbarUp: getSetting(SHIFT_NAVBAR_UP_KEY) === 'true',
       maxActive: storedMaxActive ? Number(storedMaxActive) : DEFAULT_MAX_ACTIVE,
       maxLearning: storedMaxLearning ? Number(storedMaxLearning) : DEFAULT_MAX_LEARNING,
+      miniScramble: getSetting(MINI_SCRAMBLE_KEY) === 'true',
     });
   },
 
@@ -42,5 +45,10 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
     const clamped = Math.max(MIN_MAX_LEARNING, Math.min(MAX_MAX_LEARNING, value));
     setSetting(MAX_LEARNING_KEY, String(clamped));
     set({ maxLearning: clamped });
+  },
+
+  setMiniScramble: (value) => {
+    setSetting(MINI_SCRAMBLE_KEY, value ? 'true' : 'false');
+    set({ miniScramble: value });
   },
 }));
