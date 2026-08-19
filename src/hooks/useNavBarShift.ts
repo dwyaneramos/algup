@@ -13,5 +13,5 @@ export function useNavBarShift(): number {
   const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
 
   if (Platform.OS !== 'android' || !shiftNavbarUp) return 0;
-  return insets.bottom;
+  return insets.bottom * 0.75;
 }

@@ -1,16 +1,14 @@
-import * as SQLite from 'expo-sqlite';
 import { ALG_SETS } from '@/src/logic/algsets';
-import { createAlgSet, insertCases } from '@/src/db/queries';
+import { createAlgSetWithCases, getDb } from '@/src/db/queries';
 
-const db = SQLite.openDatabaseSync('algup.db');
+const db = getDb();
 
 function seedAlgSets() {
   const existing = db.getFirstSync('SELECT COUNT(*) as count FROM algsets') as { count: number };
   if (existing.count > 0) return;
 
   for (const algSet of ALG_SETS) {
-    createAlgSet(algSet.name, algSet.event);
-    insertCases(algSet);
+    createAlgSetWithCases(algSet.name, algSet.event, algSet.cases);
   }
 }
 
@@ -59,6 +57,14 @@ export function initDB() {
       FOREIGN KEY (algset) REFERENCES algsets(name)
     );
   `);
+
+  const algsetColumns = db.getAllSync<{ name: string }>(
+    "PRAGMA table_info(algsets)"
+  );
+  const hasEvent = algsetColumns.some(c => c.name === 'event');
+  if (!hasEvent) {
+    db.execSync("ALTER TABLE algsets ADD COLUMN event TEXT NOT NULL DEFAULT '333'");
+  }
 
   const queueColumns = db.getAllSync<{ name: string }>(
     "PRAGMA table_info(scramble_queue)"

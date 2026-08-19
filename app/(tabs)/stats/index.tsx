@@ -10,7 +10,6 @@ import type { AlgSetProgress, CaseWithProgress } from '@/types';
 import { convertScoreToPercentage } from '@/src/logic/fluency';
 import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 function CaseStatsButton({ onPress }: { onPress: () => void }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -42,7 +41,6 @@ export default function Stats() {
   const [dailyStreak, setDailyStreak] = useState(0);
   const [learningFluency, setLearningFluency] = useState<number | null>(null);
   const insets = useSafeAreaInsets();
-  const navBarShift = useNavBarShift();
 
   useFocusEffect(
     useCallback(() => {
@@ -67,7 +65,7 @@ export default function Stats() {
 
   if (!algSetProgress || selectedAlgSet === null) return null;
   return (
-    <View className="items-center flex-1 pt-16" style={{ paddingBottom: insets.bottom + navBarShift }}>
+    <View className="items-center flex-1 pt-16" style={{ paddingBottom: insets.bottom }}>
 
       <Text className="font-inter-bold text-center text-header mb-3">{selectedAlgSet.name}</Text>
 
@@ -104,7 +102,7 @@ export default function Stats() {
             data={worstCases}
             renderItem={({ item }) => <CaseRow c={item} event={selectedAlgSet.event} />}
             keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 + navBarShift }}
+            contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 }}
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}

@@ -3,7 +3,7 @@ import type { AlgSet, Case, CubeEvent, CaseWithProgress, CaseState, AlgSetProgre
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
-function getDb() {
+export function getDb() {
   if (!_db) {
     _db = SQLite.openDatabaseSync('algup.db');
   }
@@ -29,6 +29,17 @@ export function createAlgSet(name: string, event: CubeEvent): void {
     'INSERT OR IGNORE INTO algsets (name, event) VALUES (?, ?)',
     [name, event]
   );
+}
+
+export function createAlgSetWithCases(name: string, event: CubeEvent, cases: Case[]): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    db.runSync(
+      'INSERT OR IGNORE INTO algsets (name, event) VALUES (?, ?)',
+      [name, event]
+    );
+    insertCasesInternal(db, { name, cases });
+  });
 }
 
 export function deleteAlgset(algsetName: string): void {
@@ -79,11 +90,6 @@ function insertCasesInternal(db: SQLite.SQLiteDatabase, algset: Pick<AlgSet, 'na
 export function deleteCases(caseIds: number[]): void {
   const db = getDb();
   db.withTransactionSync(() => deleteCasesInternal(db, caseIds));
-}
-
-export function insertCases(algset: AlgSet): void {
-  const db = getDb();
-  db.withTransactionSync(() => insertCasesInternal(db, algset));
 }
 
 export function renameAlgSet(oldName: string, newName: string): void {

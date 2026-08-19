@@ -56,7 +56,6 @@ function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   const currentRoute = state.routes[state.index];
   const isOnSelectScreen = currentRoute.name.startsWith('select');
-  const navBarShift = useNavBarShift();
 
   // Drives the tab bar's shrink only. FAB animates independently on mount/unmount.
   const progress = useSharedValue(0);
@@ -79,7 +78,7 @@ function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View
       className="absolute left-6 right-6 flex-row items-center"
-      style={{ bottom: BASE_BOTTOM_OFFSET + navBarShift }}
+      style={{ bottom: BASE_BOTTOM_OFFSET }}
       onLayout={onContainerLayout}
     >
       <Reanimated.View
@@ -134,43 +133,47 @@ function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 }
 
 export default function TabLayout() {
+  const navBarShift = useNavBarShift();
+
   return (
-    <Tabs
-      screenOptions={{ headerShown: false }}
-      tabBar={(props) => <TabBar {...props} />}
-    >
-      <Tabs.Screen
-        name="select"
-        options={{
-          title: 'Select',
-          tabBarIcon: ({ color, size }) => <IconCards color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Train',
-          tabBarIcon: ({ color, size }) => <IconStopwatch color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="stats/index"
-        options={{
-          title: 'Stats',
-          tabBarIcon: ({ color, size }) => <IconChartDots2 color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => <IconSettings color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="stats/algset"
-        options={{ title: 'Algset', href: null }}
-      />
-    </Tabs>
+    <View style={{ flex: 1, paddingBottom: navBarShift }}>
+      <Tabs
+        screenOptions={{ headerShown: false }}
+        tabBar={(props) => <TabBar {...props} />}
+      >
+        <Tabs.Screen
+          name="select"
+          options={{
+            title: 'Select',
+            tabBarIcon: ({ color, size }) => <IconCards color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Train',
+            tabBarIcon: ({ color, size }) => <IconStopwatch color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="stats/index"
+          options={{
+            title: 'Stats',
+            tabBarIcon: ({ color, size }) => <IconChartDots2 color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+            tabBarIcon: ({ color, size }) => <IconSettings color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
+          name="stats/algset"
+          options={{ title: 'Algset', href: null }}
+        />
+      </Tabs>
+    </View>
   );
 }

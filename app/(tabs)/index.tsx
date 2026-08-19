@@ -2,15 +2,17 @@ import { View, Text, Pressable, Button, StyleSheet } from 'react-native';
 import { useTimer } from '@/src/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, interpolateColor, useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing } from 'react-native-reanimated';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useFocusEffect } from "expo-router";
 import { IconReload, IconXboxX, IconMoodAnnoyed2, IconMoodHappy, IconMoodSadDizzy } from '@tabler/icons-react-native';
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { useSettingsStore } from '@/src/store/settingsStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
 import { useTrainingSession } from '@/src/hooks/useTrainingSession';
-import { useNavBarShift } from '@/src/hooks/useNavBarShift';
 import { DrawScramble } from '@/components/DrawScramble';
 import { PulsatingLoadingText } from '@/components/PulsatingLoadingText';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 const ICON_SIZE = 48;
@@ -18,12 +20,13 @@ const DEFAULT_TIME_STRING = '0.00';
 const DEFAULT_SCRAMBLE_MESSAGE = "Loading scramble..."
 
 export default function MainScreen() {
+  const insets = useSafeAreaInsets();
   const [attemptDone, setAttemptDone] = useState(false);
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+  const miniScramble = useSettingsStore(s => s.miniScramble);
   const { running, start, stop, formatted, resetTime } = useTimer();
   const { scramble, submitGrade, solution, isLoading } = useTrainingSession(selectedAlgSet?.name ?? '');
   const [showScrambleOrSolution, setShowScrambleOrSolution] = useState<string>('scramble');
-  const navBarShift = useNavBarShift();
 
   const overallFluency = selectedAlgSet
     ? getAlgSetFluencyPercentage(selectedAlgSet.name)
@@ -65,9 +68,32 @@ export default function MainScreen() {
     panelOpacity.value = 1;
   }, [selectedAlgSet])
 
+  const runningRef = useRef(running);
+  const attemptDoneRef = useRef(attemptDone);
+  useEffect(() => {
+    runningRef.current = running;
+    attemptDoneRef.current = attemptDone;
+  }, [running, attemptDone]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        if (runningRef.current || attemptDoneRef.current) {
+          stop();
+          setAttemptDone(false);
+          resetTime();
+          panelOpacity.value = 1;
+        }
+      };
+    }, [])
+  );
+
   return (
     <View className="flex-1">
-      <View className="flex-1 flex-col items-center justify-start">
+      <View
+        className="flex-1 flex-col items-center justify-start"
+        style={{ paddingBottom: insets.bottom + 75 }}
+      >
         {!running && (
           <Animated.View
             className="gap-0 flex pt-16 px-3 flex-col items-center"
@@ -101,7 +127,7 @@ export default function MainScreen() {
             </Animated.View>
           </Animated.View>
         )}
-        <View className="mt-3 w-full">
+        <View className="mt-3 w-full relative">
           <Timer
             disabled={!running && (attemptDone || isLoadingScramble)}
             formatted={formatted()}
@@ -109,39 +135,33 @@ export default function MainScreen() {
             onStart={handleStart}
             onStop={handleStopAttempt}
           />
+
+          {!running && formatted() !== DEFAULT_TIME_STRING && (
+            <Animated.View
+              entering={FadeIn.duration(200)}
+              exiting={FadeOut.duration(200)}
+              className="absolute bottom-2 left-0 right-0 flex-row justify-center items-center gap-10"
+            >
+              <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
+              <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
+              <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
+              <View className="w-1 h-8 bg-gray-300 -mx-6" />
+              <GradeButton onPress={() => {
+                panelOpacity.value = 1;
+                setAttemptDone(false);
+                resetTime();
+              }} icon={IconReload} color={COLOR_ACCENT} />
+            </Animated.View>
+          )}
         </View>
 
         {!running && (
           <Animated.View
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
-            className="flex flex-col items-center relative justify-center"
-            style={{ transform: [{ translateY: -navBarShift }] }}
+            className="flex-1 flex-col items-center justify-center relative"
           >
-            {formatted() !== DEFAULT_TIME_STRING && (
-              <Animated.View
-                entering={FadeIn.duration(200)}
-                exiting={FadeOut.duration(200)}
-                className="absolute left-0 right-0 top-0 flex-row justify-center items-center gap-10"
-                style={{ transform: [{ translateY: -80 }] }}
-              >
-                <GradeButton onPress={() => handleGrade(1)} icon={IconMoodSadDizzy} color="#d95f6b" />
-                <GradeButton onPress={() => handleGrade(2)} icon={IconMoodAnnoyed2} color="#d9a45f" />
-                <GradeButton onPress={() => handleGrade(3)} icon={IconMoodHappy} color="#5fd976" />
-                <View className="w-1 h-8 bg-gray-300 -mx-6" />
-                <GradeButton onPress={() => {
-                  panelOpacity.value = 1;
-                  setAttemptDone(false);
-                  resetTime();
-                }} icon={IconReload} color={COLOR_ACCENT} />
-              </Animated.View>
-            )}
-
-            <DrawScramble scale={2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
-
-
-
-
+            <DrawScramble scale={miniScramble ? 1.7 : 2} scramble={scramble} event={selectedAlgSet?.event ?? '333'} />
           </Animated.View>
         )}
       </View>
