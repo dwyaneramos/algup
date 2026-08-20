@@ -1,10 +1,7 @@
 import { Alg } from 'cubing/alg';
 import { sanitiseAlgorithm } from './alg';
-import {
-  generateScrambleForAlg as generateScrambleForAlgLocally,
-  generateScrambleBatchLocally,
-} from './scrambleGenerator';
-import type { CubeState, ScrambleSolutionPair, BatchScrambleResult, CubeEvent } from '@/types';
+import { generateScrambleForAlg as generateScrambleForAlgLocally } from './scrambleGenerator';
+import type { CubeState, ScrambleSolutionPair, CubeEvent } from '@/types';
 
 // 54 stickers, 9 per face in this order:
 // U(0-8) R(9-17) F(18-26) D(27-35) L(36-44) B(45-53)
@@ -239,11 +236,4 @@ export async function generateScrambleFromAlg(
   event: CubeEvent
 ): Promise<ScrambleSolutionPair> {
   return generateScrambleForAlgLocally(sanitiseAlgorithm(algString), event);
-}
-
-export async function generateScrambleBatch(
-  algs: string[],
-  event: CubeEvent
-): Promise<BatchScrambleResult[]> {
-  return generateScrambleBatchLocally(algs.map(sanitiseAlgorithm), event);
 }

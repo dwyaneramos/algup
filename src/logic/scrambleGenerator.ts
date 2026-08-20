@@ -1,7 +1,7 @@
 import { Alg } from 'cubing/alg';
 import { cube3x3x3 } from 'cubing/puzzles';
 import type { KPattern, KPuzzle, KTransformation } from 'cubing/kpuzzle';
-import type { CubeEvent, ScrambleSolutionPair, BatchScrambleResult } from '@/types';
+import type { CubeEvent, ScrambleSolutionPair } from '@/types';
 import { solve3x3x3 } from './solver3x3x3';
 
 // Client-side port of `server/src/lib/scramble.ts` - see that file's git history
@@ -195,24 +195,4 @@ export async function generateScrambleForAlg(
   } while (countMoves(scramble) < minLength);
 
   return { scramble, solution: simplifyAlg(alg) };
-}
-
-function yieldToEventLoop(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-export async function generateScrambleBatchLocally(
-  algs: string[],
-  event: CubeEvent
-): Promise<BatchScrambleResult[]> {
-  const results: BatchScrambleResult[] = [];
-  for (const alg of algs) {
-    const { scramble, solution } = await generateScrambleForAlg(alg, event);
-    results.push({ alg, scramble, solution });
-    // Solving is synchronous CPU work on Hermes' single JS thread - yielding
-    // between items keeps a 10-item batch from blocking the UI thread in one
-    // uninterrupted burst, spreading it into short chunks instead.
-    await yieldToEventLoop();
-  }
-  return results;
 }

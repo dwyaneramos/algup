@@ -41,8 +41,8 @@ jest.mock(
   { virtual: true }
 );
 
-// `src/logic/scramble.ts` also re-exports `generateScrambleFromAlg`/`generateScrambleBatch`,
-// which now import `src/logic/scrambleGenerator.ts` for real - that pulls in `cubing/puzzles`,
+// `src/logic/scramble.ts` also re-exports `generateScrambleFromAlg`, which now
+// imports `src/logic/scrambleGenerator.ts` for real - that pulls in `cubing/puzzles`,
 // which hits the same ESM-only-export-condition problem as `cubing/alg` above under Jest's
 // CJS resolver. Nothing in this file exercises that code path, so a trivial stub is enough
 // to unblock module resolution.

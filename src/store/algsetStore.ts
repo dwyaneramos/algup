@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
 import { deleteAlgset, setSetting, getSetting, getAlgSets } from '@/src/db/queries';
-import { clearScrambleQueue } from '@/src/logic/pendingScramble';
+import { clearPendingItem } from '@/src/logic/pendingScramble';
 import type { AlgSetStore } from '@/types';
 
 export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
@@ -40,7 +40,7 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
 
     // check if deleteAlgset is valid name + do error checking
     deleteAlgset(algSet.name);
-    clearScrambleQueue(algSet.name);
+    clearPendingItem(algSet.name);
 
     const remaining = algSets.filter((a) => a.name !== algSet.name);
     const nextSelected = remaining[0];

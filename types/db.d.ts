@@ -6,7 +6,7 @@ export interface AlgSetProgress {
   locked: number;
 }
 
-export interface ScrambleQueueItem {
+export interface PendingScrambleItem {
   caseId: number;
   alg: string;
   scramble: string;
