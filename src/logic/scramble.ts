@@ -238,14 +238,12 @@ export async function generateScrambleFromAlg(
   algString: string,
   event: CubeEvent
 ): Promise<ScrambleSolutionPair> {
-  const cleanAlg = algString.replace(/[()]/g, '');
-  return generateScrambleForAlgLocally(cleanAlg, event);
+  return generateScrambleForAlgLocally(sanitiseAlgorithm(algString), event);
 }
 
 export async function generateScrambleBatch(
   algs: string[],
   event: CubeEvent
 ): Promise<BatchScrambleResult[]> {
-  const cleanAlgs = algs.map((a) => a.replace(/[()]/g, ''));
-  return generateScrambleBatchLocally(cleanAlgs, event);
+  return generateScrambleBatchLocally(algs.map(sanitiseAlgorithm), event);
 }

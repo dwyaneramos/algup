@@ -1,8 +1,7 @@
 import { Alg } from 'cubing/alg';
 import { cube3x3x3 } from 'cubing/puzzles';
-import type { PuzzleLoader } from 'cubing/puzzles';
-import type { KPattern, KPuzzle } from 'cubing/kpuzzle';
-import type { CubeEvent } from '@/types';
+import type { KPattern, KPuzzle, KTransformation } from 'cubing/kpuzzle';
+import type { CubeEvent, ScrambleSolutionPair, BatchScrambleResult } from '@/types';
 import { solve3x3x3 } from './solver3x3x3';
 
 // Client-side port of `server/src/lib/scramble.ts` - see that file's git history
@@ -18,10 +17,7 @@ import { solve3x3x3 } from './solver3x3x3';
 // is a floor, not a ceiling - but worth knowing if a dedicated, shorter 2x2-only
 // solver is added later.
 
-export const MAX_BATCH_SIZE = 15;
-
 const PREFIX_LENGTH = 4;
-const MIN_PREFIX_AND_ALG_LENGTH = 12;
 const MIN_333_SCRAMBLE_LENGTH = 19;
 const MIN_222_SCRAMBLE_LENGTH = 12;
 const POSSIBLE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'];
@@ -63,13 +59,13 @@ function countMoves(alg: string): number {
 }
 
 // A short alg (e.g. a single move) barely scrambles the cube once combined
-// with a fixed 4-move prefix, so the solver's shortest solution is almost
-// always too short to reach the target scramble length - the retry loop
-// below can then spin dozens or hundreds of times before a long-enough one
-// turns up. Growing the prefix for short algs keeps prefix+alg long enough
-// that a solve is very likely to hit the target on the first try.
-function choosePrefixLength(alg: string): number {
-  return Math.max(PREFIX_LENGTH, MIN_PREFIX_AND_ALG_LENGTH - countMoves(alg));
+// with a short prefix, so the solver's shortest solution is almost always
+// too short to reach the target scramble length - sizing the prefix off the
+// actual target up front (rather than a fixed constant) makes the first
+// attempt far more likely to already be long enough, so the retry loop below
+// is a fallback for solver-output variance rather than doing most of the work.
+function choosePrefixLength(alg: string, minLength: number): number {
+  return Math.max(PREFIX_LENGTH, minLength - countMoves(alg));
 }
 
 // `experimentalSimplify`'s `puzzleLoader` option (which lets it fully cancel
@@ -100,11 +96,9 @@ function normalizeAlgString(alg: string): string {
 }
 
 function simplifyAlg(alg: Alg | string): string {
-  const simplifyParams: { cancel: boolean; puzzleLoader: PuzzleLoader } = {
-    cancel: true,
-    puzzleLoader: cube3x3x3,
-  };
-  const simplified = new Alg(alg).experimentalSimplify(simplifyParams).toString();
+  const simplified = new Alg(alg)
+    .experimentalSimplify({ cancel: true, puzzleLoader: cube3x3x3 })
+    .toString();
   return normalizeAlgString(simplified);
 }
 
@@ -144,8 +138,11 @@ function withCentersHome(kpuzzle: KPuzzle, alg: string): string {
   return correction ? `${correction} ${alg}` : alg;
 }
 
-// `cube3x3x3.kpuzzle()` lazily fetches/parses a puzzle definition on first
-// call - memoize so every scramble after the first is fully synchronous work.
+// `cube3x3x3.kpuzzle()` fetches/parses a puzzle definition - deferred behind
+// a getter (rather than a top-level `const`) so that work only happens on
+// the first actual scramble request, not unconditionally at import time for
+// every module that imports this file. Memoized so every call after the
+// first reuses the same in-flight/resolved promise.
 let cachedKPuzzlePromise: Promise<KPuzzle> | null = null;
 function getKPuzzle(): Promise<KPuzzle> {
   if (!cachedKPuzzlePromise) {
@@ -154,9 +151,20 @@ function getKPuzzle(): Promise<KPuzzle> {
   return cachedKPuzzlePromise;
 }
 
-function generateCandidateScramble(kpuzzle: KPuzzle, alg: string, prefixLength: number): string {
+// `alg` is fixed across every retry in the loop below - only the prefix
+// changes per attempt - so its transformation is computed once by the caller
+// and composed with each attempt's (short) prefix, instead of re-parsing the
+// full "prefix + alg" string from scratch on every retry.
+function generateCandidateScramble(
+  kpuzzle: KPuzzle,
+  algTransformation: KTransformation,
+  prefixLength: number
+): string {
   const prefix = generateMoveList(prefixLength);
-  const pattern = kpuzzle.algToTransformation(new Alg(`${prefix} ${alg}`)).toKPattern();
+  const pattern = kpuzzle
+    .algToTransformation(new Alg(prefix))
+    .applyTransformation(algTransformation)
+    .toKPattern();
   const solution = solve3x3x3(pattern);
   return simplifyAlg(`${solution} ${prefix}`);
 }
@@ -164,9 +172,10 @@ function generateCandidateScramble(kpuzzle: KPuzzle, alg: string, prefixLength: 
 export async function generateScrambleForAlg(
   rawAlg: string,
   event: CubeEvent
-): Promise<{ scramble: string; solution: string }> {
+): Promise<ScrambleSolutionPair> {
   const kpuzzle = await getKPuzzle();
   const alg = withCentersHome(kpuzzle, `${generateAUF()} ${rawAlg} ${generateAUF()}`);
+  const algTransformation = kpuzzle.algToTransformation(new Alg(alg));
   const minLength = event === '222' ? MIN_222_SCRAMBLE_LENGTH : MIN_333_SCRAMBLE_LENGTH;
 
   // min2phase is a genuinely near-minimal solver, so for a lightly-mixed
@@ -178,12 +187,12 @@ export async function generateScrambleForAlg(
   // solved each time, which converges fast and reliably regardless of how
   // close-to-optimal the underlying solver's output is (verified empirically
   // to converge in single-digit attempts even for the worst case found).
-  let prefixLength = choosePrefixLength(alg);
-  let scramble = generateCandidateScramble(kpuzzle, alg, prefixLength);
-  while (scramble.split(' ').length < minLength) {
+  let prefixLength = choosePrefixLength(alg, minLength) - 1;
+  let scramble: string;
+  do {
     prefixLength++;
-    scramble = generateCandidateScramble(kpuzzle, alg, prefixLength);
-  }
+    scramble = generateCandidateScramble(kpuzzle, algTransformation, prefixLength);
+  } while (countMoves(scramble) < minLength);
 
   return { scramble, solution: simplifyAlg(alg) };
 }
@@ -195,8 +204,8 @@ function yieldToEventLoop(): Promise<void> {
 export async function generateScrambleBatchLocally(
   algs: string[],
   event: CubeEvent
-): Promise<{ alg: string; scramble: string; solution: string }[]> {
-  const results: { alg: string; scramble: string; solution: string }[] = [];
+): Promise<BatchScrambleResult[]> {
+  const results: BatchScrambleResult[] = [];
   for (const alg of algs) {
     const { scramble, solution } = await generateScrambleForAlg(alg, event);
     results.push({ alg, scramble, solution });

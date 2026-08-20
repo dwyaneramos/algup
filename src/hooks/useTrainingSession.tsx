@@ -1,7 +1,19 @@
 import { useState, useCallback, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { getCasesWithProgress, updateCaseProgress, introduceNextCase, recordPractice, updateLastPracticed } from '@/src/db/queries';
-import { pickNextCase, getNextState, shouldIntroduceNewCase, getUpdatedFluency, applyDecay } from '@/src/logic/caseQueue';
+import {
+  getCasesWithProgress,
+  updateCaseProgress,
+  introduceNextCase,
+  recordPractice,
+  updateLastPracticed,
+} from '@/src/db/queries';
+import {
+  pickNextCase,
+  getNextState,
+  shouldIntroduceNewCase,
+  getUpdatedFluency,
+  applyDecay,
+} from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/logic/scramble';
 import {
   fetchAndEnqueueBatch,
@@ -14,11 +26,11 @@ import {
 } from '@/src/logic/scrambleQueue';
 import { useSettingsStore } from '@/src/store/settingsStore';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import type { CaseWithProgress, ScrambleQueueItem, CubeEvent } from '@/types';
+import type { CaseWithProgress, ScrambleQueueItem, CubeEvent, ScrambleSolutionPair } from '@/types';
 
 async function loadActiveCases(algset: string): Promise<CaseWithProgress[]> {
   let cases = applyDecay(await getCasesWithProgress(algset));
-  const hasActive = cases.some(c => c.state !== 'locked');
+  const hasActive = cases.some((c) => c.state !== 'locked');
   if (!hasActive) {
     introduceNextCase(algset);
     introduceNextCase(algset);
@@ -28,8 +40,15 @@ async function loadActiveCases(algset: string): Promise<CaseWithProgress[]> {
   return cases;
 }
 
-function matchCaseForItem(cases: CaseWithProgress[], item: ScrambleQueueItem): CaseWithProgress | null {
-  return cases.find(c => c.id === item.caseId) ?? cases.find(c => c.alg === item.alg) ?? pickNextCase(cases);
+function matchCaseForItem(
+  cases: CaseWithProgress[],
+  item: ScrambleQueueItem
+): CaseWithProgress | null {
+  return (
+    cases.find((c) => c.id === item.caseId) ??
+    cases.find((c) => c.alg === item.alg) ??
+    pickNextCase(cases)
+  );
 }
 
 async function fetchFreshScramble(
@@ -37,14 +56,11 @@ async function fetchFreshScramble(
   event: CubeEvent,
   algset: string,
   errorLabel: string
-): Promise<{ scramble: string; solution: string } | null> {
+): Promise<ScrambleSolutionPair | null> {
   try {
-    const { scramble, solution } = await generateScrambleFromAlg(alg, event);
-    if (scramble && solution) return { scramble, solution };
-    console.error(`[Algset: ${algset}] Scramble fetch returned no scramble/solution`);
-    return null;
+    return await generateScrambleFromAlg(alg, event);
   } catch (err) {
-    console.error(`[Algset: ${algset}] Failed to fetch ${errorLabel} scramble:`, err);
+    console.error(`[Algset: ${algset}] Failed to generate ${errorLabel} scramble:`, err);
     return null;
   }
 }
@@ -63,9 +79,9 @@ function refillQueueIfLow(
 }
 
 export function useTrainingSession(algset: string) {
-  const maxActive = useSettingsStore(s => s.maxActive);
-  const maxLearning = useSettingsStore(s => s.maxLearning);
-  const event = useAlgSetStore(s => s.selectedAlgSet?.event ?? '333');
+  const maxActive = useSettingsStore((s) => s.maxActive);
+  const maxLearning = useSettingsStore((s) => s.maxLearning);
+  const event = useAlgSetStore((s) => s.selectedAlgSet?.event ?? '333');
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [currentCase, setCurrentCase] = useState<CaseWithProgress | null>(null);
   const [scramble, setScramble] = useState('');
@@ -80,7 +96,10 @@ export function useTrainingSession(algset: string) {
 
     const queueSize = getQueueSize(algset);
     const queueItems = peekQueue(algset);
-    console.log(`[Algset: ${algset}] Queue size: ${queueSize}, items:`, queueItems.map(q => `caseId=${q.caseId}`));
+    console.log(
+      `[Algset: ${algset}] Queue size: ${queueSize}, items:`,
+      queueItems.map((q) => `caseId=${q.caseId}`)
+    );
 
     const pending = consumePendingItem(algset);
     if (pending) {
@@ -97,7 +116,9 @@ export function useTrainingSession(algset: string) {
         setScramble(next.scramble);
         setSolution(next.solution);
         currentItem.current = next;
-        console.log(`[Algset: ${algset}] Dequeued scramble for caseId=${next.caseId}, alg=${matchedCase?.alg}`);
+        console.log(
+          `[Algset: ${algset}] Dequeued scramble for caseId=${next.caseId}, alg=${matchedCase?.alg}`
+        );
       }
     } else {
       const firstCase = pickNextCase(active);
@@ -123,7 +144,9 @@ export function useTrainingSession(algset: string) {
 
       return () => {
         if (currentItem.current) {
-          console.log(`[Algset: ${algset}] Storing pending item for caseId=${currentItem.current.caseId}`);
+          console.log(
+            `[Algset: ${algset}] Storing pending item for caseId=${currentItem.current.caseId}`
+          );
           setPendingItem(algset, currentItem.current);
           currentItem.current = null;
         }
@@ -167,10 +190,8 @@ export function useTrainingSession(algset: string) {
     recordPractice(algset);
     currentItem.current = null;
 
-    let updatedCases = cases.map(c =>
-      c.id === currentCase.id
-        ? { ...c, fluency: newFluency, state: newState }
-        : c
+    let updatedCases = cases.map((c) =>
+      c.id === currentCase.id ? { ...c, fluency: newFluency, state: newState } : c
     );
 
     if (shouldIntroduceNewCase(updatedCases, maxActive, maxLearning)) {
