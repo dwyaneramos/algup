@@ -1,8 +1,10 @@
 import { Alg } from 'cubing/alg';
 import { sanitiseAlgorithm } from './alg';
+import {
+  generateScrambleForAlg as generateScrambleForAlgLocally,
+  generateScrambleBatchLocally,
+} from './scrambleGenerator';
 import type { CubeState, ScrambleSolutionPair, BatchScrambleResult, CubeEvent } from '@/types';
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const API_SECRET = process.env.EXPO_PUBLIC_API_SECRET;
 
 // 54 stickers, 9 per face in this order:
 // U(0-8) R(9-17) F(18-26) D(27-35) L(36-44) B(45-53)
@@ -39,75 +41,79 @@ const API_SECRET = process.env.EXPO_PUBLIC_API_SECRET;
 // 51 52 53
 
 export enum Colour {
-  White, Red, Green, Yellow, Orange, Blue
+  White,
+  Red,
+  Green,
+  Yellow,
+  Orange,
+  Blue,
 }
 
 // Each array is a cycle — sticker at index[0] goes to index[1], index[1] goes to index[2], etc.
 const BASE_MOVES: Record<string, number[][]> = {
-  'U': [
+  U: [
     [0, 2, 8, 6],
     [1, 5, 7, 3],
     [18, 36, 45, 9],
     [19, 37, 46, 10],
-    [20, 38, 47, 11]
+    [20, 38, 47, 11],
   ],
-  'R': [
+  R: [
     [9, 11, 17, 15],
     [10, 14, 16, 12],
     [2, 51, 29, 20],
     [5, 48, 32, 23],
     [8, 45, 35, 26],
   ],
-  'F': [
+  F: [
     [18, 20, 26, 24],
     [19, 23, 25, 21],
     [8, 15, 27, 38],
     [7, 12, 28, 41],
     [6, 9, 29, 44],
   ],
-  'D': [
+  D: [
     [27, 29, 35, 33],
     [28, 32, 34, 30],
     [24, 15, 51, 42],
     [25, 16, 52, 43],
-    [26, 17, 53, 44]
+    [26, 17, 53, 44],
   ],
-  'L': [
+  L: [
     [36, 38, 44, 42],
     [37, 41, 43, 39],
     [0, 18, 27, 53],
     [3, 21, 30, 50],
-    [6, 24, 33, 47]
+    [6, 24, 33, 47],
   ],
 
-  'B': [
+  B: [
     [45, 47, 53, 51],
     [46, 50, 52, 48],
-    [2, 36, 33, 17,],
+    [2, 36, 33, 17],
     [1, 39, 34, 14],
-    [0, 42, 35, 11]
+    [0, 42, 35, 11],
   ],
 
-  'M': [
+  M: [
     [1, 19, 28, 52],
     [4, 22, 31, 49],
     [7, 25, 34, 46],
   ],
 
-  'E': [
+  E: [
     [23, 14, 50, 41],
     [22, 13, 49, 40],
     [21, 12, 48, 39],
   ],
 
-  'S': [
+  S: [
     [3, 10, 32, 43],
     [4, 13, 31, 40],
     [5, 16, 30, 37],
   ],
 
-
-  'x': [
+  x: [
     [36, 42, 44, 38],
     [37, 39, 43, 41],
     [0, 53, 27, 18],
@@ -125,7 +131,7 @@ const BASE_MOVES: Record<string, number[][]> = {
     [7, 46, 34, 25],
   ],
 
-  'y': [
+  y: [
     [0, 2, 8, 6],
     [1, 5, 7, 3],
     [18, 36, 45, 9],
@@ -140,11 +146,10 @@ const BASE_MOVES: Record<string, number[][]> = {
 
     [21, 39, 48, 12],
     [22, 40, 49, 13],
-    [23, 41, 50, 14]
+    [23, 41, 50, 14],
   ],
 
-  'z': [
-
+  z: [
     [18, 20, 26, 24],
     [19, 23, 25, 21],
     [8, 15, 27, 38],
@@ -159,9 +164,8 @@ const BASE_MOVES: Record<string, number[][]> = {
 
     [3, 10, 32, 43],
     [4, 13, 31, 40],
-    [5, 16, 30, 37]
+    [5, 16, 30, 37],
   ],
-
 };
 
 function invertCycle(cycle: number[]): number[] {
@@ -180,8 +184,7 @@ const MOVES: Record<string, number[][]> = {
   d: [...BASE_MOVES.D, ...BASE_MOVES.E],
   f: [...BASE_MOVES.F, ...BASE_MOVES.S],
   b: [...BASE_MOVES.B, ...BASE_MOVES.S.map(invertCycle)],
-}
-
+};
 
 // Local sticker positions (index % 9, within a single face's 9-sticker slice)
 // that correspond to a 2x2's corner pieces. A 2x2 has no edge or center
@@ -190,7 +193,7 @@ const MOVES: Record<string, number[][]> = {
 const CORNER_POSITIONS = new Set([0, 2, 6, 8]);
 
 function cornerCyclesOnly(cycles: number[][]): number[][] {
-  return cycles.filter(cycle => cycle.every(i => CORNER_POSITIONS.has(i % 9)));
+  return cycles.filter((cycle) => cycle.every((i) => CORNER_POSITIONS.has(i % 9)));
 }
 
 function applyMove(cube: CubeState, move: string, cornersOnly: boolean): CubeState {
@@ -201,9 +204,7 @@ function applyMove(cube: CubeState, move: string, cornersOnly: boolean): CubeSta
   const isTriple = move.includes('3');
   const cycles = cornersOnly ? cornerCyclesOnly(MOVES[base]) : MOVES[base];
 
-
-
-  const times = isDouble ? 2 : (isPrime !== isTriple) ? 3 : 1; // 3 clockwise = 1 counter-clockwise
+  const times = isDouble ? 2 : isPrime !== isTriple ? 3 : 1; // 3 clockwise = 1 counter-clockwise
 
   for (let t = 0; t < times; t++) {
     const temp = [...next];
@@ -216,7 +217,6 @@ function applyMove(cube: CubeState, move: string, cornersOnly: boolean): CubeSta
 
   return next;
 }
-
 
 export function applyScramble(scramble: string, cornersOnly: boolean): CubeState {
   const sanitised = sanitiseAlgorithm(scramble);
@@ -234,41 +234,18 @@ export function solvedCube(): CubeState {
     ...Array(9).fill('B'),
   ];
 }
-export async function generateScrambleFromAlg(algString: string, event: CubeEvent): Promise<ScrambleSolutionPair> {
+export async function generateScrambleFromAlg(
+  algString: string,
+  event: CubeEvent
+): Promise<ScrambleSolutionPair> {
   const cleanAlg = algString.replace(/[()]/g, '');
-  console.log('-----------------------')
-  console.log('getting scramble for event:', event, 'alg:', cleanAlg)
-  console.log('-----------------------')
-  const res = await fetch(`${API_URL}/scramble`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
-    body: JSON.stringify({ alg: cleanAlg, event: event }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    console.error(`/scramble responded ${res.status} for alg "${cleanAlg}" (${event}):`, data);
-  }
-  return data;
+  return generateScrambleForAlgLocally(cleanAlg, event);
 }
 
-export async function generateScrambleBatch(algs: string[], event: CubeEvent): Promise<BatchScrambleResult[]> {
-  const cleanAlgs = algs.map(a => a.replace(/[()]/g, ''));
-  console.log('-----------------------')
-  console.log('getting scramble for event:', event)
-  console.log('-----------------------')
-
-  const res = await fetch(`${API_URL}/scramble/batch`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-secret': API_SECRET ?? '' },
-    body: JSON.stringify({ algs: cleanAlgs, event: event }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    console.error(`/scramble/batch responded ${res.status} for ${cleanAlgs.length} algs (${event}):`, data);
-  }
-  return data.results ?? [];
+export async function generateScrambleBatch(
+  algs: string[],
+  event: CubeEvent
+): Promise<BatchScrambleResult[]> {
+  const cleanAlgs = algs.map((a) => a.replace(/[()]/g, ''));
+  return generateScrambleBatchLocally(cleanAlgs, event);
 }
-
-

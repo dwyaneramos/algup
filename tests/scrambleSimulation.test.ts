@@ -12,30 +12,41 @@ import type { CubeState } from '@/types';
 // real, not stubbed out. Jest's babel-plugin-jest-hoist hoists this call
 // above the import above at transform time regardless of source order, so
 // writing the import first here (for import/first lint compliance) is safe.
-jest.mock('cubing/alg', () => ({
-  Alg: class MockAlg {
-    str: string;
-    constructor(str: string) {
-      this.str = str;
-    }
-    invert() {
-      const inverted = this.str
-        .trim()
-        .split(/\s+/)
-        .reverse()
-        .map((move: string) => {
-          if (move.endsWith("'")) return move.slice(0, -1);
-          if (move.endsWith('2')) return move;
-          return move + "'";
-        })
-        .join(' ');
-      return new MockAlg(inverted);
-    }
-    toString() {
-      return this.str;
-    }
-  },
-}), { virtual: true });
+jest.mock(
+  'cubing/alg',
+  () => ({
+    Alg: class MockAlg {
+      str: string;
+      constructor(str: string) {
+        this.str = str;
+      }
+      invert() {
+        const inverted = this.str
+          .trim()
+          .split(/\s+/)
+          .reverse()
+          .map((move: string) => {
+            if (move.endsWith("'")) return move.slice(0, -1);
+            if (move.endsWith('2')) return move;
+            return move + "'";
+          })
+          .join(' ');
+        return new MockAlg(inverted);
+      }
+      toString() {
+        return this.str;
+      }
+    },
+  }),
+  { virtual: true }
+);
+
+// `src/logic/scramble.ts` also re-exports `generateScrambleFromAlg`/`generateScrambleBatch`,
+// which now import `src/logic/scrambleGenerator.ts` for real - that pulls in `cubing/puzzles`,
+// which hits the same ESM-only-export-condition problem as `cubing/alg` above under Jest's
+// CJS resolver. Nothing in this file exercises that code path, so a trivial stub is enough
+// to unblock module resolution.
+jest.mock('cubing/puzzles', () => ({ cube3x3x3: {} }), { virtual: true });
 
 // Local sticker positions (index % 9) that hold a 2x2's corner pieces —
 // mirrors the CORNER_POSITIONS set in src/logic/scramble.ts. Kept as a
@@ -94,7 +105,7 @@ describe('applyScramble - 3x3 (cornersOnly=false)', () => {
     expect(applyScramble('U2', false)).toEqual(applyScramble('U U', false));
   });
 
-  it('a triple turn (R3) is equivalent to a single counter-clockwise turn (R\')', () => {
+  it("a triple turn (R3) is equivalent to a single counter-clockwise turn (R')", () => {
     expect(applyScramble('R3', false)).toEqual(applyScramble("R'", false));
   });
 
@@ -138,11 +149,14 @@ describe('applyScramble - 2x2 (cornersOnly=true)', () => {
     expect(edgeCenterStickers(result)).toEqual(edgeCenterStickers(solvedCube()));
   });
 
-  it.each(SLICE_MOVES)('%s (a pure slice move) is a full no-op — a 2x2 has no slice layer', (move) => {
-    expect(applyScramble(move, true)).toEqual(solvedCube());
-  });
+  it.each(SLICE_MOVES)(
+    '%s (a pure slice move) is a full no-op — a 2x2 has no slice layer',
+    (move) => {
+      expect(applyScramble(move, true)).toEqual(solvedCube());
+    }
+  );
 
-  it.each(['U', 'R', 'F', 'D', 'L', 'B'])('%s still visibly changes the cube\'s corners', (move) => {
+  it.each(['U', 'R', 'F', 'D', 'L', 'B'])("%s still visibly changes the cube's corners", (move) => {
     expect(applyScramble(move, true)).not.toEqual(solvedCube());
   });
 
