@@ -48,14 +48,23 @@ function matchCaseForItem(
   );
 }
 
+// Scramble generation is synchronous, CPU-heavy work - without forcing a
+// real frame to render first, the "Loading scramble..." state set right
+// before it would never actually get painted, since JS drains all pending
+// microtasks (including the generation work) before it can render a frame.
+function waitForNextFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+}
+
 async function fetchFreshScramble(
   alg: string,
   event: CubeEvent,
   algset: string,
-  errorLabel: string
+  errorLabel: string,
+  scrambleWithAUF: boolean = false
 ): Promise<ScrambleSolutionPair | null> {
   try {
-    return await generateScrambleFromAlg(alg, event);
+    return await generateScrambleFromAlg(alg, event, scrambleWithAUF);
   } catch (err) {
     console.error(`[Algset: ${algset}] Failed to generate ${errorLabel} scramble:`, err);
     return null;
@@ -65,6 +74,8 @@ async function fetchFreshScramble(
 export function useTrainingSession(algset: string) {
   const maxActive = useSettingsStore((s) => s.maxActive);
   const maxLearning = useSettingsStore((s) => s.maxLearning);
+
+  const scrambleWithAUF = useSettingsStore(s => s.scrambleWithAUF);
   const event = useAlgSetStore((s) => s.selectedAlgSet?.event ?? '333');
   const [cases, setCases] = useState<CaseWithProgress[]>([]);
   const [currentCase, setCurrentCase] = useState<CaseWithProgress | null>(null);
@@ -89,7 +100,8 @@ export function useTrainingSession(algset: string) {
       setCurrentCase(firstCase);
       if (firstCase) {
         setIsLoading(true);
-        const fetched = await fetchFreshScramble(firstCase.alg, event, algset, 'initial');
+        await waitForNextFrame();
+        const fetched = await fetchFreshScramble(firstCase.alg, event, algset, 'initial', scrambleWithAUF);
         if (fetched) {
           setScramble(fetched.scramble);
           setSolution(fetched.solution);
@@ -117,12 +129,17 @@ export function useTrainingSession(algset: string) {
     }, [algset, resumeSession])
   );
 
-  const advanceToNextCase = async (updatedCases: CaseWithProgress[], excludeCaseId: number) => {
-    const nextCase = pickNextCase(updatedCases, excludeCaseId);
+  const advanceToNextCase = async (updatedCases: CaseWithProgress[]) => {
+    console.log("CALLED HERE")
+    const nextCase = pickNextCase(updatedCases);
+    console.log(nextCase)
     setCurrentCase(nextCase);
     if (nextCase) {
       setIsLoading(true);
-      const fetched = await fetchFreshScramble(nextCase.alg, event, algset, 'next');
+      await waitForNextFrame();
+      console.log("FETCHING NEW SCMRALBe")
+      const fetched = await fetchFreshScramble(nextCase.alg, event, algset, 'next', scrambleWithAUF);
+      console.log("finished fetching")
       if (fetched) {
         setScramble(fetched.scramble);
         setSolution(fetched.solution);
@@ -151,7 +168,7 @@ export function useTrainingSession(algset: string) {
     }
 
     setCases(updatedCases);
-    await advanceToNextCase(updatedCases, currentCase.id);
+    await advanceToNextCase(updatedCases);
   };
 
   return { currentCase, scramble, solution, submitGrade, isLoading };

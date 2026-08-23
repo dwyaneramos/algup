@@ -14,9 +14,11 @@ export interface SettingsStore {
   maxActive: number;
   maxLearning: number;
   miniScramble: boolean;
+  scrambleWithAUF: boolean;
   loadSettings: () => void;
   setShiftNavbarUp: (value: boolean) => void;
   setMaxActive: (value: number) => void;
   setMaxLearning: (value: number) => void;
   setMiniScramble: (value: boolean) => void;
+  setScrambleWithAUF: (value: boolean) => void;
 }

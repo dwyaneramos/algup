@@ -233,7 +233,8 @@ export function solvedCube(): CubeState {
 }
 export async function generateScrambleFromAlg(
   algString: string,
-  event: CubeEvent
+  event: CubeEvent,
+  scrambleWithAUF: boolean = false,
 ): Promise<ScrambleSolutionPair> {
-  return generateScrambleForAlgLocally(sanitiseAlgorithm(algString), event);
+  return generateScrambleForAlgLocally(sanitiseAlgorithm(algString), event, scrambleWithAUF);
 }

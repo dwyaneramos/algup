@@ -79,9 +79,9 @@ export function getNumberOfAlgsPracticing(): number {
 }
 
 
-export function pickNextCase(cases: CaseWithProgress[], excludeId?: number): CaseWithProgress | null {
-  const focused = cases.filter(c => c.is_focused && c.id !== excludeId);
-  const normal = cases.filter(c => !c.is_focused && c.state !== 'locked' && c.id !== excludeId);
+export function pickNextCase(cases: CaseWithProgress[]): CaseWithProgress | null {
+  const focused = cases.filter(c => c.is_focused);
+  const normal = cases.filter(c => !c.is_focused && c.state !== 'locked');
 
   available = [...focused, ...normal];
   if (available.length === 0) return null;

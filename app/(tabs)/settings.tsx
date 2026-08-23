@@ -159,6 +159,9 @@ export default function Settings() {
   const setMaxLearning = useSettingsStore((s) => s.setMaxLearning);
   const miniScramble = useSettingsStore((s) => s.miniScramble);
   const setMiniScramble = useSettingsStore((s) => s.setMiniScramble);
+  const scrambleWithAUF = useSettingsStore((s) => s.scrambleWithAUF);
+  const setScrambleWithAUF = useSettingsStore((s) => s.setScrambleWithAUF);
+
   const insets = useSafeAreaInsets();
 
   return (
@@ -191,10 +194,17 @@ export default function Settings() {
             />
             <SwitchRow
               icon={IconArrowsDiagonalMinimize2}
-              label="Mini scramble"
+              label="Mini draw scramble"
               subtitle="Shrink the draw scramble"
               value={miniScramble}
               onValueChange={setMiniScramble}
+            />
+            <SwitchRow
+              icon={IconArrowsDiagonalMinimize2}
+              label="Scramble with AUFs"
+              subtitle="Practice slight variations"
+              value={scrambleWithAUF}
+              onValueChange={setScrambleWithAUF}
             />
             {Platform.OS === 'android' && (
               <SwitchRow

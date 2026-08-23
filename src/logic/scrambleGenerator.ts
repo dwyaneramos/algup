@@ -171,10 +171,12 @@ function generateCandidateScramble(
 
 export async function generateScrambleForAlg(
   rawAlg: string,
-  event: CubeEvent
+  event: CubeEvent,
+  scrambleWithAUF: boolean = false
 ): Promise<ScrambleSolutionPair> {
+  console.log("GENERATING NEW SCRAMBLE")
   const kpuzzle = await getKPuzzle();
-  const alg = withCentersHome(kpuzzle, `${generateAUF()} ${rawAlg} ${generateAUF()}`);
+  const alg = withCentersHome(kpuzzle, `${scrambleWithAUF ? generateAUF() : ''} ${rawAlg} ${scrambleWithAUF ? generateAUF() : ''}`);
   const algTransformation = kpuzzle.algToTransformation(new Alg(alg));
   const minLength = event === '222' ? MIN_222_SCRAMBLE_LENGTH : MIN_333_SCRAMBLE_LENGTH;
 

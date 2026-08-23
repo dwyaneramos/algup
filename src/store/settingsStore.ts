@@ -7,6 +7,7 @@ export const SHIFT_NAVBAR_UP_KEY = 'shiftNavbarUp';
 export const MAX_ACTIVE_KEY = 'maxActive';
 export const MAX_LEARNING_KEY = 'maxLearning';
 export const MINI_SCRAMBLE_KEY = 'miniScramble';
+export const SCRAMBLE_WITH_AUF_KEY = 'scrambleWithAUF';
 
 export const MIN_MAX_ACTIVE = 1;
 export const MAX_MAX_ACTIVE = 20;
@@ -18,6 +19,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   maxActive: DEFAULT_MAX_ACTIVE,
   maxLearning: DEFAULT_MAX_LEARNING,
   miniScramble: false,
+  scrambleWithAUF: false,
 
   loadSettings: () => {
     const storedMaxActive = getSetting(MAX_ACTIVE_KEY);
@@ -27,6 +29,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       maxActive: storedMaxActive ? Number(storedMaxActive) : DEFAULT_MAX_ACTIVE,
       maxLearning: storedMaxLearning ? Number(storedMaxLearning) : DEFAULT_MAX_LEARNING,
       miniScramble: getSetting(MINI_SCRAMBLE_KEY) === 'true',
+      scrambleWithAUF: getSetting(SCRAMBLE_WITH_AUF_KEY) === 'true',
     });
   },
 
@@ -50,5 +53,9 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   setMiniScramble: (value) => {
     setSetting(MINI_SCRAMBLE_KEY, value ? 'true' : 'false');
     set({ miniScramble: value });
+  },
+  setScrambleWithAUF: (value) => {
+    setSetting(SCRAMBLE_WITH_AUF_KEY, value ? 'true' : 'false');
+    set({ scrambleWithAUF: value });
   },
 }));
