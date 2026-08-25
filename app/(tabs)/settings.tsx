@@ -17,6 +17,7 @@ import {
   IconStack2,
   IconSchool,
   IconArrowsDiagonalMinimize2,
+  IconRotateClockwise,
 } from '@tabler/icons-react-native';
 import { COLOR_ACCENT, COLOR_ACCENT_LIGHT } from '@/utils/constants/colors';
 import {
@@ -241,7 +242,7 @@ export default function Settings() {
                 onValueChange={setMiniScramble}
               />
               <SwitchRow
-                icon={IconArrowsDiagonalMinimize2}
+                icon={IconRotateClockwise}
                 label="Scramble with AUFs"
                 subtitle="Practice slight variations"
                 value={scrambleWithAUF}
