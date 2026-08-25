@@ -1,7 +1,7 @@
 import { applyScramble } from './scramble';
+import { generateScrambleWithRetry } from './scrambleRetry';
 import { solve2x2x2, isReferenceCornerHome } from './solver2x2x2';
 import { countMoves, choosePrefixLength } from './scrambleGenerator3x3';
-import { runOnSolverThread } from './cubeWorkletRuntime';
 import type { ScrambleSolutionPair } from '@/types';
 
 const MIN_222_SCRAMBLE_LENGTH = 12;
@@ -113,18 +113,18 @@ export async function generateScramble2x2ForAlg(
     `${scrambleWithAUF ? generateAUF() : ''} ${rawAlg} ${scrambleWithAUF ? generateAUF() : ''}`.trim();
   const alg = withReferenceCornerHome(wrapped);
 
-  let prefixLength = choosePrefixLength(alg, MIN_222_SCRAMBLE_LENGTH) - 1;
-  let scramble: string;
-  do {
-    prefixLength++;
-    const prefix = generateMoveList2x2(prefixLength);
-    const targetState = applyScramble(`${prefix} ${alg}`, true);
-    const solution = await runOnSolverThread(() => {
-      'worklet';
-      return solve2x2x2(targetState);
-    });
-    scramble = simplify2x2(`${solution} ${prefix}`);
-  } while (countMoves(scramble) < MIN_222_SCRAMBLE_LENGTH);
+  const startPrefixLength = choosePrefixLength(alg, MIN_222_SCRAMBLE_LENGTH);
+  const scramble = await generateScrambleWithRetry(
+    async (prefixLength) => {
+      const prefix = generateMoveList2x2(prefixLength);
+      const targetState = applyScramble(`${prefix} ${alg}`, true);
+      const solution = solve2x2x2(targetState);
+      return simplify2x2(`${solution} ${prefix}`);
+    },
+    (candidate) => countMoves(candidate) >= MIN_222_SCRAMBLE_LENGTH,
+    startPrefixLength,
+  );
+  if (scramble === '') return { scramble: '', solution: '' };
 
   return { scramble, solution: simplify2x2(alg) };
 }

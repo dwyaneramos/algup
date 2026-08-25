@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import type { AlgSet, Case, CubeEvent, CaseWithProgress, CaseState, AlgSetProgress } from '@/types';
+import { applyDecay } from '@/src/logic/caseQueue';
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
@@ -187,6 +188,34 @@ export async function getCasesWithProgress(algset: string): Promise<CaseWithProg
   `,
     [algset]
   );
+}
+
+export async function getAllCasesWithProgress(): Promise<CaseWithProgress[]> {
+  const db = getDb();
+  return db.getAllAsync<CaseWithProgress>(`
+    SELECT c.*,
+      COALESCE(cp.fluency, 1.0) AS fluency,
+      COALESCE(cp.state, 'locked') AS state,
+      COALESCE(cp.is_focused, 0) AS is_focused,
+      cp.last_practiced
+    FROM cases c
+    LEFT JOIN case_progress cp ON c.id = cp.case_id
+  `);
+}
+
+export function updateCaseFluency(caseId: number, fluency: number): void {
+  const db = getDb();
+  db.runSync('UPDATE case_progress SET fluency = ? WHERE case_id = ?', [fluency, caseId]);
+}
+
+export async function applyDecayToAllCases(): Promise<void> {
+  const cases = await getAllCasesWithProgress();
+  const decayed = applyDecay(cases);
+  decayed.forEach((c, i) => {
+    if (c.fluency !== cases[i].fluency) {
+      updateCaseFluency(c.id, c.fluency);
+    }
+  });
 }
 
 export function saveCaseFluency(caseId: string, fluency: number) {

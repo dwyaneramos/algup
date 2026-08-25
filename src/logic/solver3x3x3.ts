@@ -48,9 +48,9 @@ const IDENTITY_CENTER: OldKPuzzleOrbit = {
  * Synchronously solves raw corner/edge orbits (centers ignored - caller must
  * have already corrected for center homing) using min2phase's two-phase
  * algorithm, returning a move string (e.g. "R U R' F2"). Takes plain
- * permutation/orientation arrays rather than a `KPattern` so this can run
- * inside a worklet runtime, which can't receive `cubing/kpuzzle` class
- * instances across the runtime boundary - see `cubeWorkletRuntime.ts`.
+ * permutation/orientation arrays rather than a `KPattern` since that's all
+ * min2phase actually needs (see `solve3x3x3` for the `KPattern`-accepting
+ * wrapper).
  */
 export function solveTransformation(corners: OldKPuzzleOrbit, edges: OldKPuzzleOrbit): string {
   ensureInitialized();
@@ -66,8 +66,8 @@ export function solveTransformation(corners: OldKPuzzleOrbit, edges: OldKPuzzleO
 /**
  * Synchronously solves a 3x3x3 KPattern's corner/edge state. Thin wrapper
  * around `solveTransformation` for callers that already have a `KPattern`
- * (e.g. tests) - see `scrambleGenerator3x3.ts` for the worklet-dispatched
- * call site used during actual scramble generation.
+ * (e.g. tests) - see `scrambleGenerator3x3.ts` for the call site used during
+ * actual scramble generation.
  */
 export function solve3x3x3(pattern: KPattern): string {
   const corners = pattern.patternData['CORNERS'];

@@ -12,7 +12,6 @@ import {
   getNextState,
   shouldIntroduceNewCase,
   getUpdatedFluency,
-  applyDecay,
 } from '@/src/logic/caseQueue';
 import { generateScrambleFromAlg } from '@/src/logic/scramble';
 import { setPendingItem, consumePendingItem } from '@/src/logic/pendingScramble';
@@ -26,7 +25,7 @@ import type {
 } from '@/types';
 
 async function loadActiveCases(algset: string): Promise<CaseWithProgress[]> {
-  let cases = applyDecay(await getCasesWithProgress(algset));
+  let cases = await getCasesWithProgress(algset);
   const hasActive = cases.some((c) => c.state !== 'locked');
   if (!hasActive) {
     introduceNextCase(algset);
@@ -64,7 +63,13 @@ async function fetchFreshScramble(
   scrambleWithAUF: boolean = false
 ): Promise<ScrambleSolutionPair | null> {
   try {
-    return await generateScrambleFromAlg(alg, event, scrambleWithAUF);
+    const result = await generateScrambleFromAlg(alg, event, scrambleWithAUF);
+    if (result.scramble === '') {
+      console.error(`[Algset: ${algset}] Exhausted retries generating ${errorLabel} scramble`);
+      alert('Something went wrong generating a scramble. Please refresh the app.');
+      return null;
+    }
+    return result;
   } catch (err) {
     console.error(`[Algset: ${algset}] Failed to generate ${errorLabel} scramble:`, err);
     return null;
@@ -164,7 +169,7 @@ export function useTrainingSession(algset: string) {
 
     if (shouldIntroduceNewCase(updatedCases, maxActive, maxLearning)) {
       introduceNextCase(algset);
-      updatedCases = applyDecay(await getCasesWithProgress(algset));
+      updatedCases = await getCasesWithProgress(algset);
     }
 
     setCases(updatedCases);
