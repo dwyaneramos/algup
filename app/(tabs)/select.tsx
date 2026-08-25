@@ -34,20 +34,11 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
 
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
-  const opacity = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
     transform: [{ translateY: translateY.value }],
     backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
   }));
-
-  useFocusEffect(
-    useCallback(() => {
-      opacity.value = 0;
-      opacity.value = withTiming(1, { duration: 300 });
-    }, [])
-  );
 
   useEffect(() => {
     getDisplayCaseScramble(algset.name).then(setScramble);
