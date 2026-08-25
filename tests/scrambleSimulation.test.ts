@@ -48,6 +48,24 @@ jest.mock(
 // to unblock module resolution.
 jest.mock('cubing/puzzles', () => ({ cube3x3x3: {} }), { virtual: true });
 
+// `react-native-worklets` ships unbuilt-for-Jest source (unreachable under
+// Jest's default transform allowlist) - same class of problem as above.
+// Nothing in this file exercises that code path either, so a trivial stub
+// unblocks resolution.
+jest.mock(
+  'react-native-worklets',
+  () => ({
+    createWorkletRuntime: jest.fn(() => ({})),
+    runOnRuntime: jest.fn(
+      (_runtime: unknown, worklet: (...args: unknown[]) => unknown) =>
+        (...args: unknown[]) =>
+          worklet(...args)
+    ),
+    runOnJS: jest.fn((fn: (...args: unknown[]) => unknown) => fn),
+  }),
+  { virtual: true }
+);
+
 // Local sticker positions (index % 9) that hold a 2x2's corner pieces —
 // mirrors the CORNER_POSITIONS set in src/logic/scramble.ts. Kept as a
 // separate literal here (not imported) so these tests exercise the public

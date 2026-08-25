@@ -12,7 +12,7 @@ import * as min2phaseModule from 'min2phase';
 // plain string (verified empirically against the installed package - its bundled
 // `.d.ts` describes an unpublished/unreachable wrapper, not the actual bundle body).
 // Hand-declare the real shape here instead of trusting the package's own types.
-type OldKPuzzleOrbit = { permutation: number[]; orientation: number[] };
+export type OldKPuzzleOrbit = { permutation: number[]; orientation: number[] };
 type OldKPuzzleTransformation = {
   CORNER: OldKPuzzleOrbit;
   EDGE: OldKPuzzleOrbit;
@@ -45,19 +45,35 @@ const IDENTITY_CENTER: OldKPuzzleOrbit = {
 };
 
 /**
- * Synchronously solves a 3x3x3 KPattern's corner/edge state (centers ignored -
- * caller must have already corrected for center homing) using min2phase's
- * two-phase algorithm, returning a move string (e.g. "R U R' F2").
+ * Synchronously solves raw corner/edge orbits (centers ignored - caller must
+ * have already corrected for center homing) using min2phase's two-phase
+ * algorithm, returning a move string (e.g. "R U R' F2"). Takes plain
+ * permutation/orientation arrays rather than a `KPattern` so this can run
+ * inside a worklet runtime, which can't receive `cubing/kpuzzle` class
+ * instances across the runtime boundary - see `cubeWorkletRuntime.ts`.
  */
-export function solve3x3x3(pattern: KPattern): string {
+export function solveTransformation(corners: OldKPuzzleOrbit, edges: OldKPuzzleOrbit): string {
   ensureInitialized();
-  const corners = pattern.patternData['CORNERS'];
-  const edges = pattern.patternData['EDGES'];
   const transformation: OldKPuzzleTransformation = {
-    CORNER: { permutation: corners.pieces, orientation: corners.orientation },
-    EDGE: { permutation: edges.pieces, orientation: edges.orientation },
+    CORNER: corners,
+    EDGE: edges,
     CENTER: IDENTITY_CENTER,
   };
   const sequence = min2phase.solve(transformation);
   return oldAlg.algToString(sequence);
+}
+
+/**
+ * Synchronously solves a 3x3x3 KPattern's corner/edge state. Thin wrapper
+ * around `solveTransformation` for callers that already have a `KPattern`
+ * (e.g. tests) - see `scrambleGenerator3x3.ts` for the worklet-dispatched
+ * call site used during actual scramble generation.
+ */
+export function solve3x3x3(pattern: KPattern): string {
+  const corners = pattern.patternData['CORNERS'];
+  const edges = pattern.patternData['EDGES'];
+  return solveTransformation(
+    { permutation: corners.pieces, orientation: corners.orientation },
+    { permutation: edges.pieces, orientation: edges.orientation }
+  );
 }

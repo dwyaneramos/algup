@@ -1,5 +1,5 @@
 import type { KPattern } from 'cubing/kpuzzle';
-import { solve3x3x3 } from '@/src/logic/solver3x3x3';
+import { solve3x3x3, solveTransformation } from '@/src/logic/solver3x3x3';
 
 // `cubing/kpuzzle` only declares an ESM "import" export condition, which Jest's
 // CJS-based resolver can't load (same class of problem `tests/scrambleSimulation.test.ts`
@@ -71,5 +71,19 @@ describe('solve3x3x3', () => {
   it('is idempotent/repeatable across calls (initialize() only runs once)', () => {
     expect(solve3x3x3(AFTER_R)).toBe("R'");
     expect(solve3x3x3(AFTER_R)).toBe("R'");
+  });
+});
+
+describe('solveTransformation', () => {
+  it('solves the same raw corner/edge orbits solve3x3x3 extracts from a KPattern', () => {
+    expect(
+      solveTransformation(
+        { permutation: [4, 0, 2, 3, 7, 5, 6, 1], orientation: [2, 1, 0, 0, 1, 0, 0, 2] },
+        {
+          permutation: [0, 8, 2, 3, 4, 10, 6, 7, 5, 9, 1, 11],
+          orientation: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        }
+      )
+    ).toBe("R'");
   });
 });

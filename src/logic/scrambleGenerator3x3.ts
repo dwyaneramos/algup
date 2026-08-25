@@ -2,7 +2,8 @@ import { Alg } from 'cubing/alg';
 import { cube3x3x3 } from 'cubing/puzzles';
 import type { KPattern, KPuzzle, KTransformation } from 'cubing/kpuzzle';
 import type { ScrambleSolutionPair } from '@/types';
-import { solve3x3x3 } from './solver3x3x3';
+import { solveTransformation } from './solver3x3x3';
+import { runOnSolverThread } from './cubeWorkletRuntime';
 
 // Client-side port of `server/src/lib/scramble.ts` - see that file's git
 // history for the original server-side implementation this was ported from.
@@ -146,17 +147,28 @@ function getKPuzzle(): Promise<KPuzzle> {
 // changes per attempt - so its transformation is computed once by the caller
 // and composed with each attempt's (short) prefix, instead of re-parsing the
 // full "prefix + alg" string from scratch on every retry.
-function generateCandidateScramble(
+async function generateCandidateScramble(
   kpuzzle: KPuzzle,
   algTransformation: KTransformation,
   prefixLength: number
-): string {
+): Promise<string> {
   const prefix = generateMoveList(prefixLength);
   const pattern = kpuzzle
     .algToTransformation(new Alg(prefix))
     .applyTransformation(algTransformation)
     .toKPattern();
-  const solution = solve3x3x3(pattern);
+  // Extract plain permutation/orientation arrays here, on the main thread -
+  // a `KPattern` is a `cubing/kpuzzle` class instance and can't cross into
+  // the worklet runtime below, but the actual solve only ever needed this
+  // plain data in the first place (see `solveTransformation`).
+  const corners = pattern.patternData['CORNERS'];
+  const edges = pattern.patternData['EDGES'];
+  const cornerOrbit = { permutation: corners.pieces, orientation: corners.orientation };
+  const edgeOrbit = { permutation: edges.pieces, orientation: edges.orientation };
+  const solution = await runOnSolverThread(() => {
+    'worklet';
+    return solveTransformation(cornerOrbit, edgeOrbit);
+  });
   return simplifyAlg(`${solution} ${prefix}`);
 }
 
@@ -184,7 +196,7 @@ export async function generateScrambleForAlg(
   let scramble: string;
   do {
     prefixLength++;
-    scramble = generateCandidateScramble(kpuzzle, algTransformation, prefixLength);
+    scramble = await generateCandidateScramble(kpuzzle, algTransformation, prefixLength);
   } while (countMoves(scramble) < MIN_333_SCRAMBLE_LENGTH);
 
   return { scramble, solution: simplifyAlg(alg) };
