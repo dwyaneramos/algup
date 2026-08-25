@@ -36,24 +36,6 @@ jest.mock(
 );
 jest.mock('cubing/puzzles', () => ({ cube3x3x3: {} }), { virtual: true });
 
-// `react-native-worklets` ships unbuilt-for-Jest source (unreachable under
-// Jest's default transform allowlist) - same class of problem as the mocks
-// above. This mock simulates a same-thread runtime so `runOnSolverThread`
-// still runs the real solver logic, just without an actual thread hop.
-jest.mock(
-  'react-native-worklets',
-  () => ({
-    createWorkletRuntime: jest.fn(() => ({})),
-    runOnRuntime: jest.fn(
-      (_runtime: unknown, worklet: (...args: unknown[]) => unknown) =>
-        (...args: unknown[]) =>
-          worklet(...args)
-    ),
-    runOnJS: jest.fn((fn: (...args: unknown[]) => unknown) => fn),
-  }),
-  { virtual: true }
-);
-
 const SOLVER_TOKEN = /^[RUF]['2]?$/;
 const MIN_222_SCRAMBLE_LENGTH = 12;
 

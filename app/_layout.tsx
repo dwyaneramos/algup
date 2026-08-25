@@ -1,4 +1,5 @@
 import '../global.css';
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { useFonts } from '@expo-google-fonts/inter/useFonts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -26,33 +27,39 @@ import { Inter_700Bold_Italic } from '@expo-google-fonts/inter/700Bold_Italic';
 import { Inter_800ExtraBold_Italic } from '@expo-google-fonts/inter/800ExtraBold_Italic';
 import { Inter_900Black_Italic } from '@expo-google-fonts/inter/900Black_Italic';
 import { initDB } from '@/src/db/schema';
-import { getSetting, getAlgSets, getAlgSet } from '@/src/db/queries';
+import { getSetting, getAlgSets, getAlgSet, applyDecayToAllCases } from '@/src/db/queries';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { useSettingsStore } from '@/src/store/settingsStore';
 
 initDB();
+applyDecayToAllCases();
 export default function RootLayout() {
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
-
-  let selectedAlgsetName = getSetting(SELECTED_ALGSET_KEY);
-  if (selectedAlgsetName === null) {
-    // guaranteed to not be null if initDB is called successfully
-    const defaultAlgset = getAlgSets()[0];
-    setSelectedAlgSet(defaultAlgset);
-  } else {
-    const retrievedAlgSet = getAlgSet(selectedAlgsetName);
-    if (retrievedAlgSet !== null) setSelectedAlgSet(retrievedAlgSet);
-    else alert("No Algset exists")
-  }
-
-
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
-  loadAlgSets();
-
   const loadSettings = useSettingsStore(s => s.loadSettings);
-  loadSettings();
+
+  // DB-driven store hydration is a side effect, not something safe to do
+  // during render - calling setSelectedAlgSet here mid-render caused a
+  // "Cannot update a component while rendering a different component" error
+  // (MainScreen is already subscribed to this store), risking it reading a
+  // stale selectedAlgSet on first mount.
+  useEffect(() => {
+    let selectedAlgsetName = getSetting(SELECTED_ALGSET_KEY);
+    if (selectedAlgsetName === null) {
+      // guaranteed to not be null if initDB is called successfully
+      const defaultAlgset = getAlgSets()[0];
+      setSelectedAlgSet(defaultAlgset);
+    } else {
+      const retrievedAlgSet = getAlgSet(selectedAlgsetName);
+      if (retrievedAlgSet !== null) setSelectedAlgSet(retrievedAlgSet);
+      else alert("No Algset exists")
+    }
+
+    loadAlgSets();
+    loadSettings();
+  }, []);
 
   let [fontsLoaded] = useFonts({
     Inter_100Thin,

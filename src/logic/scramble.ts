@@ -232,6 +232,7 @@ export function solvedCube(): CubeState {
     ...Array(9).fill('B'),
   ];
 }
+
 export async function generateScrambleFromAlg(
   algString: string,
   event: CubeEvent,

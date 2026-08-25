@@ -3,7 +3,7 @@ import { cube3x3x3 } from 'cubing/puzzles';
 import type { KPattern, KPuzzle, KTransformation } from 'cubing/kpuzzle';
 import type { ScrambleSolutionPair } from '@/types';
 import { solveTransformation } from './solver3x3x3';
-import { runOnSolverThread } from './cubeWorkletRuntime';
+import { generateScrambleWithRetry } from './scrambleRetry';
 
 // Client-side port of `server/src/lib/scramble.ts` - see that file's git
 // history for the original server-side implementation this was ported from.
@@ -157,18 +157,14 @@ async function generateCandidateScramble(
     .algToTransformation(new Alg(prefix))
     .applyTransformation(algTransformation)
     .toKPattern();
-  // Extract plain permutation/orientation arrays here, on the main thread -
-  // a `KPattern` is a `cubing/kpuzzle` class instance and can't cross into
-  // the worklet runtime below, but the actual solve only ever needed this
-  // plain data in the first place (see `solveTransformation`).
+  // Extract plain permutation/orientation arrays - `solveTransformation`
+  // only ever needed this plain data, not the `cubing/kpuzzle` `KPattern`
+  // class instance itself (see `solveTransformation`'s docstring).
   const corners = pattern.patternData['CORNERS'];
   const edges = pattern.patternData['EDGES'];
   const cornerOrbit = { permutation: corners.pieces, orientation: corners.orientation };
   const edgeOrbit = { permutation: edges.pieces, orientation: edges.orientation };
-  const solution = await runOnSolverThread(() => {
-    'worklet';
-    return solveTransformation(cornerOrbit, edgeOrbit);
-  });
+  const solution = solveTransformation(cornerOrbit, edgeOrbit);
   return simplifyAlg(`${solution} ${prefix}`);
 }
 
@@ -192,12 +188,13 @@ export async function generateScrambleForAlg(
   // solved each time, which converges fast and reliably regardless of how
   // close-to-optimal the underlying solver's output is (verified empirically
   // to converge in single-digit attempts even for the worst case found).
-  let prefixLength = choosePrefixLength(alg, MIN_333_SCRAMBLE_LENGTH) - 1;
-  let scramble: string;
-  do {
-    prefixLength++;
-    scramble = await generateCandidateScramble(kpuzzle, algTransformation, prefixLength);
-  } while (countMoves(scramble) < MIN_333_SCRAMBLE_LENGTH);
+  const startPrefixLength = choosePrefixLength(alg, MIN_333_SCRAMBLE_LENGTH);
+  const scramble = await generateScrambleWithRetry(
+    (prefixLength) => generateCandidateScramble(kpuzzle, algTransformation, prefixLength),
+    (candidate) => countMoves(candidate) >= MIN_333_SCRAMBLE_LENGTH,
+    startPrefixLength
+  );
+  if (scramble === '') return { scramble: '', solution: '' };
 
   return { scramble, solution: simplifyAlg(alg) };
 }

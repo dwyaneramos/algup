@@ -1,4 +1,9 @@
-import { applyScramble, solvedCube, invertAlgorithm } from '@/src/logic/scramble';
+import {
+  applyScramble,
+  solvedCube,
+  invertAlgorithm,
+} from '@/src/logic/scramble';
+import { generateScrambleWithRetry } from '@/src/logic/scrambleRetry';
 import type { CubeState } from '@/types';
 
 // `cubing/alg`'s package.json only declares an "import" (ESM) export
@@ -47,24 +52,6 @@ jest.mock(
 // CJS resolver. Nothing in this file exercises that code path, so a trivial stub is enough
 // to unblock module resolution.
 jest.mock('cubing/puzzles', () => ({ cube3x3x3: {} }), { virtual: true });
-
-// `react-native-worklets` ships unbuilt-for-Jest source (unreachable under
-// Jest's default transform allowlist) - same class of problem as above.
-// Nothing in this file exercises that code path either, so a trivial stub
-// unblocks resolution.
-jest.mock(
-  'react-native-worklets',
-  () => ({
-    createWorkletRuntime: jest.fn(() => ({})),
-    runOnRuntime: jest.fn(
-      (_runtime: unknown, worklet: (...args: unknown[]) => unknown) =>
-        (...args: unknown[]) =>
-          worklet(...args)
-    ),
-    runOnJS: jest.fn((fn: (...args: unknown[]) => unknown) => fn),
-  }),
-  { virtual: true }
-);
 
 // Local sticker positions (index % 9) that hold a 2x2's corner pieces —
 // mirrors the CORNER_POSITIONS set in src/logic/scramble.ts. Kept as a
@@ -201,5 +188,38 @@ describe('applyScramble - 2x2 (cornersOnly=true)', () => {
   it('slice moves interspersed with face moves do not disturb the pinned edges/centers', () => {
     const result = applyScramble("R M U E R' S", true);
     expect(edgeCenterStickers(result)).toEqual(edgeCenterStickers(solvedCube()));
+  });
+});
+
+describe('generateScrambleWithRetry', () => {
+  it('returns the first candidate that satisfies isLongEnough', async () => {
+    const generateCandidate = jest.fn(async (prefixLength: number) => `candidate-${prefixLength}`);
+    const isLongEnough = jest.fn((scramble: string) => scramble === 'candidate-3');
+
+    const result = await generateScrambleWithRetry(generateCandidate, isLongEnough, 1, 10);
+
+    expect(result).toBe('candidate-3');
+    expect(generateCandidate).toHaveBeenCalledTimes(3);
+  });
+
+  it('increments prefixLength by one on each attempt starting from startPrefixLength', async () => {
+    const seenPrefixLengths: number[] = [];
+    const generateCandidate = async (prefixLength: number) => {
+      seenPrefixLengths.push(prefixLength);
+      return 'too-short';
+    };
+
+    await generateScrambleWithRetry(generateCandidate, () => false, 5, 4);
+
+    expect(seenPrefixLengths).toEqual([5, 6, 7, 8]);
+  });
+
+  it('returns an empty string after maxAttempts candidates all fail isLongEnough', async () => {
+    const generateCandidate = jest.fn(async () => 'never-long-enough');
+
+    const result = await generateScrambleWithRetry(generateCandidate, () => false, 1, 5);
+
+    expect(result).toBe('');
+    expect(generateCandidate).toHaveBeenCalledTimes(5);
   });
 });
