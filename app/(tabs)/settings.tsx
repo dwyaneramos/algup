@@ -1,7 +1,23 @@
 import { Children, isValidElement, ReactNode } from 'react';
 import { View, Text, Pressable, Linking, Switch, Platform, ScrollView } from 'react-native';
-import Animated, { FadeIn, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { IconBrandGithub, IconCoffee, IconMail, IconChevronRight, IconArrowBarToUp, IconMinus, IconPlus, IconStack2, IconSchool, IconArrowsDiagonalMinimize2 } from '@tabler/icons-react-native';
+import Animated, {
+  FadeIn,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
+import {
+  IconBrandGithub,
+  IconCoffee,
+  IconMail,
+  IconChevronRight,
+  IconArrowBarToUp,
+  IconMinus,
+  IconPlus,
+  IconStack2,
+  IconSchool,
+  IconArrowsDiagonalMinimize2,
+} from '@tabler/icons-react-native';
 import { COLOR_ACCENT, COLOR_ACCENT_LIGHT } from '@/utils/constants/colors';
 import {
   useSettingsStore,
@@ -35,11 +51,17 @@ const LINKS = [
   },
 ];
 
-function RowIcon({ icon: Icon, color }: { icon: React.ComponentType<{ size: number; color: string }>; color: string }) {
+function RowIcon({
+  icon: Icon,
+  color,
+}: {
+  icon: React.ComponentType<{ size: number; color: string }>;
+  color: string;
+}) {
   return (
-    <View className="w-11 h-11 rounded-full items-center justify-center"  >
+    <View className="h-11 w-11 items-center justify-center rounded-full">
       <Icon size={ICON_SIZE} color={color} />
-    </View >
+    </View>
   );
 }
 
@@ -52,7 +74,12 @@ function RowLabel({ label, subtitle }: { label: string; subtitle: string }) {
   );
 }
 
-function LinkRow({ label, subtitle, url, icon }: {
+function LinkRow({
+  label,
+  subtitle,
+  url,
+  icon,
+}: {
   label: string;
   subtitle: string;
   url: string;
@@ -67,9 +94,12 @@ function LinkRow({ label, subtitle, url, icon }: {
   return (
     <Pressable
       onPress={() => Linking.openURL(url)}
-      onPressIn={() => { scale.value = withSpring(0.98); }}
-      onPressOut={() => { scale.value = withSpring(1); }}
-    >
+      onPressIn={() => {
+        scale.value = withSpring(0.98);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1);
+      }}>
       <Animated.View style={animatedStyle} className="flex-row items-center gap-4 px-4 py-3.5">
         <RowIcon icon={icon} color={COLOR_ACCENT} />
         <RowLabel label={label} subtitle={subtitle} />
@@ -79,7 +109,13 @@ function LinkRow({ label, subtitle, url, icon }: {
   );
 }
 
-function SwitchRow({ icon, label, subtitle, value, onValueChange }: {
+function SwitchRow({
+  icon,
+  label,
+  subtitle,
+  value,
+  onValueChange,
+}: {
   icon: React.ComponentType<{ size: number; color: string }>;
   label: string;
   subtitle: string;
@@ -100,7 +136,15 @@ function SwitchRow({ icon, label, subtitle, value, onValueChange }: {
   );
 }
 
-function StepperRow({ icon, label, subtitle, value, min, max, onValueChange }: {
+function StepperRow({
+  icon,
+  label,
+  subtitle,
+  value,
+  min,
+  max,
+  onValueChange,
+}: {
   icon: React.ComponentType<{ size: number; color: string }>;
   label: string;
   subtitle: string;
@@ -117,18 +161,16 @@ function StepperRow({ icon, label, subtitle, value, min, max, onValueChange }: {
         <Pressable
           onPress={() => onValueChange(value - 1)}
           disabled={value <= min}
-          className="w-8 h-8 rounded-full items-center justify-center bg-gray-100"
-          style={{ opacity: value <= min ? 0.3 : 1 }}
-        >
+          className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
+          style={{ opacity: value <= min ? 0.3 : 1 }}>
           <IconMinus size={16} color={COLOR_ACCENT} />
         </Pressable>
-        <Text className="font-inter-semibold text-lg w-6 text-center">{value}</Text>
+        <Text className="w-6 text-center font-inter-semibold text-lg">{value}</Text>
         <Pressable
           onPress={() => onValueChange(value + 1)}
           disabled={value >= max}
-          className="w-8 h-8 rounded-full items-center justify-center bg-gray-100"
-          style={{ opacity: value >= max ? 0.3 : 1 }}
-        >
+          className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
+          style={{ opacity: value >= max ? 0.3 : 1 }}>
           <IconPlus size={16} color={COLOR_ACCENT} />
         </Pressable>
       </View>
@@ -139,7 +181,7 @@ function StepperRow({ icon, label, subtitle, value, min, max, onValueChange }: {
 function SettingsGroup({ children }: { children: ReactNode }) {
   const rows = Children.toArray(children).filter(isValidElement);
   return (
-    <View className="bg-white rounded-2xl overflow-hidden">
+    <View className="overflow-hidden rounded-2xl bg-white">
       {rows.map((row, i) => (
         <View key={row.key ?? i}>
           {row}
@@ -165,68 +207,68 @@ export default function Settings() {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView
-      className="flex-1 px-4"
-      contentContainerStyle={{ paddingTop: 64, paddingBottom: insets.bottom + 96 }}
-    >
-      <Animated.View entering={FadeIn.duration(300)}>
-        <Text className="text-header mb-2 text-center">Settings</Text>
-
-        <View className="mb-6">
-          <SettingsGroup>
-            <StepperRow
-              icon={IconStack2}
-              label="Max active cases"
-              subtitle="Cases in learning or review at once"
-              value={maxActive}
-              min={MIN_MAX_ACTIVE}
-              max={MAX_MAX_ACTIVE}
-              onValueChange={setMaxActive}
-            />
-            <StepperRow
-              icon={IconSchool}
-              label="Max learning cases"
-              subtitle="New cases introduced at once"
-              value={maxLearning}
-              min={MIN_MAX_LEARNING}
-              max={MAX_MAX_LEARNING}
-              onValueChange={setMaxLearning}
-            />
-            <SwitchRow
-              icon={IconArrowsDiagonalMinimize2}
-              label="Mini draw scramble"
-              subtitle="Shrink the draw scramble"
-              value={miniScramble}
-              onValueChange={setMiniScramble}
-            />
-            <SwitchRow
-              icon={IconArrowsDiagonalMinimize2}
-              label="Scramble with AUFs"
-              subtitle="Practice slight variations"
-              value={scrambleWithAUF}
-              onValueChange={setScrambleWithAUF}
-            />
-            {Platform.OS === 'android' && (
-              <SwitchRow
-                icon={IconArrowBarToUp}
-                label="Shift navbar up"
-                subtitle="Nudge the tab bar above system gestures"
-                value={shiftNavbarUp}
-                onValueChange={setShiftNavbarUp}
+    <View className="flex-1 items-center pt-16">
+      <Text className="text-header mb-2 text-center">Settings</Text>
+      <ScrollView
+        className="w-full flex-1 px-4"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}>
+        <Animated.View entering={FadeIn.duration(300)}>
+          <View className="mb-6">
+            <SettingsGroup>
+              <StepperRow
+                icon={IconStack2}
+                label="Max active cases"
+                subtitle="Cases in learning or review at once"
+                value={maxActive}
+                min={MIN_MAX_ACTIVE}
+                max={MAX_MAX_ACTIVE}
+                onValueChange={setMaxActive}
               />
-            )}
-          </SettingsGroup>
-        </View>
+              <StepperRow
+                icon={IconSchool}
+                label="Max learning cases"
+                subtitle="New cases introduced at once"
+                value={maxLearning}
+                min={MIN_MAX_LEARNING}
+                max={MAX_MAX_LEARNING}
+                onValueChange={setMaxLearning}
+              />
+              <SwitchRow
+                icon={IconArrowsDiagonalMinimize2}
+                label="Mini draw scramble"
+                subtitle="Shrink the draw scramble"
+                value={miniScramble}
+                onValueChange={setMiniScramble}
+              />
+              <SwitchRow
+                icon={IconArrowsDiagonalMinimize2}
+                label="Scramble with AUFs"
+                subtitle="Practice slight variations"
+                value={scrambleWithAUF}
+                onValueChange={setScrambleWithAUF}
+              />
+              {Platform.OS === 'android' && (
+                <SwitchRow
+                  icon={IconArrowBarToUp}
+                  label="Shift navbar up"
+                  subtitle="Nudge the tab bar above system gestures"
+                  value={shiftNavbarUp}
+                  onValueChange={setShiftNavbarUp}
+                />
+              )}
+            </SettingsGroup>
+          </View>
 
-        <View>
-          <Text className="text-subheader mb-2 text-center">Links</Text>
-          <SettingsGroup>
-            {LINKS.map((link) => (
-              <LinkRow key={link.label} {...link} />
-            ))}
-          </SettingsGroup>
-        </View>
-      </Animated.View>
-    </ScrollView>
+          <View>
+            <Text className="text-subheader mb-2 text-center">Links</Text>
+            <SettingsGroup>
+              {LINKS.map((link) => (
+                <LinkRow key={link.label} {...link} />
+              ))}
+            </SettingsGroup>
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
 }
