@@ -65,7 +65,7 @@ export function initDB() {
 
   // Scrambles used to be prefetched in bulk and queued in this table to hide
   // network latency from a remote server; scramble generation now runs
-  // on-device (see src/logic/scrambleGenerator.ts) and no longer needs a
+  // on-device (see src/logic/scrambleGenerator3x3.ts) and no longer needs a
   // queue, so this table is no longer created - just cleaned up once for
   // anyone who already has it from an earlier app version.
   db.execSync('DROP TABLE IF EXISTS scramble_queue');

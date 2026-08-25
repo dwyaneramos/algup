@@ -38,7 +38,7 @@ function ensureInitialized(): void {
 // `Combine`/`Invert` calls index into it unconditionally, so it must be present.
 // Center-homing (needed before this is ever called, since an off-home center
 // state would otherwise be silently ignored) is the caller's responsibility -
-// see `withCentersHome` in `scrambleGenerator.ts`.
+// see `withCentersHome` in `scrambleGenerator3x3.ts`.
 const IDENTITY_CENTER: OldKPuzzleOrbit = {
   permutation: [0, 1, 2, 3, 4, 5],
   orientation: [0, 0, 0, 0, 0, 0],

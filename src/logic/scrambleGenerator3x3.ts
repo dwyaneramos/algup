@@ -1,25 +1,16 @@
 import { Alg } from 'cubing/alg';
 import { cube3x3x3 } from 'cubing/puzzles';
 import type { KPattern, KPuzzle, KTransformation } from 'cubing/kpuzzle';
-import type { CubeEvent, ScrambleSolutionPair } from '@/types';
+import type { ScrambleSolutionPair } from '@/types';
 import { solve3x3x3 } from './solver3x3x3';
 
-// Client-side port of `server/src/lib/scramble.ts` - see that file's git history
-// for the original server-side implementation this was ported from. The server
-// used a dedicated 2x2x2 solver (`experimentalSolve2x2x2`) that ignores edges
-// entirely, producing tighter, near-minimal 2x2 scrambles. Here, both events
-// reuse the same `solve3x3x3` (min2phase-backed, corners+edges+centers) solver -
-// a 2x2 case alg only ever uses ordinary face-turn/rotation notation, so running
-// it through the full 3x3x3 solve pipeline still produces a correct, legally-
-// notated 2x2 scramble; it's just solving a harder (edges-inclusive) problem
-// than strictly necessary, so 2x2 scrambles come out closer to 3x3-length than
-// the server's tighter minimum. Not a correctness issue - MIN_222_SCRAMBLE_LENGTH
-// is a floor, not a ceiling - but worth knowing if a dedicated, shorter 2x2-only
-// solver is added later.
+// Client-side port of `server/src/lib/scramble.ts` - see that file's git
+// history for the original server-side implementation this was ported from.
+// 2x2 scrambles no longer flow through this file - see
+// `scrambleGenerator2x2.ts` for the dedicated R/U/F-only solver.
 
 const PREFIX_LENGTH = 4;
 const MIN_333_SCRAMBLE_LENGTH = 19;
-const MIN_222_SCRAMBLE_LENGTH = 12;
 const POSSIBLE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'];
 const OPPOSITE_MOVES: Record<string, string> = {
   R: 'L',
@@ -54,7 +45,7 @@ function generateAUF(): string {
   return POSSIBLE_AUFS[Math.floor(Math.random() * POSSIBLE_AUFS.length)];
 }
 
-function countMoves(alg: string): number {
+export function countMoves(alg: string): number {
   return alg.split(/\s+/).filter(Boolean).length;
 }
 
@@ -64,7 +55,7 @@ function countMoves(alg: string): number {
 // actual target up front (rather than a fixed constant) makes the first
 // attempt far more likely to already be long enough, so the retry loop below
 // is a fallback for solver-output variance rather than doing most of the work.
-function choosePrefixLength(alg: string, minLength: number): number {
+export function choosePrefixLength(alg: string, minLength: number): number {
   return Math.max(PREFIX_LENGTH, minLength - countMoves(alg));
 }
 
@@ -171,14 +162,14 @@ function generateCandidateScramble(
 
 export async function generateScrambleForAlg(
   rawAlg: string,
-  event: CubeEvent,
   scrambleWithAUF: boolean = false
 ): Promise<ScrambleSolutionPair> {
-  console.log("GENERATING NEW SCRAMBLE")
   const kpuzzle = await getKPuzzle();
-  const alg = withCentersHome(kpuzzle, `${scrambleWithAUF ? generateAUF() : ''} ${rawAlg} ${scrambleWithAUF ? generateAUF() : ''}`);
+  const alg = withCentersHome(
+    kpuzzle,
+    `${scrambleWithAUF ? generateAUF() : ''} ${rawAlg} ${scrambleWithAUF ? generateAUF() : ''}`
+  );
   const algTransformation = kpuzzle.algToTransformation(new Alg(alg));
-  const minLength = event === '222' ? MIN_222_SCRAMBLE_LENGTH : MIN_333_SCRAMBLE_LENGTH;
 
   // min2phase is a genuinely near-minimal solver, so for a lightly-mixed
   // state (short alg + a short prefix) its solutions cluster short - a
@@ -189,12 +180,12 @@ export async function generateScrambleForAlg(
   // solved each time, which converges fast and reliably regardless of how
   // close-to-optimal the underlying solver's output is (verified empirically
   // to converge in single-digit attempts even for the worst case found).
-  let prefixLength = choosePrefixLength(alg, minLength) - 1;
+  let prefixLength = choosePrefixLength(alg, MIN_333_SCRAMBLE_LENGTH) - 1;
   let scramble: string;
   do {
     prefixLength++;
     scramble = generateCandidateScramble(kpuzzle, algTransformation, prefixLength);
-  } while (countMoves(scramble) < minLength);
+  } while (countMoves(scramble) < MIN_333_SCRAMBLE_LENGTH);
 
   return { scramble, solution: simplifyAlg(alg) };
 }

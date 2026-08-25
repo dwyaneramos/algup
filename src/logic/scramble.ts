@@ -1,6 +1,7 @@
 import { Alg } from 'cubing/alg';
 import { sanitiseAlgorithm } from './alg';
-import { generateScrambleForAlg as generateScrambleForAlgLocally } from './scrambleGenerator';
+import { generateScrambleForAlg as generateScrambleForAlgLocally } from './scrambleGenerator3x3';
+import { generateScramble2x2ForAlg } from './scrambleGenerator2x2';
 import type { CubeState, ScrambleSolutionPair, CubeEvent } from '@/types';
 
 // 54 stickers, 9 per face in this order:
@@ -193,7 +194,7 @@ function cornerCyclesOnly(cycles: number[][]): number[][] {
   return cycles.filter((cycle) => cycle.every((i) => CORNER_POSITIONS.has(i % 9)));
 }
 
-function applyMove(cube: CubeState, move: string, cornersOnly: boolean): CubeState {
+export function applyMove(cube: CubeState, move: string, cornersOnly: boolean): CubeState {
   const next = [...cube];
   const base = move.replace("'", '').replace('2', '').replace('3', '');
   const isPrime = move.includes("'");
@@ -234,7 +235,10 @@ export function solvedCube(): CubeState {
 export async function generateScrambleFromAlg(
   algString: string,
   event: CubeEvent,
-  scrambleWithAUF: boolean = false,
+  scrambleWithAUF: boolean = false
 ): Promise<ScrambleSolutionPair> {
-  return generateScrambleForAlgLocally(sanitiseAlgorithm(algString), event, scrambleWithAUF);
+  const alg = sanitiseAlgorithm(algString);
+  return event === '222'
+    ? generateScramble2x2ForAlg(alg, scrambleWithAUF)
+    : generateScrambleForAlgLocally(alg, scrambleWithAUF);
 }
