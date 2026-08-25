@@ -180,7 +180,7 @@ export default function Select() {
       <Sheet ref={deleteConfirmSheetRef} snapPoints={['20%']}>
         <View className="flex flex-col gap-4 items-center ">
           <Text className="text-form-header">Are you sure you want to delete {selectedAlgSet?.name}?</Text>
-          <Pressable className="rounded-full p-4"
+          <Pressable className="rounded-full bg-red-500 p-4"
             onPress={() => {
               if (selectedAlgSet === null) return;
               const algToDelete = selectedAlgSet.name;
