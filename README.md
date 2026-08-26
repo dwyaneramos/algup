@@ -50,38 +50,6 @@ _Below are instructions for how you can clone and run a development build of the
    npx expo start
    ```
 
-#### Backend (used for scramble generation)
-
-1. Enter the project
-
-   ```sh
-   cd algup/
-   ```
-
-2. Make a .env which containing the following:
-
-   ```
-   EXPO_PUBLIC_API_URL = <IP addresss given when you start your mobile app>:3000
-   ```
-3. Enter the server directory
-
-   ```sh
-   cd server/
-   ```
-
-4. Install NPM packages
-
-   ```sh
-   npm install
-   ```
-
-5. Run the dev environment
-
-   ```sh
-   npm run dev
-   ```
-
-
 <!-- WIREFRAMES / MOCKUPS -->
 
 # Wireframes / Mockups
