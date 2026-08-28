@@ -1,5 +1,5 @@
 import { ALG_SETS } from '@/src/logic/algsets';
-import { createAlgSetWithCases, getDb } from '@/src/db/queries';
+import { createAlgSetWithCases, createFolder, getDb, setAlgSetFolder } from '@/src/db/queries';
 
 const db = getDb();
 
@@ -9,6 +9,10 @@ function seedAlgSets() {
 
   for (const algSet of ALG_SETS) {
     createAlgSetWithCases(algSet.name, algSet.event, algSet.cases);
+    if (algSet.folder) {
+      createFolder(algSet.folder);
+      setAlgSetFolder(algSet.name, algSet.folder);
+    }
   }
 }
 
