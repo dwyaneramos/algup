@@ -42,7 +42,7 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
   },
 
   deleteAlgSet: (algSet): boolean => {
-    const { algSets } = get();
+    const { algSets, selectedAlgSet } = get();
 
     if (algSets.length <= 1) return false;
 
@@ -51,10 +51,14 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
     clearPendingItem(algSet.name);
 
     const remaining = algSets.filter((a) => a.name !== algSet.name);
-    const nextSelected = remaining[0];
 
-    set({ algSets: remaining, selectedAlgSet: nextSelected });
-    setSetting(SELECTED_ALGSET_KEY, nextSelected.name);
+    if (selectedAlgSet?.name === algSet.name) {
+      const nextSelected = remaining[0];
+      set({ algSets: remaining, selectedAlgSet: nextSelected });
+      setSetting(SELECTED_ALGSET_KEY, nextSelected.name);
+    } else {
+      set({ algSets: remaining });
+    }
     return true;
   },
 }));
