@@ -1,7 +1,7 @@
 import { Text, View, Pressable } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withTiming, interpolateColor,
+  useSharedValue, useAnimatedStyle, withTiming, withSpring, interpolateColor,
 } from 'react-native-reanimated';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
@@ -11,6 +11,7 @@ import { invertAlgorithm } from '@/src/logic/scramble';
 import type { AlgSet } from '@/types';
 
 const COLOR_TRANSITION_DURATION = 150;
+const PRESS_SCALE = 0.97;
 
 type AlgSetRowProps = {
   algset: AlgSet;
@@ -24,9 +25,10 @@ export function AlgSetRow({ algset, onLongPress }: AlgSetRowProps) {
 
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
+  const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
     backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
   }));
 
@@ -50,12 +52,22 @@ export function AlgSetRow({ algset, onLongPress }: AlgSetRowProps) {
     setSelectedAlgSet(algset);
   };
 
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(PRESS_SCALE);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1);
+  }, [scale]);
+
   //TODO: scramble displayed is just the inverse of the fetched algorithm
   return (
     <Animated.View style={animatedStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
       <Pressable
         onPress={handlePress}
         onLongPress={() => onLongPress(algset)}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         className="flex-1 flex-row justify-between"
       >
         <View className="flex flex-col justify-center">

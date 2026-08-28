@@ -1,12 +1,16 @@
 import { Text, View, Pressable } from 'react-native';
-import { useEffect, useState } from 'react';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useEffect, useState, useCallback } from 'react';
+import Animated, {
+  FadeIn, FadeOut, useSharedValue, useAnimatedStyle, withSpring,
+} from 'react-native-reanimated';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { AlgSetRow } from '@/components/AlgSetRow';
 import { DrawScramble } from '@/components/DrawScramble';
 import { getFirstAlgSetInFolder, getFirstCase } from '@/src/db/queries';
 import { invertAlgorithm } from '@/src/logic/scramble';
 import type { AlgSet, Folder } from '@/types';
+
+const PRESS_SCALE = 0.97;
 
 type FolderRowProps = {
   folder: Folder;
@@ -19,6 +23,19 @@ export function FolderRow({ folder, algsets, onLongPress, onLongPressAlgSet }: F
   const selectedAlgSetName = useAlgSetStore(s => s.selectedAlgSet?.name);
   const [expanded, setExpanded] = useState(false);
   const [scramble, setScramble] = useState<string | null>(null);
+  const scale = useSharedValue(1);
+
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(PRESS_SCALE);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1);
+  }, [scale]);
 
   useEffect(() => {
     const firstAlgSet = getFirstAlgSetInFolder(folder.name);
@@ -39,10 +56,12 @@ export function FolderRow({ folder, algsets, onLongPress, onLongPressAlgSet }: F
 
   return (
     <View className="w-full flex flex-col gap-2">
-      <View className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
+      <Animated.View style={pressStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
         <Pressable
           onPress={toggleExpanded}
           onLongPress={() => onLongPress(folder)}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
           className="flex-1 flex-row justify-between"
         >
           <View className="flex flex-col justify-center">
@@ -64,7 +83,7 @@ export function FolderRow({ folder, algsets, onLongPress, onLongPressAlgSet }: F
             <View className="h-16 w-16 bg-gray-200 rounded-xl" />
           )}
         </Pressable>
-      </View>
+      </Animated.View>
 
       {expanded && (
         <View className="flex flex-col gap-2 pl-4">
