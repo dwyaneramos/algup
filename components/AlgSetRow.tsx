@@ -23,12 +23,11 @@ export function AlgSetRow({ algset, onLongPress }: AlgSetRowProps) {
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
   const [scramble, setScramble] = useState<string | null>(null);
 
-  const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    transform: [{ scale: scale.value }],
     backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
   }));
 
@@ -46,9 +45,6 @@ export function AlgSetRow({ algset, onLongPress }: AlgSetRowProps) {
   }, [isSelected]);
   const handlePress = () => {
     if (isSelected) return;
-    translateY.value = withTiming(-10, { duration: 200 }, () => {
-      translateY.value = withTiming(0, { duration: 350 });
-    });
     setSelectedAlgSet(algset);
   };
 
