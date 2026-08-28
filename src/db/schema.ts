@@ -17,6 +17,7 @@ export function resetDB() {
   db.execSync('DROP TABLE IF EXISTS cases');
   db.execSync('DROP TABLE IF EXISTS algsets');
   db.execSync('DROP TABLE IF EXISTS practice_log');
+  db.execSync('DROP TABLE IF EXISTS folders');
 }
 
 export function initDB() {
@@ -24,6 +25,10 @@ export function initDB() {
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS folders (
+      name TEXT PRIMARY KEY
     );
 
     CREATE TABLE IF NOT EXISTS algsets (
@@ -61,6 +66,10 @@ export function initDB() {
   const hasEvent = algsetColumns.some((c) => c.name === 'event');
   if (!hasEvent) {
     db.execSync("ALTER TABLE algsets ADD COLUMN event TEXT NOT NULL DEFAULT '333'");
+  }
+  const hasFolder = algsetColumns.some((c) => c.name === 'folder');
+  if (!hasFolder) {
+    db.execSync('ALTER TABLE algsets ADD COLUMN folder TEXT REFERENCES folders(name)');
   }
 
   seedAlgSets();
