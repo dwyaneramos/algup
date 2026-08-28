@@ -8,7 +8,7 @@ import Reanimated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { COLOR_ACCENT } from '@/utils/constants/colors';
-import { IconPlus, IconPencil, IconTrash, IconDotsVertical } from '@tabler/icons-react-native';
+import { IconPlus, IconPencil, IconTrash, IconDotsVertical, IconFolderPlus } from '@tabler/icons-react-native';
 import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import type { FabRef, IconComponent, SatelliteAction } from '@/types';
@@ -38,6 +38,7 @@ const SHADOW = {
 
 type FabProps = {
   onCreate: () => void;
+  onCreateFolder: () => void;
   onEdit: () => void;
   onDelete: () => void;
   bottomOffset?: number;
@@ -127,7 +128,7 @@ function SatelliteButton({
 }
 
 export const Fab = forwardRef<FabRef, FabProps>(function Fab(
-  { onCreate, onEdit, onDelete, bottomOffset = 0 },
+  { onCreate, onCreateFolder, onEdit, onDelete, bottomOffset = 0 },
   ref
 ) {
   const [isOpen, setIsOpen] = useState(false);
@@ -186,6 +187,7 @@ export const Fab = forwardRef<FabRef, FabProps>(function Fab(
     { key: 'delete', icon: IconTrash, onPress: onDelete, backgroundColor: '#ef4444' },
     { key: 'edit', icon: IconPencil, onPress: onEdit },
     { key: 'create', icon: IconPlus, onPress: onCreate },
+    { key: 'create-folder', icon: IconFolderPlus, onPress: onCreateFolder },
   ];
 
   return (
