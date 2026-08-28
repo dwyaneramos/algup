@@ -1,4 +1,9 @@
-import { createAlgSetWithCases, applyAlgSetCaseChanges, renameAlgSet } from '@/src/db/queries';
+import {
+  createAlgSetWithCases,
+  applyAlgSetCaseChanges,
+  renameAlgSet,
+  setAlgSetFolder,
+} from '@/src/db/queries';
 import { clearPendingItem } from '@/src/logic/pendingScramble';
 import { validateAlgorithm } from '@/src/logic/alg';
 import type { Case, AlgSet } from '@/types';
@@ -59,6 +64,11 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
     }
 
     applyAlgSetCaseChanges(caseIDs, edited.name, casesToInsert);
+
+    if ((old.folder ?? null) !== (edited.folder ?? null)) {
+      setAlgSetFolder(edited.name, edited.folder ?? null);
+    }
+
     clearPendingItem(edited.name);
     return true;
   } catch (error) {
@@ -70,6 +80,9 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
 export function insertNewAlgSet(algset: AlgSet): boolean {
   try {
     createAlgSetWithCases(algset.name, algset.event, algset.cases);
+    if (algset.folder) {
+      setAlgSetFolder(algset.name, algset.folder);
+    }
     return true;
   } catch (error) {
     console.error(`Failed to store new algset "${algset.name}":`, error);
