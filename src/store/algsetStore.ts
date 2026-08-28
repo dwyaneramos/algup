@@ -18,7 +18,15 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
     set({ algSets });
 
     const { selectedAlgSet } = get();
-    if (selectedAlgSet || algSets.length === 0) return;
+    if (algSets.length === 0) return;
+
+    // Re-resolve the current selection against the freshly loaded list so it
+    // never keeps pointing at a stale object (e.g. an outdated `folder`).
+    if (selectedAlgSet) {
+      const fresh = algSets.find((a) => a.name === selectedAlgSet.name);
+      if (fresh) set({ selectedAlgSet: fresh });
+      return;
+    }
 
     const savedName = getSetting(SELECTED_ALGSET_KEY);
     const restored = algSets.find((a) => a.name === savedName);
