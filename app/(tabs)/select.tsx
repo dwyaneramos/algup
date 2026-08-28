@@ -14,6 +14,7 @@ import { CreateAlgSetSheet } from '@/components/CreateAlgSetSheet';
 import { EditAlgSetSheet } from '@/components/EditAlgSetSheet';
 import { CreateFolderSheet } from '@/components/CreateFolderSheet';
 import { EditFolderSheet } from '@/components/EditFolderSheet';
+import { RowOptionsSheet } from '@/components/RowOptionsSheet';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sheet } from '@/components/Sheet'
@@ -24,6 +25,12 @@ import type {
 
 
 const TOAST_DURATION = 2500;
+
+type RowTarget = { type: 'algset'; algset: AlgSet } | { type: 'folder'; folder: Folder };
+
+function targetKey(target: RowTarget): string {
+  return target.type === 'algset' ? `algset:${target.algset.name}` : `folder:${target.folder.name}`;
+}
 
 export default function Select() {
   const algsets = useAlgSetStore(s => s.algSets);
@@ -48,9 +55,11 @@ export default function Select() {
   const createFolderSheetRef = useRef<CreateFolderSheetRef>(null);
   const editFolderSheetRef = useRef<EditFolderSheetRef>(null);
   const deleteFolderConfirmSheetRef = useRef<SheetRef>(null);
+  const optionsSheetRef = useRef<SheetRef>(null);
   const fabRef = useRef<FabRef>(null);
 
-  const [folderTarget, setFolderTarget] = useState<Folder | null>(null);
+  const [rowTarget, setRowTarget] = useState<RowTarget | null>(null);
+  const openTargetKeyRef = useRef<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -63,31 +72,37 @@ export default function Select() {
     createSheetRef.current?.present();
   }, []);
 
-  const displayEditAlgSetSheet = useCallback(() => {
-    if (selectedAlgSet === null) return;
-    editSheetRef.current?.present();
-  }, [selectedAlgSet]);
-
-  const displayConfirmDeleteSheet = useCallback(() => {
-    if (selectedAlgSet === null) return;
-    deleteConfirmSheetRef.current?.present();
-  }, [selectedAlgSet]);
-
   const displayCreateFolderSheet = useCallback(() => {
     createFolderSheetRef.current?.present();
   }, []);
 
-  const displayEditFolderSheet = useCallback((folder: Folder) => {
-    setFolderTarget(folder);
-    editFolderSheetRef.current?.present();
+  const openRowOptions = useCallback((target: RowTarget) => {
+    const key = targetKey(target);
+    if (openTargetKeyRef.current === key) {
+      optionsSheetRef.current?.dismiss();
+      openTargetKeyRef.current = null;
+      return;
+    }
+    setRowTarget(target);
+    openTargetKeyRef.current = key;
+    optionsSheetRef.current?.present();
   }, []);
 
-  const displayConfirmDeleteFolderSheet = useCallback((folder: Folder) => {
-    setFolderTarget(folder);
-    deleteFolderConfirmSheetRef.current?.present();
+  const handleOptionsDismiss = useCallback(() => {
+    openTargetKeyRef.current = null;
   }, []);
+
+  const handleAlgSetLongPress = useCallback((algset: AlgSet) => {
+    openRowOptions({ type: 'algset', algset });
+  }, [openRowOptions]);
+
+  const handleFolderLongPress = useCallback((folder: Folder) => {
+    openRowOptions({ type: 'folder', folder });
+  }, [openRowOptions]);
 
   const ungroupedAlgsets = algsets.filter((a) => !a.folder);
+  const algSetTarget = rowTarget?.type === 'algset' ? rowTarget.algset : null;
+  const folderTarget = rowTarget?.type === 'folder' ? rowTarget.folder : null;
   const folderTargetMemberCount = folderTarget
     ? algsets.filter((a) => a.folder === folderTarget.name).length
     : 0;
@@ -114,11 +129,11 @@ export default function Select() {
               <FolderRow
                 folder={item.folder}
                 algsets={algsets.filter((a) => a.folder === item.folder.name)}
-                onEdit={displayEditFolderSheet}
-                onDelete={displayConfirmDeleteFolderSheet}
+                onLongPress={handleFolderLongPress}
+                onLongPressAlgSet={handleAlgSetLongPress}
               />
             ) : (
-              <AlgSetRow algset={item.algset} />
+              <AlgSetRow algset={item.algset} onLongPress={handleAlgSetLongPress} />
             )
           }
           keyExtractor={(item) => (item.type === 'folder' ? `folder-${item.folder.name}` : item.algset.name)}
@@ -131,20 +146,31 @@ export default function Select() {
         ref={fabRef}
         onCreate={displayCreateAlgSetSheet}
         onCreateFolder={displayCreateFolderSheet}
-        onEdit={displayEditAlgSetSheet}
+      />
+
+      <RowOptionsSheet
+        ref={optionsSheetRef}
+        title={algSetTarget?.name ?? folderTarget?.name ?? ''}
+        onDismiss={handleOptionsDismiss}
+        onEdit={() => {
+          if (algSetTarget) editSheetRef.current?.present();
+          else if (folderTarget) editFolderSheetRef.current?.present();
+        }}
         onDelete={() => {
-          displayConfirmDeleteSheet()
+          if (algSetTarget) deleteConfirmSheetRef.current?.present();
+          else if (folderTarget) deleteFolderConfirmSheetRef.current?.present();
         }}
       />
+
       <EditAlgSetSheet
-        algset={selectedAlgSet!}
+        algset={algSetTarget!}
         ref={editSheetRef}
         onEdit={(algset: AlgSet, editedAlgset: AlgSet) => {
           const editSuccessful = editAlgset(algset, editedAlgset)
           if (editSuccessful) {
             loadAlgSets();
             const refreshed = getAlgSet(editedAlgset.name);
-            if (refreshed) {
+            if (refreshed && selectedAlgSet?.name === algset.name) {
               setSelectedAlgSet(refreshed);
             }
             showToast(`${algset.name} edited successfully!`, TOAST_DURATION);
@@ -192,7 +218,8 @@ export default function Select() {
           }
         }}
         onDelete={(folder) => {
-          setFolderTarget(folder);
+          setRowTarget({ type: 'folder', folder });
+          openTargetKeyRef.current = targetKey({ type: 'folder', folder });
           deleteFolderConfirmSheetRef.current?.present();
         }}
       />
@@ -200,12 +227,12 @@ export default function Select() {
 
       <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "20%" : "25%"]}>
         <View className="flex flex-col gap-4 items-center ">
-          <Text className="text-form-header">Are you sure you want to delete {selectedAlgSet?.name}?</Text>
+          <Text className="text-form-header">Are you sure you want to delete {algSetTarget?.name}?</Text>
           <Pressable className="rounded-full bg-red-500 p-4"
             onPress={() => {
-              if (selectedAlgSet === null) return;
-              const algToDelete = selectedAlgSet.name;
-              if (deleteAlgSet(selectedAlgSet)) {
+              if (algSetTarget === null) return;
+              const algToDelete = algSetTarget.name;
+              if (deleteAlgSet(algSetTarget)) {
                 showToast(`${algToDelete} deleted successfully!`, TOAST_DURATION);
               } else {
                 showToast('Must have at least one algset');

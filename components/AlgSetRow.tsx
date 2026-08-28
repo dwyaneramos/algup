@@ -12,7 +12,12 @@ import type { AlgSet } from '@/types';
 
 const COLOR_TRANSITION_DURATION = 150;
 
-export function AlgSetRow({ algset }: { algset: AlgSet }) {
+type AlgSetRowProps = {
+  algset: AlgSet;
+  onLongPress: (algset: AlgSet) => void;
+};
+
+export function AlgSetRow({ algset, onLongPress }: AlgSetRowProps) {
   const isSelected = useAlgSetStore(s => s.selectedAlgSet?.name === algset.name);
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
   const [scramble, setScramble] = useState<string | null>(null);
@@ -48,7 +53,11 @@ export function AlgSetRow({ algset }: { algset: AlgSet }) {
   //TODO: scramble displayed is just the inverse of the fetched algorithm
   return (
     <Animated.View style={animatedStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
-      <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
+      <Pressable
+        onPress={handlePress}
+        onLongPress={() => onLongPress(algset)}
+        className="flex-1 flex-row justify-between"
+      >
         <View className="flex flex-col justify-center">
           <Text className="font-inter-semibold text-xl">{algset.name}</Text>
           <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
