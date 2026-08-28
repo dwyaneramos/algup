@@ -99,7 +99,6 @@ export function useTrainingSession(algset: string) {
       setScramble(pending.scramble);
       setSolution(pending.solution);
       currentItem.current = pending;
-      console.log(`[Algset: ${algset}] Restored pending item for caseId=${pending.caseId}`);
     } else {
       const firstCase = pickNextCase(active);
       setCurrentCase(firstCase);
@@ -124,9 +123,6 @@ export function useTrainingSession(algset: string) {
 
       return () => {
         if (currentItem.current) {
-          console.log(
-            `[Algset: ${algset}] Storing pending item for caseId=${currentItem.current.caseId}`
-          );
           setPendingItem(algset, currentItem.current);
           currentItem.current = null;
         }
@@ -135,16 +131,12 @@ export function useTrainingSession(algset: string) {
   );
 
   const advanceToNextCase = async (updatedCases: CaseWithProgress[]) => {
-    console.log("CALLED HERE")
     const nextCase = pickNextCase(updatedCases);
-    console.log(nextCase)
     setCurrentCase(nextCase);
     if (nextCase) {
       setIsLoading(true);
       await waitForNextFrame();
-      console.log("FETCHING NEW SCMRALBe")
       const fetched = await fetchFreshScramble(nextCase.alg, event, algset, 'next', scrambleWithAUF);
-      console.log("finished fetching")
       if (fetched) {
         setScramble(fetched.scramble);
         setSolution(fetched.solution);
