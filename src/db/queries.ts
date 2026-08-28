@@ -45,19 +45,21 @@ export function createAlgSetWithCases(name: string, event: CubeEvent, cases: Cas
   });
 }
 
+function deleteAlgsetInternal(db: SQLite.SQLiteDatabase, algsetName: string): void {
+  db.runSync(
+    `DELETE FROM case_progress
+     WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
+    [algsetName]
+  );
+
+  db.runSync('DELETE FROM cases WHERE algset = ?', [algsetName]);
+
+  db.runSync('DELETE FROM algsets WHERE name = ?', [algsetName]);
+}
+
 export function deleteAlgset(algsetName: string): void {
   const db = getDb();
-  db.withTransactionSync(() => {
-    db.runSync(
-      `DELETE FROM case_progress
-       WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
-      [algsetName]
-    );
-
-    db.runSync('DELETE FROM cases WHERE algset = ?', [algsetName]);
-
-    db.runSync('DELETE FROM algsets WHERE name = ?', [algsetName]);
-  });
+  db.withTransactionSync(() => deleteAlgsetInternal(db, algsetName));
 }
 
 export function getFirstCase(algsetName: string): Case | null {
@@ -122,12 +124,7 @@ export function deleteFolder(name: string): void {
       name,
     ]);
     for (const member of members) {
-      db.runSync(
-        `DELETE FROM case_progress WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
-        [member.name]
-      );
-      db.runSync('DELETE FROM cases WHERE algset = ?', [member.name]);
-      db.runSync('DELETE FROM algsets WHERE name = ?', [member.name]);
+      deleteAlgsetInternal(db, member.name);
     }
     db.runSync('DELETE FROM folders WHERE name = ?', [name]);
   });
