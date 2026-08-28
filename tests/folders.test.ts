@@ -1,4 +1,9 @@
-import { validateFolderName, validateFolder, folderAlreadyExistsError, folderNameLengthError } from '@/src/logic/folders';
+import {
+  validateFolderName,
+  validateFolder,
+  folderAlreadyExistsError,
+  folderNameLengthError,
+} from '@/src/logic/folders';
 import type { Folder } from '@/types';
 
 describe('validateFolderName', () => {
