@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { InteractionManager } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
   getCasesWithProgress,
@@ -47,12 +48,11 @@ function matchCaseForItem(
   );
 }
 
-// Scramble generation is synchronous, CPU-heavy work - without forcing a
-// real frame to render first, the "Loading scramble..." state set right
-// before it would never actually get painted, since JS drains all pending
-// microtasks (including the generation work) before it can render a frame.
+// Scramble generation is synchronous, CPU-heavy work - without waiting here,
+// the "Loading scramble..." state set right before it would never actually
+// get painted, since JS drains all pending work before it can render a frame.
 function waitForNextFrame(): Promise<void> {
-  return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  return new Promise((resolve) => InteractionManager.runAfterInteractions(() => resolve()));
 }
 
 async function fetchFreshScramble(
