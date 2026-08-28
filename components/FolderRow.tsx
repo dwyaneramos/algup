@@ -56,7 +56,7 @@ export function FolderRow({ folder, algsets, onLongPress, onLongPressAlgSet }: F
 
   return (
     <View className="w-full flex flex-col gap-2">
-      <Animated.View style={pressStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
+      <Animated.View style={pressStyle} className={`w-full py-3 px-3 rounded-2xl  flex flex-row justify-between min-h-20 ${selectedChild ? 'bg-accent-light' : ''}`}>
         <Pressable
           onPress={toggleExpanded}
           onLongPress={() => onLongPress(folder)}
@@ -66,10 +66,10 @@ export function FolderRow({ folder, algsets, onLongPress, onLongPressAlgSet }: F
         >
           <View className="flex flex-col justify-center">
             <Text className="font-inter-semibold text-xl">{folder.name}</Text>
-            <Text className="font-inter-medium text-muted">
+            <Text className={`font-inter-medium ${selectedChild ? "text-black" : "text-muted"}`}>
               {selectedChild ? `${selectedChild.name} selected` : 'No algset selected'}
             </Text>
-            <Text className="font-inter-medium text-muted">
+            <Text className={`font-inter-medium ${selectedChild ? "text-black" : "text-muted"}`}>
               {algsets.length} algset{algsets.length !== 1 ? 's' : ''}
             </Text>
           </View>
@@ -85,19 +85,21 @@ export function FolderRow({ folder, algsets, onLongPress, onLongPressAlgSet }: F
         </Pressable>
       </Animated.View>
 
-      {expanded && (
-        <View className="flex flex-col gap-2 pl-4">
-          {algsets.map((algset) => (
-            <Animated.View
-              key={algset.name}
-              entering={FadeIn.duration(220)}
-              exiting={FadeOut.duration(180)}
-            >
-              <AlgSetRow algset={algset} onLongPress={onLongPressAlgSet} />
-            </Animated.View>
-          ))}
-        </View>
-      )}
-    </View>
+      {
+        expanded && (
+          <View className="flex flex-col gap-2 pl-4">
+            {algsets.map((algset) => (
+              <Animated.View
+                key={algset.name}
+                entering={FadeIn.duration(220)}
+                exiting={FadeOut.duration(180)}
+              >
+                <AlgSetRow algset={algset} onLongPress={onLongPressAlgSet} />
+              </Animated.View>
+            ))}
+          </View>
+        )
+      }
+    </View >
   );
 }
