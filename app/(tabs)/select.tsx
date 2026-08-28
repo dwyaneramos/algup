@@ -181,23 +181,22 @@ export default function Select() {
         }}
       />
 
-      {folderTarget && (
-        <EditFolderSheet
-          folder={folderTarget}
-          ref={editFolderSheetRef}
-          onEdit={(folder, editedFolder, algsetNamesToAssign) => {
-            const oldMemberNames = algsets.filter((a) => a.folder === folder.name).map((a) => a.name);
-            const editSuccessful = updateFolder(folder, editedFolder, oldMemberNames, algsetNamesToAssign);
-            if (editSuccessful) {
-              showToast(`${folder.name} edited successfully!`, TOAST_DURATION);
-            }
-          }}
-          onDelete={(folder) => {
-            setFolderTarget(folder);
-            deleteFolderConfirmSheetRef.current?.present();
-          }}
-        />
-      )}
+      <EditFolderSheet
+        folder={folderTarget!}
+        ref={editFolderSheetRef}
+        onEdit={(folder, editedFolder, algsetNamesToAssign) => {
+          const oldMemberNames = algsets.filter((a) => a.folder === folder.name).map((a) => a.name);
+          const editSuccessful = updateFolder(folder, editedFolder, oldMemberNames, algsetNamesToAssign);
+          if (editSuccessful) {
+            showToast(`${folder.name} edited successfully!`, TOAST_DURATION);
+          }
+        }}
+        onDelete={(folder) => {
+          setFolderTarget(folder);
+          deleteFolderConfirmSheetRef.current?.present();
+        }}
+      />
+
 
       <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "20%" : "25%"]}>
         <View className="flex flex-col gap-4 items-center ">
