@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { getFolders, deleteFolder as deleteFolderQuery } from '@/src/db/queries';
 import { insertNewFolder, editFolder } from '@/src/logic/folders';
+import { clearPendingItem } from '@/src/logic/pendingScramble';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import type { FolderStore } from '@/types';
 
@@ -38,6 +39,9 @@ export const useFolderStore = create<FolderStore>((set, get) => ({
     if (members.length === algSets.length) return false;
 
     deleteFolderQuery(folder.name);
+    for (const member of members) {
+      clearPendingItem(member.name);
+    }
     set({ folders: get().folders.filter((f) => f.name !== folder.name) });
     useAlgSetStore.getState().loadAlgSets();
 
