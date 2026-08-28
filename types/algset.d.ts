@@ -9,4 +9,9 @@ export interface AlgSet {
   name: string;
   event: CubeEvent;
   cases: Case[];
+  folder?: string | null;
+}
+
+export interface Folder {
+  name: string;
 }
