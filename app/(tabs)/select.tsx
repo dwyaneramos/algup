@@ -3,6 +3,7 @@ import { getAlgSet } from '@/src/db/queries';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { editAlgset } from '@/src/logic/algsets';
 import { showToast } from '@/utils/toast';
+import { useSettingsStore } from '@/src/store/settingsStore';
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, interpolateColor,
 } from 'react-native-reanimated';
@@ -20,8 +21,6 @@ import { invertAlgorithm } from '@/src/logic/scramble';
 import { Sheet } from '@/components/Sheet'
 import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, FabRef, SheetRef } from '@/types';
 
-//TODO: scramble displayed is just the inverse of the fetched algorithm
-
 
 const TOAST_DURATION = 2500;
 
@@ -34,20 +33,11 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
 
   const translateY = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
-  const opacity = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
     transform: [{ translateY: translateY.value }],
     backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
   }));
-
-  useFocusEffect(
-    useCallback(() => {
-      opacity.value = 0;
-      opacity.value = withTiming(1, { duration: 300 });
-    }, [])
-  );
 
   useEffect(() => {
     getDisplayCaseScramble(algset.name).then(setScramble);
@@ -69,6 +59,7 @@ function AlgSetRow({ algset }: { algset: AlgSet }) {
     setSelectedAlgSet(algset);
   };
 
+  //TODO: scramble displayed is just the inverse of the fetched algorithm
   return (
     <Animated.View style={animatedStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
       <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
@@ -97,6 +88,8 @@ export default function Select() {
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
   const addAlgSet = useAlgSetStore(s => s.addAlgSet);
   const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+
+  const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
 
   const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
   const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
@@ -186,10 +179,11 @@ export default function Select() {
         }}
       />
 
-      <Sheet ref={deleteConfirmSheetRef} snapPoints={['20%']}>
+
+      <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "20%" : "25%"]}>
         <View className="flex flex-col gap-4 items-center ">
           <Text className="text-form-header">Are you sure you want to delete {selectedAlgSet?.name}?</Text>
-          <Pressable className="rounded-full p-4"
+          <Pressable className="rounded-full bg-red-500 p-4"
             onPress={() => {
               if (selectedAlgSet === null) return;
               const algToDelete = selectedAlgSet.name;

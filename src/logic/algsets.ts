@@ -1,30 +1,28 @@
-import { createAlgSetWithCases, applyAlgSetCaseChanges, renameAlgSet } from "@/src/db/queries";
-import { clearScrambleQueue } from "@/src/logic/pendingScramble";
-import { validateAlgorithm } from "@/src/logic/alg";
-import type { Case, AlgSet } from "@/types";
+import { createAlgSetWithCases, applyAlgSetCaseChanges, renameAlgSet } from '@/src/db/queries';
+import { clearPendingItem } from '@/src/logic/pendingScramble';
+import { validateAlgorithm } from '@/src/logic/alg';
+import type { Case, AlgSet } from '@/types';
 
-export const SELECTED_ALGSET_KEY = "selectedAlgset"
+export const SELECTED_ALGSET_KEY = 'selectedAlgset';
 
 export function validateAlgSetName(name: string): boolean {
-  name = name.trim()
+  name = name.trim();
   return name.length > 0 && name.length <= 32;
 }
 
 const NUM_ALGS_LIMIT = 128;
 
-export const algsetAlreadyExistsError = "Algset name already exists";
-export const algsetNameLengthError = "Algset name must be between 1 and 32 characters";
-export const algsetNoCasesError = "Must include at least one alg";
+export const algsetAlreadyExistsError = 'Algset name already exists';
+export const algsetNameLengthError = 'Algset name must be between 1 and 32 characters';
+export const algsetNoCasesError = 'Must include at least one alg';
 export const invalidAlgError = (alg: string) => `Invalid algorithm: ${alg}`;
 export const algsetInvalidLengthError = `Maximum number of algs is ${NUM_ALGS_LIMIT}`;
 
-
 export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): string {
-
   if (algset.cases.length > NUM_ALGS_LIMIT) {
     return algsetInvalidLengthError;
   }
-  if (existingAlgsets.some(a => a.name === algset.name.trim())) {
+  if (existingAlgsets.some((a) => a.name === algset.name.trim())) {
     return algsetAlreadyExistsError;
   }
   if (validateAlgSetName(algset.name) === false) {
@@ -32,7 +30,7 @@ export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): strin
   }
 
   if (algset.cases.length === 0) {
-    return algsetNoCasesError
+    return algsetNoCasesError;
   }
 
   for (const c of algset.cases) {
@@ -40,20 +38,20 @@ export function validateAlgSet(algset: AlgSet, existingAlgsets: AlgSet[]): strin
       return invalidAlgError(c.alg);
     }
   }
-  return "";
+  return '';
 }
 
 export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
   try {
     const casesToDelete = old.cases.filter(
-      c => !edited.cases.some(ec => ec.alg.trim() === c.alg.trim())
+      (c) => !edited.cases.some((ec) => ec.alg.trim() === c.alg.trim())
     );
     const caseIDs = casesToDelete
       .filter((c: Case): c is Case & { id: number } => c.id !== undefined)
-      .map(c => c.id);
+      .map((c) => c.id);
 
     const casesToInsert = edited.cases.filter(
-      ec => !old.cases.some(c => c.alg.trim() === ec.alg.trim())
+      (ec) => !old.cases.some((c) => c.alg.trim() === ec.alg.trim())
     );
 
     if (old.name !== edited.name) {
@@ -61,7 +59,7 @@ export function editAlgset(old: AlgSet, edited: AlgSet): boolean {
     }
 
     applyAlgSetCaseChanges(caseIDs, edited.name, casesToInsert);
-    clearScrambleQueue(edited.name);
+    clearPendingItem(edited.name);
     return true;
   } catch (error) {
     console.error(`Failed to edit algset "${edited.name}":`, error);
@@ -73,12 +71,10 @@ export function insertNewAlgSet(algset: AlgSet): boolean {
   try {
     createAlgSetWithCases(algset.name, algset.event, algset.cases);
     return true;
-
   } catch (error) {
     console.error(`Failed to store new algset "${algset.name}":`, error);
     return false;
   }
-
 }
 
 // Default cases
@@ -129,7 +125,7 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "F R U R' U' R U R' U' R U R' U' F' " },
       { alg: "R U2 R' U' R U2 L' U R' U' L " },
       { alg: "F R U' R' U' R U R' F' R U R' U' R' F R F' " },
-    ]
+    ],
   },
 
   {
@@ -140,7 +136,7 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "R' U R' U' R' U' R' U R U R2 " },
       { alg: "M2 U' M2 U2 M2 U' M2 " },
       {
-        alg: "M' U' M2 U' M2 U' M' U2 M2 "
+        alg: "M' U' M2 U' M2 U' M' U2 M2 ",
       },
       { alg: "l' U R' D2 R U' R' D2 R2 x' " },
       { alg: "x R2 D2 R U R' D2 R U' R x' " },
@@ -156,25 +152,23 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R' " },
       { alg: "z D' R U' R2 D R' U D' R U' R2 D R' U z' " },
       {
-        alg: "F R U' R' U' R U R' F' R U R' U' R' F R F' "
+        alg: "F R U' R' U' R U R' F' R U R' U' R' F R F' ",
       },
       { alg: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R " },
       { alg: "R U R' U' R' F R2 U' R' U' R U R' F' " },
       { alg: "R' U R' d' R' F' R2 U' R' U R' F R F " },
-    ]
+    ],
   },
 
   {
     name: 'OLL',
     event: '333',
     cases: [
-
-
       { alg: "R U2 R2' F R F' U2 R' F R F' " },
       { alg: "F R U R' U' F' f R U R' U' f' " },
       { alg: "U' f R U R' U' f' U' F R U R' U' F' " },
       {
-        alg: "U' f R U R' U' f' U F R U R' U' F' "
+        alg: "U' f R U R' U' f' U F R U R' U' F' ",
       },
       { alg: "r' U2 R U R' U r " },
       { alg: "r U2 R' U' R U' r' " },
@@ -201,7 +195,7 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "R U R' U R U2 R' " },
       { alg: "r U R' U' M U R U' R' " },
       {
-        alg: "M U R U R' U' R' F R F' M' "
+        alg: "M U R U R' U' R' F R F' M' ",
       },
       { alg: "U' r' D' r U' r' D r2 U' r' U r U r' " },
       { alg: "R' U' F U R U' R' F' R " },
@@ -226,14 +220,14 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "r' U r2 U' r2' U' r2 U r' " },
       { alg: "f R U R' U' R U R' U' f' " },
       {
-        alg: "R U R' U R d' R U' R' F' "
+        alg: "R U R' U R d' R U' R' F' ",
       },
       { alg: "r' U' R U' R' U R U' R' U2 r " },
       { alg: "r U R' U R U' R' U R U2 r' " },
       { alg: "R U2 R2 U' R U' R' U2 F R F' " },
       { alg: "r U r' U R U' R' U R U' R' r U' r' " },
       { alg: "R U R' U' M' U R U' r' " },
-    ]
+    ],
   },
 
   {
@@ -280,8 +274,6 @@ export const ALG_SETS: AlgSet[] = [
       { alg: "U F R U R' U' R U R' U' R U R' U' F'" },
       { alg: "R U R' U R U R' F R' F' R" },
       { alg: "F R2 U' R2' U' R2 U R2' F'" },
-    ]
+    ],
   },
 ];
-
-

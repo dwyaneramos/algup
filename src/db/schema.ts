@@ -13,7 +13,6 @@ function seedAlgSets() {
 }
 
 export function resetDB() {
-  db.execSync('DROP TABLE IF EXISTS scramble_queue');
   db.execSync('DROP TABLE IF EXISTS case_progress');
   db.execSync('DROP TABLE IF EXISTS cases');
   db.execSync('DROP TABLE IF EXISTS algsets');
@@ -58,33 +57,18 @@ export function initDB() {
     );
   `);
 
-  const algsetColumns = db.getAllSync<{ name: string }>(
-    "PRAGMA table_info(algsets)"
-  );
-  const hasEvent = algsetColumns.some(c => c.name === 'event');
+  const algsetColumns = db.getAllSync<{ name: string }>('PRAGMA table_info(algsets)');
+  const hasEvent = algsetColumns.some((c) => c.name === 'event');
   if (!hasEvent) {
     db.execSync("ALTER TABLE algsets ADD COLUMN event TEXT NOT NULL DEFAULT '333'");
   }
 
-  const queueColumns = db.getAllSync<{ name: string }>(
-    "PRAGMA table_info(scramble_queue)"
-  );
-  const hasAlg = queueColumns.some(c => c.name === 'alg');
-  if (!hasAlg) {
-    db.execSync('DROP TABLE IF EXISTS scramble_queue');
-  }
-  db.execSync(`
-    CREATE TABLE IF NOT EXISTS scramble_queue (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      algset TEXT NOT NULL,
-      case_id INTEGER NOT NULL,
-      alg TEXT NOT NULL,
-      scramble TEXT NOT NULL,
-      solution TEXT NOT NULL,
-      FOREIGN KEY (algset) REFERENCES algsets(name),
-      FOREIGN KEY (case_id) REFERENCES cases(id)
-    );
-  `);
+  // Scrambles used to be prefetched in bulk and queued in this table to hide
+  // network latency from a remote server; scramble generation now runs
+  // on-device (see src/logic/scrambleGenerator3x3.ts) and no longer needs a
+  // queue, so this table is no longer created - just cleaned up once for
+  // anyone who already has it from an earlier app version.
+  db.execSync('DROP TABLE IF EXISTS scramble_queue');
 
   seedAlgSets();
 }

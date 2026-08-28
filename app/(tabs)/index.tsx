@@ -50,10 +50,8 @@ export default function MainScreen() {
     setShowScrambleOrSolution('scramble')
     submitGrade(grade);
     panelOpacity.value = withTiming(1, { duration: 300 });
-    setTimeout(() => {
-      setAttemptDone(false);
-      resetTime();
-    }, 200);
+    setAttemptDone(false);
+    resetTime();
   }
 
   function toggleDisplayMode() {
