@@ -1,8 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
 import { Text, View, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { IconChevronDown } from '@tabler/icons-react-native';
 import { validateAlgSet } from '@/src/logic/algsets';
 import { useAlgSetStore } from '@/src/store/algsetStore';
+import { useFolderStore } from '@/src/store/folderStore';
+import { COLOR_MUTED } from '@/utils/constants/colors';
 import type { AlgSet, CubeEvent } from '@/types';
 
 const MIN_ALGS_TEXTAREA_HEIGHT = 40;
@@ -25,6 +28,9 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
 
   const [name, setName] = useState(initialAlgSet?.name ?? '');
   const [event, setEvent] = useState<CubeEvent>(initialAlgSet?.event ?? '333');
+  const folders = useFolderStore(s => s.folders);
+  const [folderName, setFolderName] = useState<string | null>(initialAlgSet?.folder ?? null);
+  const [folderPickerOpen, setFolderPickerOpen] = useState(false);
   const isEditing = !!initialAlgSet;
   const [algsText, setAlgsText] = useState(
     initialAlgSet?.cases.map(c => c.alg).join('\n') ?? ''
@@ -43,7 +49,7 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
       .filter(line => line.length > 0)
       .map(alg => ({ alg }));
 
-    const algsetToStore: AlgSet = { name: name.trim(), event, cases };
+    const algsetToStore: AlgSet = { name: name.trim(), event, cases, folder: folderName };
 
     const otherAlgsets = initialAlgSet
       ? algsets.filter(a => a.name !== initialAlgSet.name)
@@ -86,6 +92,36 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
             </Pressable>
           ))}
         </View>
+      </View>
+
+      <View className="flex flex-col gap-1">
+        <Text className="text-form-header">Parent Folder</Text>
+        <Pressable
+          onPress={() => setFolderPickerOpen((open) => !open)}
+          className="flex flex-row justify-between items-center border border-gray-400 rounded-lg p-2 w-[80vw]"
+        >
+          <Text className="text-body">{folderName ?? 'None'}</Text>
+          <IconChevronDown size={18} color={COLOR_MUTED} />
+        </Pressable>
+        {folderPickerOpen && (
+          <View className="border border-gray-400 rounded-lg w-[80vw]">
+            <Pressable
+              onPress={() => { setFolderName(null); setFolderPickerOpen(false); }}
+              className="p-2"
+            >
+              <Text className="text-body">None</Text>
+            </Pressable>
+            {folders.map((folder) => (
+              <Pressable
+                key={folder.name}
+                onPress={() => { setFolderName(folder.name); setFolderPickerOpen(false); }}
+                className="p-2"
+              >
+                <Text className="text-body">{folder.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </View>
 
       <View className="flex flex-col gap-1">
