@@ -1,87 +1,22 @@
 import { Text, View, Pressable, FlatList } from 'react-native';
 import { getAlgSet } from '@/src/db/queries';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { editAlgset } from '@/src/logic/algsets';
 import { showToast } from '@/utils/toast';
 import { useSettingsStore } from '@/src/store/settingsStore';
-import Animated, {
-  useSharedValue, useAnimatedStyle, withTiming, interpolateColor,
-} from 'react-native-reanimated';
 
 import { Fab } from '@/components/Fab';
 import { useAlgSetStore } from '@/src/store/algsetStore';
 import { CreateAlgSetSheet } from '@/components/CreateAlgSetSheet';
-import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
+import { AlgSetRow } from '@/components/AlgSetRow';
 import { EditAlgSetSheet } from '@/components/EditAlgSetSheet';
 import { useFocusEffect } from 'expo-router';
-import { getDisplayCaseScramble } from '@/src/logic/case';
-import { DrawScramble } from '@/components/DrawScramble';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { invertAlgorithm } from '@/src/logic/scramble';
 import { Sheet } from '@/components/Sheet'
 import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, FabRef, SheetRef } from '@/types';
 
 
 const TOAST_DURATION = 2500;
-
-const COLOR_TRANSITION_DURATION = 150;
-
-function AlgSetRow({ algset }: { algset: AlgSet }) {
-  const isSelected = useAlgSetStore(s => s.selectedAlgSet?.name === algset.name);
-  const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
-  const [scramble, setScramble] = useState<string | null>(null);
-
-  const translateY = useSharedValue(0);
-  const selected = useSharedValue(isSelected ? 1 : 0);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-    backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
-  }));
-
-  useEffect(() => {
-    getDisplayCaseScramble(algset.name).then(setScramble);
-  }, [algset]);
-
-  useEffect(() => {
-    if (isSelected) {
-      selected.value = withTiming(1, { duration: COLOR_TRANSITION_DURATION })
-    } else {
-      selected.value = withTiming(0, { duration: COLOR_TRANSITION_DURATION });
-    }
-
-  }, [isSelected]);
-  const handlePress = () => {
-    if (isSelected) return;
-    translateY.value = withTiming(-10, { duration: 200 }, () => {
-      translateY.value = withTiming(0, { duration: 350 });
-    });
-    setSelectedAlgSet(algset);
-  };
-
-  //TODO: scramble displayed is just the inverse of the fetched algorithm
-  return (
-    <Animated.View style={animatedStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
-      <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
-        <View className="flex flex-col justify-center">
-          <Text className="font-inter-semibold text-xl">{algset.name}</Text>
-          <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
-            {getAlgSetFluencyPercentage(algset.name).toFixed(2)}% Fluency
-          </Text>
-          <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
-            {algset.cases.length} Algorithms
-          </Text>
-        </View>
-        {scramble ? (
-          <DrawScramble scramble={invertAlgorithm(scramble)} scale={0.6} event={algset.event} />
-        ) : (
-          <View className="h-16 w-16 bg-gray-200 rounded-xl" />
-        )}
-      </Pressable>
-    </Animated.View>
-  );
-}
-
 
 export default function Select() {
   const algsets = useAlgSetStore(s => s.algSets);
