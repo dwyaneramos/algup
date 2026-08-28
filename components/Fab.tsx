@@ -39,6 +39,7 @@ const SHADOW = {
 type FabProps = {
   onCreate: () => void;
   onCreateFolder: () => void;
+  onOpenChange?: (open: boolean) => void;
   bottomOffset?: number;
 };
 
@@ -126,7 +127,7 @@ function SatelliteButton({
 }
 
 export const Fab = forwardRef<FabRef, FabProps>(function Fab(
-  { onCreate, onCreateFolder, bottomOffset = 0 },
+  { onCreate, onCreateFolder, onOpenChange, bottomOffset = 0 },
   ref
 ) {
   const [isOpen, setIsOpen] = useState(false);
@@ -158,12 +159,14 @@ export const Fab = forwardRef<FabRef, FabProps>(function Fab(
     isOpenSV.value = next;
     rotation.value = withTiming(next ? 45 : 0, { duration: ROTATION_DURATION });
     setIsOpen(next);
-  }, [isOpen, isOpenSV, rotation]);
+    onOpenChange?.(next);
+  }, [isOpen, isOpenSV, rotation, onOpenChange]);
   const close = useCallback(() => {
     isOpenSV.value = false;
     rotation.value = withTiming(0, { duration: ROTATION_DURATION });
     setIsOpen(false);
-  }, [isOpenSV, rotation]);
+    onOpenChange?.(false);
+  }, [isOpenSV, rotation, onOpenChange]);
 
   useImperativeHandle(ref, () => ({ close }), [close]);
 

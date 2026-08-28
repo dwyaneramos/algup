@@ -1,4 +1,4 @@
-import { Text, View, Pressable, FlatList } from 'react-native';
+import { Text, View, Pressable, FlatList, StyleSheet } from 'react-native';
 import { getAlgSet } from '@/src/db/queries';
 import { useState, useCallback, useRef } from 'react';
 import { editAlgset } from '@/src/logic/algsets';
@@ -60,6 +60,7 @@ export default function Select() {
 
   const [rowTarget, setRowTarget] = useState<RowTarget | null>(null);
   const openTargetKeyRef = useRef<string | null>(null);
+  const [fabOpen, setFabOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -114,10 +115,7 @@ export default function Select() {
   ];
 
   return (
-    <View
-      className="items-center flex-1 justify-start flex-col pt-16"
-      onTouchStart={() => fabRef.current?.close()}
-    >
+    <View className="items-center flex-1 justify-start flex-col pt-16">
       <Text className="text-header mb-2">Select Algorithm Set</Text>
       {rows.length > 0 && (
         <FlatList
@@ -142,10 +140,17 @@ export default function Select() {
           windowSize={20}
         />
       )}
+      {fabOpen && (
+        <Pressable
+          style={StyleSheet.absoluteFillObject}
+          onPress={() => fabRef.current?.close()}
+        />
+      )}
       <Fab
         ref={fabRef}
         onCreate={displayCreateAlgSetSheet}
         onCreateFolder={displayCreateFolderSheet}
+        onOpenChange={setFabOpen}
       />
 
       <RowOptionsSheet
