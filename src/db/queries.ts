@@ -1,5 +1,13 @@
 import * as SQLite from 'expo-sqlite';
-import type { AlgSet, Case, CubeEvent, CaseWithProgress, CaseState, AlgSetProgress } from '@/types';
+import type {
+  AlgSet,
+  Case,
+  CubeEvent,
+  CaseWithProgress,
+  CaseState,
+  AlgSetProgress,
+  Folder,
+} from '@/types';
 import { applyDecay } from '@/src/logic/caseQueue';
 
 let _db: SQLite.SQLiteDatabase | null = null;
@@ -13,7 +21,7 @@ export function getDb() {
 
 export function getAlgSet(name: string): AlgSet | null {
   const db = getDb();
-  const algset = db.getFirstSync<{ name: string; event: CubeEvent }>(
+  const algset = db.getFirstSync<{ name: string; event: CubeEvent; folder: string | null }>(
     'SELECT * FROM algsets WHERE name = ?',
     [name]
   );
@@ -89,6 +97,60 @@ export function renameAlgSet(oldName: string, newName: string): void {
   });
 }
 
+export function getFolders(): Folder[] {
+  const db = getDb();
+  return db.getAllSync<Folder>('SELECT * FROM folders');
+}
+
+export function createFolder(name: string): void {
+  const db = getDb();
+  db.runSync('INSERT OR IGNORE INTO folders (name) VALUES (?)', [name]);
+}
+
+export function renameFolder(oldName: string, newName: string): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    db.runSync('UPDATE folders SET name = ? WHERE name = ?', [newName, oldName]);
+    db.runSync('UPDATE algsets SET folder = ? WHERE folder = ?', [newName, oldName]);
+  });
+}
+
+export function deleteFolder(name: string): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    const members = db.getAllSync<{ name: string }>('SELECT name FROM algsets WHERE folder = ?', [
+      name,
+    ]);
+    for (const member of members) {
+      db.runSync(
+        `DELETE FROM case_progress WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
+        [member.name]
+      );
+      db.runSync('DELETE FROM cases WHERE algset = ?', [member.name]);
+      db.runSync('DELETE FROM algsets WHERE name = ?', [member.name]);
+    }
+    db.runSync('DELETE FROM folders WHERE name = ?', [name]);
+  });
+}
+
+export function setAlgSetFolder(algsetName: string, folderName: string | null): void {
+  const db = getDb();
+  db.runSync('UPDATE algsets SET folder = ? WHERE name = ?', [folderName, algsetName]);
+}
+
+export function getFirstAlgSetInFolder(folderName: string): AlgSet | null {
+  const db = getDb();
+  const algset = db.getFirstSync<{ name: string; event: CubeEvent; folder: string | null }>(
+    'SELECT * FROM algsets WHERE folder = ? ORDER BY rowid ASC LIMIT 1',
+    [folderName]
+  );
+  if (!algset) return null;
+  return {
+    ...algset,
+    cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [algset.name]),
+  };
+}
+
 export function applyAlgSetCaseChanges(
   caseIdsToDelete: number[],
   algsetNameForInsert: string,
@@ -130,7 +192,9 @@ export function getAlgSetProgress(algset: string): AlgSetProgress {
 
 export function getAlgSets(): AlgSet[] {
   const db = getDb();
-  const algsets = db.getAllSync<{ name: string; event: CubeEvent }>('SELECT * FROM algsets');
+  const algsets = db.getAllSync<{ name: string; event: CubeEvent; folder: string | null }>(
+    'SELECT * FROM algsets'
+  );
   return algsets.map((a) => ({
     ...a,
     cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [a.name]),
