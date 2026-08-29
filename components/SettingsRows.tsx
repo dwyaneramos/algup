@@ -34,11 +34,13 @@ export function LinkRow({
   subtitle,
   url,
   icon,
+  onPress,
 }: {
   label: string;
   subtitle: string;
-  url: string;
-  icon: React.ComponentType<{ size: number; color: string }>;
+  url?: string;
+  icon?: React.ComponentType<{ size: number; color: string }>;
+  onPress?: () => void;
 }) {
   const scale = useSharedValue(1);
 
@@ -48,7 +50,7 @@ export function LinkRow({
 
   return (
     <Pressable
-      onPress={() => Linking.openURL(url)}
+      onPress={onPress ?? (() => url && Linking.openURL(url))}
       onPressIn={() => {
         scale.value = withSpring(0.98);
       }}
@@ -56,7 +58,7 @@ export function LinkRow({
         scale.value = withSpring(1);
       }}>
       <Animated.View style={animatedStyle} className="flex-row items-center gap-4 px-4 py-3.5">
-        <RowIcon icon={icon} color={COLOR_ACCENT} />
+        {icon && <RowIcon icon={icon} color={COLOR_ACCENT} />}
         <RowLabel label={label} subtitle={subtitle} />
         <IconChevronRight size={18} color={COLOR_ACCENT} />
       </Animated.View>

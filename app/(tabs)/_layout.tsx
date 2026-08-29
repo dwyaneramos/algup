@@ -49,9 +49,10 @@ function TabItem({ isFocused, onPress, icon, label }: TabItemProps) {
 
 function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
+  const HIDDEN_TITLES = ['Algset', 'Credits'];
   const visibleRoutes = state.routes.filter((route) => {
     const { options } = descriptors[route.key];
-    return (options as Record<string, unknown>).title !== 'Algset';
+    return !HIDDEN_TITLES.includes((options as Record<string, unknown>).title as string);
   });
 
   const currentRoute = state.routes[state.index];
@@ -163,7 +164,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="settings"
+          name="settings/index"
           options={{
             title: 'Settings',
             tabBarIcon: ({ color, size }) => <IconSettings color={color} size={size} />,
@@ -172,6 +173,10 @@ export default function TabLayout() {
         <Tabs.Screen
           name="stats/algset"
           options={{ title: 'Algset', href: null }}
+        />
+        <Tabs.Screen
+          name="settings/credits"
+          options={{ title: 'Credits', href: null }}
         />
       </Tabs>
     </View>

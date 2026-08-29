@@ -9,7 +9,9 @@ import {
   IconSchool,
   IconArrowsDiagonalMinimize2,
   IconRotateClockwise,
+  IconUsers,
 } from '@tabler/icons-react-native';
+import { useRouter } from 'expo-router';
 import {
   useSettingsStore,
   MIN_MAX_ACTIVE,
@@ -42,6 +44,7 @@ const LINKS = [
 ];
 
 export default function Settings() {
+  const router = useRouter();
   const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
   const setShiftNavbarUp = useSettingsStore((s) => s.setShiftNavbarUp);
   const maxActive = useSettingsStore((s) => s.maxActive);
@@ -114,6 +117,12 @@ export default function Settings() {
               {LINKS.map((link) => (
                 <LinkRow key={link.label} {...link} />
               ))}
+              <LinkRow
+                label="Credits"
+                subtitle="Testers and where the algorithms came from"
+                icon={IconUsers}
+                onPress={() => router.push('/settings/credits')}
+              />
             </SettingsGroup>
           </View>
         </Animated.View>
