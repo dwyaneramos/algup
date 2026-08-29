@@ -125,6 +125,7 @@ const algSet: AlgSet = {
       alg: "F R2 U' R2' U' R2 U R2' F'",
     },
   ],
+  folder: '2x2',
 };
 
 export default algSet;

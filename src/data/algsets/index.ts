@@ -2,6 +2,8 @@ import type { AlgSet } from '@/types';
 import ASZBAlgSet from './AS-ZB';
 import CLLAlgSet from './CLL';
 import CMLLAlgSet from './CMLL';
+import EG1AlgSet from './EG-1';
+import EG2AlgSet from './EG-2';
 import HZBAlgSet from './H-ZB';
 import LZBAlgSet from './L-ZB';
 import OLLAlgSet from './OLL';
@@ -15,6 +17,8 @@ export const DEFAULT_ALGSETS: AlgSet[] = [
   ASZBAlgSet,
   CLLAlgSet,
   CMLLAlgSet,
+  EG1AlgSet,
+  EG2AlgSet,
   HZBAlgSet,
   LZBAlgSet,
   OLLAlgSet,
