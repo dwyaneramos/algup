@@ -73,6 +73,7 @@ export function AlgSetForm({ title, submitLabel, initialAlgSet, onSubmit }: AlgS
           className="border border-gray-400 rounded-lg p-2 w-[80vw]"
           onChangeText={setName}
           value={name}
+          maxLength={16}
         />
       </View>
 

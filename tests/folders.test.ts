@@ -20,7 +20,7 @@ const renameFolderMock = renameFolder as jest.MockedFunction<typeof renameFolder
 const setAlgSetFolderMock = setAlgSetFolder as jest.MockedFunction<typeof setAlgSetFolder>;
 
 describe('validateFolderName', () => {
-  it('accepts a non-empty name within 32 characters', () => {
+  it('accepts a non-empty name within 16 characters', () => {
     expect(validateFolderName('OLL Cases')).toBe(true);
   });
 
@@ -28,12 +28,12 @@ describe('validateFolderName', () => {
     expect(validateFolderName('   ')).toBe(false);
   });
 
-  it('rejects a name over 32 characters', () => {
-    expect(validateFolderName('a'.repeat(33))).toBe(false);
+  it('rejects a name over 16 characters', () => {
+    expect(validateFolderName('a'.repeat(17))).toBe(false);
   });
 
-  it('accepts a name exactly 32 characters', () => {
-    expect(validateFolderName('a'.repeat(32))).toBe(true);
+  it('accepts a name exactly 16 characters', () => {
+    expect(validateFolderName('a'.repeat(16))).toBe(true);
   });
 });
 

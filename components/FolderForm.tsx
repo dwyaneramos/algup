@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Text, View, Pressable } from 'react-native';
+import { Text, View, Pressable, ScrollView } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { IconSquare, IconSquareCheck } from '@tabler/icons-react-native';
 import { validateFolder } from '@/src/logic/folders';
@@ -26,6 +26,10 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
   );
 
   const isEditing = !!initialFolder;
+
+  const selectableAlgsets = algsets.filter(
+    (a) => !a.folder || a.folder === initialFolder?.name
+  );
 
   const toggleAlgSet = (algsetName: string) => {
     setSelectedNames((current) =>
@@ -59,6 +63,7 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
           className="border border-gray-400 rounded-lg p-2 w-[80vw]"
           onChangeText={setName}
           value={name}
+          maxLength={16}
         />
       </View>
 
@@ -66,8 +71,8 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
         <Text className="text-form-header">
           Add Algorithm Sets ({selectedNames.length} selected)
         </Text>
-        <View className="border border-gray-400 rounded-lg w-[80vw]">
-          {algsets.map((algset) => {
+        <ScrollView className="border border-gray-400 rounded-lg w-[80vw] max-h-48">
+          {selectableAlgsets.map((algset) => {
             const checked = selectedNames.includes(algset.name);
             return (
               <Pressable
@@ -84,7 +89,7 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
 
       <Pressable className="rounded-full bg-accent p-3 cursor-pointer w-32" onPress={handleSubmit}>

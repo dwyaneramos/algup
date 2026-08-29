@@ -3,11 +3,11 @@ import type { Folder } from '@/types';
 
 export function validateFolderName(name: string): boolean {
   name = name.trim();
-  return name.length > 0 && name.length <= 32;
+  return name.length > 0 && name.length <= 16;
 }
 
 export const folderAlreadyExistsError = 'Folder name already exists';
-export const folderNameLengthError = 'Folder name must be between 1 and 32 characters';
+export const folderNameLengthError = 'Folder name must be between 1 and 16 characters';
 
 export function validateFolder(folder: Folder, existingFolders: Folder[]): string {
   if (existingFolders.some((f) => f.name === folder.name.trim())) {
