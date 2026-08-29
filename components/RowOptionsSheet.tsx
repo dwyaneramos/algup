@@ -20,26 +20,36 @@ export const RowOptionsSheet = forwardRef<SheetRef, RowOptionsSheetProps>(
     }));
 
     return (
-      <Sheet ref={sheetRef} snapPoints={['25%']} onDismiss={onDismiss}>
-        <View className="flex flex-col gap-3 items-center w-full">
-          <Text className="text-form-header">{title}</Text>
+      <Sheet ref={sheetRef} snapPoints={['35%']} onDismiss={onDismiss}>
+        <View className="w-full">
+          <Text className="text-form-header text-center mb-5">{title}</Text>
+
+          <View className="w-full flex flex-col gap-3">
+            <Pressable
+              className="w-full rounded-full bg-accent py-4 items-center"
+              onPress={() => {
+                sheetRef.current?.dismiss();
+                onEdit();
+              }}
+            >
+              <Text className="font-inter-semibold text-base text-white">Edit</Text>
+            </Pressable>
+            <Pressable
+              className="w-full rounded-full bg-red-500 py-4 items-center"
+              onPress={() => {
+                sheetRef.current?.dismiss();
+                onDelete();
+              }}
+            >
+              <Text className="font-inter-semibold text-base text-white">Delete</Text>
+            </Pressable>
+          </View>
+
           <Pressable
-            className="rounded-full bg-accent p-3 w-40"
-            onPress={() => {
-              sheetRef.current?.dismiss();
-              onEdit();
-            }}
+            className="w-full rounded-full bg-gray-100 items-center py-4 mt-3"
+            onPress={() => sheetRef.current?.dismiss()}
           >
-            <Text className="text-white text-center">Edit</Text>
-          </Pressable>
-          <Pressable
-            className="rounded-full bg-red-500 p-3 w-40"
-            onPress={() => {
-              sheetRef.current?.dismiss();
-              onDelete();
-            }}
-          >
-            <Text className="text-white text-center">Delete</Text>
+            <Text className="font-inter-semibold text-base text-muted">Cancel</Text>
           </Pressable>
         </View>
       </Sheet>

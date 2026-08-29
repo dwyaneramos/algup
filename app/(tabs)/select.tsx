@@ -230,10 +230,10 @@ export default function Select() {
       />
 
 
-      <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "20%" : "25%"]}>
-        <View className="flex flex-col gap-4 items-center ">
-          <Text className="text-form-header">Are you sure you want to delete {algSetTarget?.name}?</Text>
-          <Pressable className="rounded-full bg-red-500 p-4"
+      <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "25%" : "30%"]}>
+        <View className="w-full flex flex-col gap-4 items-center pb-6">
+          <Text className="text-form-header text-center">Are you sure you want to delete {algSetTarget?.name}?</Text>
+          <Pressable className="w-full rounded-full bg-red-500 py-4 items-center"
             onPress={() => {
               if (algSetTarget === null) return;
               const algToDelete = algSetTarget.name;
@@ -246,19 +246,19 @@ export default function Select() {
             }
             }
           >
-            <Text className="text-white ">Confirm</Text>
+            <Text className="font-inter-semibold text-base text-white">Confirm</Text>
 
           </Pressable>
         </View>
 
       </Sheet>
 
-      <Sheet ref={deleteFolderConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "20%" : "25%"]}>
-        <View className="flex flex-col gap-4 items-center ">
-          <Text className="text-form-header">
-            Delete {folderTarget?.name} and its {folderTargetMemberCount} algset(s)? This can&apos;t be undone.
+      <Sheet ref={deleteFolderConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "25%" : "30%"]}>
+        <View className="w-full flex flex-col gap-4 items-center pb-6">
+          <Text className="text-form-header text-center">
+            Delete {folderTarget?.name} and its {folderTargetMemberCount} algset(s)?{'\n'}This can&apos;t be undone.
           </Text>
-          <Pressable className="rounded-full bg-red-500 p-4"
+          <Pressable className="w-full rounded-full bg-red-500 py-4 items-center"
             onPress={() => {
               if (folderTarget === null) return;
               const folderToDelete = folderTarget.name;
@@ -270,7 +270,7 @@ export default function Select() {
               deleteFolderConfirmSheetRef.current?.dismiss();
             }}
           >
-            <Text className="text-white ">Confirm</Text>
+            <Text className="font-inter-semibold text-base text-white">Confirm</Text>
           </Pressable>
         </View>
       </Sheet>
