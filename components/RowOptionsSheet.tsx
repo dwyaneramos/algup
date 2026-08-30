@@ -1,6 +1,7 @@
 import { forwardRef, useRef, useImperativeHandle } from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Sheet } from '@/components/Sheet';
+import { useSettingsStore } from '@/src/store/settingsStore';
 import type { SheetRef } from '@/types';
 
 type RowOptionsSheetProps = {
@@ -13,6 +14,7 @@ type RowOptionsSheetProps = {
 export const RowOptionsSheet = forwardRef<SheetRef, RowOptionsSheetProps>(
   function RowOptionsSheet({ title, onEdit, onDelete, onDismiss }, ref) {
     const sheetRef = useRef<SheetRef>(null);
+    const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
 
     useImperativeHandle(ref, () => ({
       present: () => sheetRef.current?.present(),
@@ -20,7 +22,7 @@ export const RowOptionsSheet = forwardRef<SheetRef, RowOptionsSheetProps>(
     }));
 
     return (
-      <Sheet ref={sheetRef} snapPoints={['35%']} onDismiss={onDismiss}>
+      <Sheet ref={sheetRef} snapPoints={[!shiftNavbarUp ? '35%' : '40%']} onDismiss={onDismiss}>
         <View className="w-full">
           <Text className="text-form-header text-center mb-5">{title}</Text>
 
