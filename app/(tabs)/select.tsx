@@ -1,7 +1,5 @@
 import { Text, View, Pressable, FlatList, StyleSheet } from 'react-native';
-import { getAlgSet } from '@/src/db/queries';
 import { useState, useCallback, useRef } from 'react';
-import { editAlgset } from '@/src/logic/algsets';
 import { showToast } from '@/utils/toast';
 import { useSettingsStore } from '@/src/store/settingsStore';
 
@@ -10,18 +8,11 @@ import { useAlgSetStore } from '@/src/store/algsetStore';
 import { useFolderStore } from '@/src/store/folderStore';
 import { AlgSetRow } from '@/components/AlgSetRow';
 import { FolderRow } from '@/components/FolderRow';
-import { CreateAlgSetSheet } from '@/components/CreateAlgSetSheet';
-import { EditAlgSetSheet } from '@/components/EditAlgSetSheet';
-import { CreateFolderSheet } from '@/components/CreateFolderSheet';
-import { EditFolderSheet } from '@/components/EditFolderSheet';
 import { RowOptionsSheet } from '@/components/RowOptionsSheet';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sheet } from '@/components/Sheet'
-import type {
-  AlgSet, Folder, CreateAlgSetSheetRef, EditAlgSetSheetRef, FabRef, SheetRef,
-  CreateFolderSheetRef, EditFolderSheetRef,
-} from '@/types';
+import type { AlgSet, Folder, FabRef, SheetRef } from '@/types';
 
 
 const TOAST_DURATION = 2500;
@@ -33,27 +24,19 @@ function targetKey(target: RowTarget): string {
 }
 
 export default function Select() {
+  const router = useRouter();
   const algsets = useAlgSetStore(s => s.algSets);
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
-  const addAlgSet = useAlgSetStore(s => s.addAlgSet);
-  const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
-  const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
   const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
 
   const folders = useFolderStore(s => s.folders);
   const loadFolders = useFolderStore(s => s.loadFolders);
-  const addFolder = useFolderStore(s => s.addFolder);
-  const updateFolder = useFolderStore(s => s.updateFolder);
   const deleteFolderAction = useFolderStore(s => s.deleteFolder);
 
   const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
 
   const insets = useSafeAreaInsets();
-  const createSheetRef = useRef<CreateAlgSetSheetRef>(null);
-  const editSheetRef = useRef<EditAlgSetSheetRef>(null);
   const deleteConfirmSheetRef = useRef<SheetRef>(null);
-  const createFolderSheetRef = useRef<CreateFolderSheetRef>(null);
-  const editFolderSheetRef = useRef<EditFolderSheetRef>(null);
   const deleteFolderConfirmSheetRef = useRef<SheetRef>(null);
   const optionsSheetRef = useRef<SheetRef>(null);
   const fabRef = useRef<FabRef>(null);
@@ -69,13 +52,13 @@ export default function Select() {
     }, [])
   );
 
-  const displayCreateAlgSetSheet = useCallback(() => {
-    createSheetRef.current?.present();
-  }, []);
+  const openCreateAlgSetPage = useCallback(() => {
+    router.push('/algset/create');
+  }, [router]);
 
-  const displayCreateFolderSheet = useCallback(() => {
-    createFolderSheetRef.current?.present();
-  }, []);
+  const openCreateFolderPage = useCallback(() => {
+    router.push('/folder/create');
+  }, [router]);
 
   const openRowOptions = useCallback((target: RowTarget) => {
     const key = targetKey(target);
@@ -148,8 +131,8 @@ export default function Select() {
       )}
       <Fab
         ref={fabRef}
-        onCreate={displayCreateAlgSetSheet}
-        onCreateFolder={displayCreateFolderSheet}
+        onCreate={openCreateAlgSetPage}
+        onCreateFolder={openCreateFolderPage}
         onOpenChange={setFabOpen}
       />
 
@@ -158,77 +141,14 @@ export default function Select() {
         title={algSetTarget?.name ?? folderTarget?.name ?? ''}
         onDismiss={handleOptionsDismiss}
         onEdit={() => {
-          if (algSetTarget) editSheetRef.current?.present();
-          else if (folderTarget) editFolderSheetRef.current?.present();
+          if (algSetTarget) router.push(`/algset/edit/${encodeURIComponent(algSetTarget.name)}`);
+          else if (folderTarget) router.push(`/folder/edit/${encodeURIComponent(folderTarget.name)}`);
         }}
         onDelete={() => {
           if (algSetTarget) deleteConfirmSheetRef.current?.present();
           else if (folderTarget) deleteFolderConfirmSheetRef.current?.present();
         }}
       />
-
-      <EditAlgSetSheet
-        algset={algSetTarget!}
-        ref={editSheetRef}
-        onEdit={(algset: AlgSet, editedAlgset: AlgSet) => {
-          const editSuccessful = editAlgset(algset, editedAlgset)
-          if (editSuccessful) {
-            loadAlgSets();
-            const refreshed = getAlgSet(editedAlgset.name);
-            if (refreshed && selectedAlgSet?.name === algset.name) {
-              setSelectedAlgSet(refreshed);
-            }
-            showToast(`${algset.name} edited successfully!`, TOAST_DURATION);
-          }
-        }
-        }
-      />
-
-      <CreateAlgSetSheet
-        ref={createSheetRef}
-        onCreate={(algset) => {
-          const created = addAlgSet(algset);
-          if (!created) {
-            showToast(`Failed to create ${algset.name}`, TOAST_DURATION);
-            return;
-          }
-          const refreshed = getAlgSet(algset.name);
-          if (refreshed) {
-            setSelectedAlgSet(refreshed);
-          }
-          showToast(`${algset.name} added!`, TOAST_DURATION);
-        }}
-      />
-
-      <CreateFolderSheet
-        ref={createFolderSheetRef}
-        onCreate={(folder, algsetNamesToAssign) => {
-          const created = addFolder(folder, algsetNamesToAssign);
-          if (!created) {
-            showToast(`Failed to create ${folder.name}`, TOAST_DURATION);
-            return;
-          }
-          showToast(`${folder.name} added!`, TOAST_DURATION);
-        }}
-      />
-
-      <EditFolderSheet
-        folder={folderTarget!}
-        ref={editFolderSheetRef}
-        onEdit={(folder, editedFolder, algsetNamesToAssign) => {
-          const oldMemberNames = algsets.filter((a) => a.folder === folder.name).map((a) => a.name);
-          const editSuccessful = updateFolder(folder, editedFolder, oldMemberNames, algsetNamesToAssign);
-          if (editSuccessful) {
-            showToast(`${folder.name} edited successfully!`, TOAST_DURATION);
-          }
-        }}
-        onDelete={(folder) => {
-          setRowTarget({ type: 'folder', folder });
-          openTargetKeyRef.current = targetKey({ type: 'folder', folder });
-          deleteFolderConfirmSheetRef.current?.present();
-        }}
-      />
-
 
       <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "25%" : "30%"]}>
         <View className="w-full flex flex-col gap-4 items-center pb-6">

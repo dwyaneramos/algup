@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Text, View, Pressable, ScrollView } from 'react-native';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { Text, View, Pressable, TextInput, ScrollView } from 'react-native';
 import { IconSquare, IconSquareCheck } from '@tabler/icons-react-native';
 import { validateFolder } from '@/src/logic/folders';
 import { useFolderStore } from '@/src/store/folderStore';
@@ -9,14 +8,12 @@ import { COLOR_ACCENT, COLOR_MUTED } from '@/utils/constants/colors';
 import type { Folder } from '@/types';
 
 type FolderFormProps = {
-  title: string;
   submitLabel: string;
   initialFolder?: Folder;
   onSubmit: (folder: Folder, algsetNamesToAssign: string[]) => void;
-  onDelete?: () => void;
 };
 
-export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDelete }: FolderFormProps) {
+export function FolderForm({ submitLabel, initialFolder, onSubmit }: FolderFormProps) {
   const folders = useFolderStore(s => s.folders);
   const algsets = useAlgSetStore(s => s.algSets);
 
@@ -24,8 +21,6 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
   const [selectedNames, setSelectedNames] = useState<string[]>(
     initialFolder ? algsets.filter(a => a.folder === initialFolder.name).map(a => a.name) : []
   );
-
-  const isEditing = !!initialFolder;
 
   const selectableAlgsets = algsets.filter(
     (a) => !a.folder || a.folder === initialFolder?.name
@@ -55,11 +50,9 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
 
   return (
     <View className="flex flex-col gap-3 items-center">
-      <Text className="text-subheader w-[80vw]">{title}</Text>
-
       <View className="flex flex-col gap-1">
         <Text className="text-form-header">Folder Name</Text>
-        <BottomSheetTextInput
+        <TextInput
           className="border border-gray-400 rounded-lg p-2 w-[80vw]"
           onChangeText={setName}
           value={name}
@@ -95,12 +88,6 @@ export function FolderForm({ title, submitLabel, initialFolder, onSubmit, onDele
       <Pressable className="rounded-full bg-accent p-3 cursor-pointer w-32" onPress={handleSubmit}>
         <Text className="text-white text-center">{submitLabel}</Text>
       </Pressable>
-
-      {isEditing && onDelete && (
-        <Pressable onPress={onDelete}>
-          <Text className="text-red-500">Delete Folder</Text>
-        </Pressable>
-      )}
     </View>
   );
 }

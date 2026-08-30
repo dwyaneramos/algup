@@ -9,26 +9,6 @@ export type FabRef = {
   close: () => void;
 };
 
-export type EditAlgSetSheetRef = {
-  present: () => void;
-  dismiss: () => void;
-};
-
-export type CreateAlgSetSheetRef = {
-  present: () => void;
-  dismiss: () => void;
-};
-
-export type EditFolderSheetRef = {
-  present: () => void;
-  dismiss: () => void;
-};
-
-export type CreateFolderSheetRef = {
-  present: () => void;
-  dismiss: () => void;
-};
-
 export type IconComponent = ComponentType<{ color?: string; size?: number }>;
 
 export type SatelliteAction = {
