@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { InteractionManager } from 'react-native';
 import { SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
 import { deleteAlgset, setSetting, getSetting, getAlgSets } from '@/src/db/queries';
 import { clearPendingItem } from '@/src/logic/pendingScramble';
@@ -10,7 +11,11 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
 
   setSelectedAlgSet: (algSet) => {
     set({ selectedAlgSet: algSet });
-    setSetting(SELECTED_ALGSET_KEY, algSet.name);
+    // Defer the blocking DB write past the next frame so the row's
+    // press/select highlight animation isn't stalled waiting on disk I/O.
+    InteractionManager.runAfterInteractions(() => {
+      setSetting(SELECTED_ALGSET_KEY, algSet.name);
+    });
   },
 
   loadAlgSets: () => {
