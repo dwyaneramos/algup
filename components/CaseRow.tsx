@@ -15,7 +15,7 @@ import { useSettingsStore } from "@/src/store/settingsStore";
 const FOCUSED_COLOR = ALG_CATEGORIES.find((c) => c.key === "focused")?.borderColor ?? "#000000";
 const PRESS_SCALE = 0.97;
 
-export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent }) {
+export function CaseRow({ c, event, onMasteredChange }: { c: CaseWithProgress, event: CubeEvent, onMasteredChange?: () => void }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
   const [state, setState] = useState(c.state);
   const [fluency, setFluency] = useState(c.fluency);
@@ -75,6 +75,7 @@ export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent })
       setFluency(5);
       showToast(`Case ${c.id} marked as mastered!`);
     }
+    onMasteredChange?.();
     sheetRef.current?.dismiss();
   }
 
