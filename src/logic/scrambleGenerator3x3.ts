@@ -11,7 +11,7 @@ import { generateScrambleWithRetry } from './scrambleRetry';
 // `scrambleGenerator2x2.ts` for the dedicated R/U/F-only solver.
 
 const PREFIX_LENGTH = 4;
-const MIN_333_SCRAMBLE_LENGTH = 19;
+const MIN_333_SCRAMBLE_LENGTH = 17;
 const POSSIBLE_MOVES = ['R', 'L', 'U', 'D', 'F', 'B'];
 const OPPOSITE_MOVES: Record<string, string> = {
   R: 'L',
