@@ -14,15 +14,15 @@ import TZBAlgSet from './T-ZB';
 import UZBAlgSet from './U-ZB';
 
 export const DEFAULT_ALGSETS: AlgSet[] = [
-  ASZBAlgSet,
-  CLLAlgSet,
-  CMLLAlgSet,
-  EG1AlgSet,
-  EG2AlgSet,
-  HZBAlgSet,
-  LZBAlgSet,
   OLLAlgSet,
   PLLAlgSet,
+  CMLLAlgSet,
+  CLLAlgSet,
+  EG1AlgSet,
+  EG2AlgSet,
+  ASZBAlgSet,
+  HZBAlgSet,
+  LZBAlgSet,
   PiZBAlgSet,
   SZBAlgSet,
   TZBAlgSet,
