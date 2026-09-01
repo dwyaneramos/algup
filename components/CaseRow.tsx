@@ -65,8 +65,8 @@ export function CaseRow({ c, event, onMasteredChange }: { c: CaseWithProgress, e
 
   function onToggleMastered() {
     if (isMastered) {
-      unmarkCaseMastered(c.id);
-      setState('learning');
+      const restoredState = unmarkCaseMastered(c.id);
+      setState(restoredState);
       setFluency(1);
       showToast(`Case ${c.id} progress reset`);
     } else {

@@ -349,11 +349,25 @@ export function updateCaseProgress(caseId: number, fluency: number, state: CaseS
 }
 
 export function markCaseMastered(caseId: number) {
-  updateCaseProgress(caseId, 5, 'mastered');
+  const db = getDb();
+  db.runSync(
+    `
+    INSERT INTO case_progress (case_id, fluency, state)
+    VALUES (?, 5, 'mastered')
+    ON CONFLICT(case_id) DO UPDATE SET
+      fluency = excluded.fluency,
+      state = excluded.state
+  `,
+    [caseId]
+  );
 }
 
-export function unmarkCaseMastered(caseId: number) {
-  updateCaseProgress(caseId, 1, 'learning');
+export function unmarkCaseMastered(caseId: number): CaseState {
+  const db = getDb();
+  db.runSync("UPDATE case_progress SET fluency = 1, state = 'locked' WHERE case_id = ?", [
+    caseId,
+  ]);
+  return 'locked';
 }
 
 export function introduceNextCase(algset: string): void {
