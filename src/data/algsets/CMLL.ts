@@ -23,7 +23,7 @@ const algSet: AlgSet = {
       alg: "R' U' R U' R' U R U' R' U F' U F R",
     },
     {
-      alg: "(U') R' U' R U R' U R U2' R' U R U2' R'",
+      alg: "(U') R' U' R U R' U R U2' R' U R U2' R' U' R",
     },
     {
       alg: "(U2) F R U R' U' R' U R U' F' U R' U' R",
