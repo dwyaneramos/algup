@@ -6,10 +6,14 @@
   <h1 align="center">Algup</h1>
 
   <p align="center">
-    A mobile app to build confidence in your cubing algorithms
+    A mobile flashcard-based app to build confidence in your cubing algorithms
   </p>
-</div>
 
+<img alt="image" src="./assets/feature-1.png" />
+
+<a href="https://play.google.com/store/apps/details?id=com.algup.cubealgtrainer&pcampaignid=web_share" target="_blank">Play Store Link</a>
+
+</div>
 <!-- GETTING STARTED -->
 
 ## Getting Started
@@ -49,10 +53,3 @@ _Below are instructions for how you can clone and run a development build of the
    ```sh
    npx expo start
    ```
-
-<!-- WIREFRAMES / MOCKUPS -->
-
-# Wireframes / Mockups
-
-<img width="711" height="436" alt="image" src="https://github.com/user-attachments/assets/c374e2ef-aa20-493f-82ee-c05e1bc64f43" />
-<img width="722" height="435" alt="image" src="https://github.com/user-attachments/assets/cb060737-3aee-4bb5-a5fb-6c39e05d389c" />
