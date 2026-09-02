@@ -1,4 +1,4 @@
-import type { AlgSet } from './algset';
+import type { AlgSet, Folder } from './algset';
 
 export interface AlgSetStore {
   algSets: AlgSet[];
@@ -7,6 +7,19 @@ export interface AlgSetStore {
   loadAlgSets: () => void;
   addAlgSet: (algSet: AlgSet) => boolean;
   deleteAlgSet: (algSet: AlgSet) => boolean;
+}
+
+export interface FolderStore {
+  folders: Folder[];
+  loadFolders: () => void;
+  addFolder: (folder: Folder, algsetNamesToAssign: string[]) => boolean;
+  updateFolder: (
+    old: Folder,
+    edited: Folder,
+    oldMemberNames: string[],
+    newMemberNames: string[]
+  ) => boolean;
+  deleteFolder: (folder: Folder) => boolean;
 }
 
 export interface SettingsStore {

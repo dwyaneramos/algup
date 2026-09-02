@@ -64,7 +64,7 @@ export default function MainScreen() {
     setShowScrambleOrSolution('scramble')
     resetTime();
     panelOpacity.value = 1;
-  }, [selectedAlgSet])
+  }, [selectedAlgSet?.name])
 
   const runningRef = useRef(running);
   const attemptDoneRef = useRef(attemptDone);

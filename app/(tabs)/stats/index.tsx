@@ -63,6 +63,12 @@ export default function Stats() {
     }, [selectedAlgSet])
   );
 
+  const refreshProgress = useCallback(() => {
+    if (!selectedAlgSet) return;
+    setAlgSetProgress(getAlgSetProgress(selectedAlgSet.name));
+    setLearningFluency(getLearningFluency(selectedAlgSet.name));
+  }, [selectedAlgSet]);
+
   if (!algSetProgress || selectedAlgSet === null) return null;
   return (
     <View className="items-center flex-1 pt-16" style={{ paddingBottom: insets.bottom }}>
@@ -100,7 +106,9 @@ export default function Stats() {
         <Animated.View entering={FadeIn.duration(300)} className="flex-1 w-full">
           <FlatList
             data={worstCases}
-            renderItem={({ item }) => <CaseRow c={item} event={selectedAlgSet.event} />}
+            renderItem={({ item }) => (
+              <CaseRow c={item} event={selectedAlgSet.event} onMasteredChange={refreshProgress} />
+            )}
             keyExtractor={(_, index) => index.toString()}
             contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 }}
             initialNumToRender={10}

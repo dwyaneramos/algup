@@ -1,193 +1,163 @@
-import { Text, View, Pressable, FlatList } from 'react-native';
-import { getAlgSet } from '@/src/db/queries';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { editAlgset } from '@/src/logic/algsets';
+import { Text, View, Pressable, FlatList, StyleSheet } from 'react-native';
+import { useState, useCallback, useRef } from 'react';
 import { showToast } from '@/utils/toast';
 import { useSettingsStore } from '@/src/store/settingsStore';
-import Animated, {
-  useSharedValue, useAnimatedStyle, withTiming, interpolateColor,
-} from 'react-native-reanimated';
 
 import { Fab } from '@/components/Fab';
 import { useAlgSetStore } from '@/src/store/algsetStore';
-import { CreateAlgSetSheet } from '@/components/CreateAlgSetSheet';
-import { getAlgSetFluencyPercentage } from '@/src/logic/fluency';
-import { EditAlgSetSheet } from '@/components/EditAlgSetSheet';
-import { useFocusEffect } from 'expo-router';
-import { getDisplayCaseScramble } from '@/src/logic/case';
-import { DrawScramble } from '@/components/DrawScramble';
+import { useFolderStore } from '@/src/store/folderStore';
+import { AlgSetRow } from '@/components/AlgSetRow';
+import { FolderRow } from '@/components/FolderRow';
+import { RowOptionsSheet } from '@/components/RowOptionsSheet';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { invertAlgorithm } from '@/src/logic/scramble';
 import { Sheet } from '@/components/Sheet'
-import type { AlgSet, CreateAlgSetSheetRef, EditAlgSetSheetRef, FabRef, SheetRef } from '@/types';
+import type { AlgSet, Folder, FabRef, SheetRef } from '@/types';
 
 
 const TOAST_DURATION = 2500;
 
-const COLOR_TRANSITION_DURATION = 150;
+type RowTarget = { type: 'algset'; algset: AlgSet } | { type: 'folder'; folder: Folder };
 
-function AlgSetRow({ algset }: { algset: AlgSet }) {
-  const isSelected = useAlgSetStore(s => s.selectedAlgSet?.name === algset.name);
-  const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
-  const [scramble, setScramble] = useState<string | null>(null);
-
-  const translateY = useSharedValue(0);
-  const selected = useSharedValue(isSelected ? 1 : 0);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-    backgroundColor: interpolateColor(selected.value, [0, 1], ['#ffffff', '#e899f2']),
-  }));
-
-  useEffect(() => {
-    getDisplayCaseScramble(algset.name).then(setScramble);
-  }, [algset]);
-
-  useEffect(() => {
-    if (isSelected) {
-      selected.value = withTiming(1, { duration: COLOR_TRANSITION_DURATION })
-    } else {
-      selected.value = withTiming(0, { duration: COLOR_TRANSITION_DURATION });
-    }
-
-  }, [isSelected]);
-  const handlePress = () => {
-    if (isSelected) return;
-    translateY.value = withTiming(-10, { duration: 200 }, () => {
-      translateY.value = withTiming(0, { duration: 350 });
-    });
-    setSelectedAlgSet(algset);
-  };
-
-  //TODO: scramble displayed is just the inverse of the fetched algorithm
-  return (
-    <Animated.View style={animatedStyle} className="w-full bg-white py-3 px-3 rounded-2xl border border-black/5 flex flex-row justify-between min-h-20">
-      <Pressable onPress={handlePress} className="flex-1 flex-row justify-between">
-        <View className="flex flex-col justify-center">
-          <Text className="font-inter-semibold text-xl">{algset.name}</Text>
-          <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
-            {getAlgSetFluencyPercentage(algset.name).toFixed(2)}% Fluency
-          </Text>
-          <Text className={`font-inter-medium ${isSelected ? 'text-black' : 'text-muted'}`}>
-            {algset.cases.length} Algorithms
-          </Text>
-        </View>
-        {scramble ? (
-          <DrawScramble scramble={invertAlgorithm(scramble)} scale={0.6} event={algset.event} />
-        ) : (
-          <View className="h-16 w-16 bg-gray-200 rounded-xl" />
-        )}
-      </Pressable>
-    </Animated.View>
-  );
+function targetKey(target: RowTarget): string {
+  return target.type === 'algset' ? `algset:${target.algset.name}` : `folder:${target.folder.name}`;
 }
 
-
 export default function Select() {
+  const router = useRouter();
   const algsets = useAlgSetStore(s => s.algSets);
   const loadAlgSets = useAlgSetStore(s => s.loadAlgSets);
-  const addAlgSet = useAlgSetStore(s => s.addAlgSet);
-  const selectedAlgSet = useAlgSetStore(s => s.selectedAlgSet);
+  const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
+
+  const folders = useFolderStore(s => s.folders);
+  const loadFolders = useFolderStore(s => s.loadFolders);
+  const deleteFolderAction = useFolderStore(s => s.deleteFolder);
 
   const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
 
-  const setSelectedAlgSet = useAlgSetStore(s => s.setSelectedAlgSet);
-  const deleteAlgSet = useAlgSetStore(s => s.deleteAlgSet);
-
   const insets = useSafeAreaInsets();
-  const createSheetRef = useRef<CreateAlgSetSheetRef>(null);
-  const editSheetRef = useRef<EditAlgSetSheetRef>(null);
   const deleteConfirmSheetRef = useRef<SheetRef>(null);
+  const deleteFolderConfirmSheetRef = useRef<SheetRef>(null);
+  const optionsSheetRef = useRef<SheetRef>(null);
   const fabRef = useRef<FabRef>(null);
+
+  const [rowTarget, setRowTarget] = useState<RowTarget | null>(null);
+  const openTargetKeyRef = useRef<string | null>(null);
+  const [fabOpen, setFabOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       loadAlgSets();
+      loadFolders();
     }, [])
   );
 
-  const displayCreateAlgSetSheet = useCallback(() => {
-    createSheetRef.current?.present();
+  const openCreateAlgSetPage = useCallback(() => {
+    router.push('/algset/create');
+  }, [router]);
+
+  const openCreateFolderPage = useCallback(() => {
+    router.push('/folder/create');
+  }, [router]);
+
+  const openRowOptions = useCallback((target: RowTarget) => {
+    const key = targetKey(target);
+    if (openTargetKeyRef.current === key) {
+      optionsSheetRef.current?.dismiss();
+      openTargetKeyRef.current = null;
+      return;
+    }
+    setRowTarget(target);
+    openTargetKeyRef.current = key;
+    optionsSheetRef.current?.present();
   }, []);
 
-  const displayEditAlgSetSheet = useCallback(() => {
-    if (selectedAlgSet === null) return;
-    editSheetRef.current?.present();
-  }, [selectedAlgSet]);
+  const handleOptionsDismiss = useCallback(() => {
+    openTargetKeyRef.current = null;
+  }, []);
 
-  const displayConfirmDeleteSheet = useCallback(() => {
-    if (selectedAlgSet === null) return;
-    deleteConfirmSheetRef.current?.present();
-  }, [selectedAlgSet]);
+  const handleAlgSetLongPress = useCallback((algset: AlgSet) => {
+    openRowOptions({ type: 'algset', algset });
+  }, [openRowOptions]);
+
+  const handleFolderLongPress = useCallback((folder: Folder) => {
+    openRowOptions({ type: 'folder', folder });
+  }, [openRowOptions]);
+
+  const ungroupedAlgsets = algsets.filter((a) => !a.folder);
+  const algSetTarget = rowTarget?.type === 'algset' ? rowTarget.algset : null;
+  const folderTarget = rowTarget?.type === 'folder' ? rowTarget.folder : null;
+  const folderTargetMemberCount = folderTarget
+    ? algsets.filter((a) => a.folder === folderTarget.name).length
+    : 0;
+
+  type Row = { type: 'folder'; folder: Folder } | { type: 'algset'; algset: AlgSet };
+  const rows: Row[] = [
+    ...folders.map((folder): Row => ({ type: 'folder', folder })),
+    ...ungroupedAlgsets.map((algset): Row => ({ type: 'algset', algset })),
+  ];
 
   return (
-    <View
-      className="items-center flex-1 justify-start flex-col pt-16"
-      onTouchStart={() => fabRef.current?.close()}
-    >
+    <View className="items-center flex-1 justify-start flex-col pt-16">
       <Text className="text-header mb-2">Select Algorithm Set</Text>
-      {algsets.length > 0 && (
+      {rows.length > 0 && (
         <FlatList
           className="w-full flex-1"
-          data={algsets}
+          data={rows}
           contentContainerStyle={{ gap: 12, padding: 12, paddingBottom: insets.bottom + 75 }}
-          renderItem={({ item }) => <AlgSetRow algset={item} />}
-          keyExtractor={(item) => item.name}
+          renderItem={({ item }) =>
+            item.type === 'folder' ? (
+              <FolderRow
+                folder={item.folder}
+                algsets={algsets.filter((a) => a.folder === item.folder.name)}
+                onLongPress={handleFolderLongPress}
+                onLongPressAlgSet={handleAlgSetLongPress}
+              />
+            ) : (
+              <AlgSetRow algset={item.algset} onLongPress={handleAlgSetLongPress} />
+            )
+          }
+          keyExtractor={(item) => (item.type === 'folder' ? `folder-${item.folder.name}` : item.algset.name)}
           initialNumToRender={10}
           maxToRenderPerBatch={20}
           windowSize={20}
         />
       )}
+      {fabOpen && (
+        <Pressable
+          style={StyleSheet.absoluteFillObject}
+          onPress={() => fabRef.current?.close()}
+        />
+      )}
       <Fab
         ref={fabRef}
-        onCreate={displayCreateAlgSetSheet}
-        onEdit={displayEditAlgSetSheet}
+        onCreate={openCreateAlgSetPage}
+        onCreateFolder={openCreateFolderPage}
+        onOpenChange={setFabOpen}
+      />
+
+      <RowOptionsSheet
+        ref={optionsSheetRef}
+        title={algSetTarget?.name ?? folderTarget?.name ?? ''}
+        onDismiss={handleOptionsDismiss}
+        onEdit={() => {
+          if (algSetTarget) router.push(`/algset/edit/${encodeURIComponent(algSetTarget.name)}`);
+          else if (folderTarget) router.push(`/folder/edit/${encodeURIComponent(folderTarget.name)}`);
+        }}
         onDelete={() => {
-          displayConfirmDeleteSheet()
-        }}
-      />
-      <EditAlgSetSheet
-        algset={selectedAlgSet!}
-        ref={editSheetRef}
-        onEdit={(algset: AlgSet, editedAlgset: AlgSet) => {
-          const editSuccessful = editAlgset(algset, editedAlgset)
-          if (editSuccessful) {
-            loadAlgSets();
-            const refreshed = getAlgSet(editedAlgset.name);
-            if (refreshed) {
-              setSelectedAlgSet(refreshed);
-            }
-            showToast(`${algset.name} edited successfully!`, TOAST_DURATION);
-          }
-        }
-        }
-      />
-
-      <CreateAlgSetSheet
-        ref={createSheetRef}
-        onCreate={(algset) => {
-          const created = addAlgSet(algset);
-          if (!created) {
-            showToast(`Failed to create ${algset.name}`, TOAST_DURATION);
-            return;
-          }
-          const refreshed = getAlgSet(algset.name);
-          if (refreshed) {
-            setSelectedAlgSet(refreshed);
-          }
-          showToast(`${algset.name} added!`, TOAST_DURATION);
+          if (algSetTarget) deleteConfirmSheetRef.current?.present();
+          else if (folderTarget) deleteFolderConfirmSheetRef.current?.present();
         }}
       />
 
-
-      <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "20%" : "25%"]}>
-        <View className="flex flex-col gap-4 items-center ">
-          <Text className="text-form-header">Are you sure you want to delete {selectedAlgSet?.name}?</Text>
-          <Pressable className="rounded-full bg-red-500 p-4"
+      <Sheet ref={deleteConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "25%" : "30%"]}>
+        <View className="w-full flex flex-col gap-4 items-center pb-6">
+          <Text className="text-form-header text-center">Are you sure you want to delete {algSetTarget?.name}?</Text>
+          <Pressable className="w-full rounded-full bg-red-500 py-4 items-center"
             onPress={() => {
-              if (selectedAlgSet === null) return;
-              const algToDelete = selectedAlgSet.name;
-              if (deleteAlgSet(selectedAlgSet)) {
+              if (algSetTarget === null) return;
+              const algToDelete = algSetTarget.name;
+              if (deleteAlgSet(algSetTarget)) {
                 showToast(`${algToDelete} deleted successfully!`, TOAST_DURATION);
               } else {
                 showToast('Must have at least one algset');
@@ -196,11 +166,33 @@ export default function Select() {
             }
             }
           >
-            <Text className="text-white ">Confirm</Text>
+            <Text className="font-inter-semibold text-base text-white">Confirm</Text>
 
           </Pressable>
         </View>
 
+      </Sheet>
+
+      <Sheet ref={deleteFolderConfirmSheetRef} snapPoints={[!shiftNavbarUp ? "25%" : "30%"]}>
+        <View className="w-full flex flex-col gap-4 items-center pb-6">
+          <Text className="text-form-header text-center">
+            Delete {folderTarget?.name} and its {folderTargetMemberCount} algset(s)?{'\n'}This can&apos;t be undone.
+          </Text>
+          <Pressable className="w-full rounded-full bg-red-500 py-4 items-center"
+            onPress={() => {
+              if (folderTarget === null) return;
+              const folderToDelete = folderTarget.name;
+              if (deleteFolderAction(folderTarget)) {
+                showToast(`${folderToDelete} deleted successfully!`, TOAST_DURATION);
+              } else {
+                showToast('Must have at least one algset');
+              }
+              deleteFolderConfirmSheetRef.current?.dismiss();
+            }}
+          >
+            <Text className="font-inter-semibold text-base text-white">Confirm</Text>
+          </Pressable>
+        </View>
       </Sheet>
     </View>
   );

@@ -1,5 +1,13 @@
 import * as SQLite from 'expo-sqlite';
-import type { AlgSet, Case, CubeEvent, CaseWithProgress, CaseState, AlgSetProgress } from '@/types';
+import type {
+  AlgSet,
+  Case,
+  CubeEvent,
+  CaseWithProgress,
+  CaseState,
+  AlgSetProgress,
+  Folder,
+} from '@/types';
 import { applyDecay } from '@/src/logic/caseQueue';
 
 let _db: SQLite.SQLiteDatabase | null = null;
@@ -13,7 +21,7 @@ export function getDb() {
 
 export function getAlgSet(name: string): AlgSet | null {
   const db = getDb();
-  const algset = db.getFirstSync<{ name: string; event: CubeEvent }>(
+  const algset = db.getFirstSync<{ name: string; event: CubeEvent; folder: string | null }>(
     'SELECT * FROM algsets WHERE name = ?',
     [name]
   );
@@ -37,19 +45,21 @@ export function createAlgSetWithCases(name: string, event: CubeEvent, cases: Cas
   });
 }
 
+function deleteAlgsetInternal(db: SQLite.SQLiteDatabase, algsetName: string): void {
+  db.runSync(
+    `DELETE FROM case_progress
+     WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
+    [algsetName]
+  );
+
+  db.runSync('DELETE FROM cases WHERE algset = ?', [algsetName]);
+
+  db.runSync('DELETE FROM algsets WHERE name = ?', [algsetName]);
+}
+
 export function deleteAlgset(algsetName: string): void {
   const db = getDb();
-  db.withTransactionSync(() => {
-    db.runSync(
-      `DELETE FROM case_progress
-       WHERE case_id IN (SELECT id FROM cases WHERE algset = ?)`,
-      [algsetName]
-    );
-
-    db.runSync('DELETE FROM cases WHERE algset = ?', [algsetName]);
-
-    db.runSync('DELETE FROM algsets WHERE name = ?', [algsetName]);
-  });
+  db.withTransactionSync(() => deleteAlgsetInternal(db, algsetName));
 }
 
 export function getFirstCase(algsetName: string): Case | null {
@@ -87,6 +97,55 @@ export function renameAlgSet(oldName: string, newName: string): void {
     db.runSync('UPDATE cases SET algset = ? WHERE algset = ?', [newName, oldName]);
     db.runSync('UPDATE practice_log SET algset = ? WHERE algset = ?', [newName, oldName]);
   });
+}
+
+export function getFolders(): Folder[] {
+  const db = getDb();
+  return db.getAllSync<Folder>('SELECT * FROM folders');
+}
+
+export function createFolder(name: string): void {
+  const db = getDb();
+  db.runSync('INSERT OR IGNORE INTO folders (name) VALUES (?)', [name]);
+}
+
+export function renameFolder(oldName: string, newName: string): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    db.runSync('UPDATE folders SET name = ? WHERE name = ?', [newName, oldName]);
+    db.runSync('UPDATE algsets SET folder = ? WHERE folder = ?', [newName, oldName]);
+  });
+}
+
+export function deleteFolder(name: string): void {
+  const db = getDb();
+  db.withTransactionSync(() => {
+    const members = db.getAllSync<{ name: string }>('SELECT name FROM algsets WHERE folder = ?', [
+      name,
+    ]);
+    for (const member of members) {
+      deleteAlgsetInternal(db, member.name);
+    }
+    db.runSync('DELETE FROM folders WHERE name = ?', [name]);
+  });
+}
+
+export function setAlgSetFolder(algsetName: string, folderName: string | null): void {
+  const db = getDb();
+  db.runSync('UPDATE algsets SET folder = ? WHERE name = ?', [folderName, algsetName]);
+}
+
+export function getFirstAlgSetInFolder(folderName: string): AlgSet | null {
+  const db = getDb();
+  const algset = db.getFirstSync<{ name: string; event: CubeEvent; folder: string | null }>(
+    'SELECT * FROM algsets WHERE folder = ? ORDER BY rowid ASC LIMIT 1',
+    [folderName]
+  );
+  if (!algset) return null;
+  return {
+    ...algset,
+    cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [algset.name]),
+  };
 }
 
 export function applyAlgSetCaseChanges(
@@ -130,7 +189,9 @@ export function getAlgSetProgress(algset: string): AlgSetProgress {
 
 export function getAlgSets(): AlgSet[] {
   const db = getDb();
-  const algsets = db.getAllSync<{ name: string; event: CubeEvent }>('SELECT * FROM algsets');
+  const algsets = db.getAllSync<{ name: string; event: CubeEvent; folder: string | null }>(
+    'SELECT * FROM algsets'
+  );
   return algsets.map((a) => ({
     ...a,
     cases: db.getAllSync<Case>('SELECT * FROM cases WHERE algset = ?', [a.name]),
@@ -288,11 +349,25 @@ export function updateCaseProgress(caseId: number, fluency: number, state: CaseS
 }
 
 export function markCaseMastered(caseId: number) {
-  updateCaseProgress(caseId, 5, 'mastered');
+  const db = getDb();
+  db.runSync(
+    `
+    INSERT INTO case_progress (case_id, fluency, state)
+    VALUES (?, 5, 'mastered')
+    ON CONFLICT(case_id) DO UPDATE SET
+      fluency = excluded.fluency,
+      state = excluded.state
+  `,
+    [caseId]
+  );
 }
 
-export function unmarkCaseMastered(caseId: number) {
-  updateCaseProgress(caseId, 1, 'learning');
+export function unmarkCaseMastered(caseId: number): CaseState {
+  const db = getDb();
+  db.runSync("UPDATE case_progress SET fluency = 1, state = 'locked' WHERE case_id = ?", [
+    caseId,
+  ]);
+  return 'locked';
 }
 
 export function introduceNextCase(algset: string): void {

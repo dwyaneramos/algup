@@ -1,9 +1,6 @@
-import {
-  applyScramble,
-  solvedCube,
-  invertAlgorithm,
-} from '@/src/logic/scramble';
+import { applyScramble, solvedCube, invertAlgorithm } from '@/src/logic/scramble';
 import { generateScrambleWithRetry } from '@/src/logic/scrambleRetry';
+import { sanitiseAlgorithm } from '@/src/logic/alg';
 import type { CubeState } from '@/types';
 
 // `cubing/alg`'s package.json only declares an "import" (ESM) export
@@ -144,6 +141,21 @@ describe('invertAlgorithm', () => {
   it('composed with the original scramble returns the cube to solved', () => {
     const scramble = "R U R' U' F2 B D2 L'";
     const result = applyScramble(`${scramble} ${invertAlgorithm(scramble)}`, false);
+    expect(result).toEqual(solvedCube());
+  });
+
+  // Default algset data uses a leading "(U')"-style parenthesized group as a
+  // decorative optional-AUF convention. `cubing/alg`'s real Alg treats "(...)"
+  // as a group node: inverting turns a single-move group into a trailing
+  // group-inversion marker (e.g. "(U')" -> "(U')'"), which naive paren
+  // stripping then mangles into a malformed double-primed token like "U''".
+  // Callers must sanitise (strip the decorative parens) BEFORE inverting, not
+  // after, so the real Alg only ever sees a flat move sequence.
+  it('produces an appliable result when the alg is sanitised before inverting', () => {
+    const alg = "(U') B U' R2 F2 U' F";
+    const inverted = invertAlgorithm(sanitiseAlgorithm(alg));
+    expect(() => applyScramble(inverted, true)).not.toThrow();
+    const result = applyScramble(`${sanitiseAlgorithm(alg)} ${inverted}`, true);
     expect(result).toEqual(solvedCube());
   });
 });

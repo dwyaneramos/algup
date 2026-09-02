@@ -1,5 +1,5 @@
 import { ALG_SETS } from '@/src/logic/algsets';
-import { createAlgSetWithCases, getDb } from '@/src/db/queries';
+import { createAlgSetWithCases, createFolder, getDb, setAlgSetFolder } from '@/src/db/queries';
 
 const db = getDb();
 
@@ -9,6 +9,10 @@ function seedAlgSets() {
 
   for (const algSet of ALG_SETS) {
     createAlgSetWithCases(algSet.name, algSet.event, algSet.cases);
+    if (algSet.folder) {
+      createFolder(algSet.folder);
+      setAlgSetFolder(algSet.name, algSet.folder);
+    }
   }
 }
 
@@ -17,6 +21,7 @@ export function resetDB() {
   db.execSync('DROP TABLE IF EXISTS cases');
   db.execSync('DROP TABLE IF EXISTS algsets');
   db.execSync('DROP TABLE IF EXISTS practice_log');
+  db.execSync('DROP TABLE IF EXISTS folders');
 }
 
 export function initDB() {
@@ -24,6 +29,10 @@ export function initDB() {
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS folders (
+      name TEXT PRIMARY KEY
     );
 
     CREATE TABLE IF NOT EXISTS algsets (
@@ -62,13 +71,10 @@ export function initDB() {
   if (!hasEvent) {
     db.execSync("ALTER TABLE algsets ADD COLUMN event TEXT NOT NULL DEFAULT '333'");
   }
-
-  // Scrambles used to be prefetched in bulk and queued in this table to hide
-  // network latency from a remote server; scramble generation now runs
-  // on-device (see src/logic/scrambleGenerator3x3.ts) and no longer needs a
-  // queue, so this table is no longer created - just cleaned up once for
-  // anyone who already has it from an earlier app version.
-  db.execSync('DROP TABLE IF EXISTS scramble_queue');
+  const hasFolder = algsetColumns.some((c) => c.name === 'folder');
+  if (!hasFolder) {
+    db.execSync('ALTER TABLE algsets ADD COLUMN folder TEXT REFERENCES folders(name)');
+  }
 
   seedAlgSets();
 }

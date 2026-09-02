@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { InteractionManager } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import {
   getCasesWithProgress,
@@ -47,12 +48,11 @@ function matchCaseForItem(
   );
 }
 
-// Scramble generation is synchronous, CPU-heavy work - without forcing a
-// real frame to render first, the "Loading scramble..." state set right
-// before it would never actually get painted, since JS drains all pending
-// microtasks (including the generation work) before it can render a frame.
+// Scramble generation is synchronous, CPU-heavy work - without waiting here,
+// the "Loading scramble..." state set right before it would never actually
+// get painted, since JS drains all pending work before it can render a frame.
 function waitForNextFrame(): Promise<void> {
-  return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  return new Promise((resolve) => InteractionManager.runAfterInteractions(() => resolve()));
 }
 
 async function fetchFreshScramble(
@@ -90,6 +90,12 @@ export function useTrainingSession(algset: string) {
   const currentItem = useRef<PendingScrambleItem | null>(null);
 
   const resumeSession = useCallback(async () => {
+    // Set loading (and let it paint) before any of the potentially heavy,
+    // synchronous work below runs - otherwise a switch to a new algset would
+    // leave the previous algset's stale scramble on screen while it hitches.
+    setIsLoading(true);
+    await waitForNextFrame();
+
     const active = await loadActiveCases(algset);
     setCases(active);
 
@@ -99,21 +105,19 @@ export function useTrainingSession(algset: string) {
       setScramble(pending.scramble);
       setSolution(pending.solution);
       currentItem.current = pending;
-      console.log(`[Algset: ${algset}] Restored pending item for caseId=${pending.caseId}`);
+      setIsLoading(false);
     } else {
       const firstCase = pickNextCase(active);
       setCurrentCase(firstCase);
       if (firstCase) {
-        setIsLoading(true);
-        await waitForNextFrame();
         const fetched = await fetchFreshScramble(firstCase.alg, event, algset, 'initial', scrambleWithAUF);
         if (fetched) {
           setScramble(fetched.scramble);
           setSolution(fetched.solution);
           currentItem.current = { caseId: firstCase.id, alg: firstCase.alg, ...fetched };
         }
-        setIsLoading(false);
       }
+      setIsLoading(false);
     }
   }, [algset, event]);
 
@@ -124,9 +128,6 @@ export function useTrainingSession(algset: string) {
 
       return () => {
         if (currentItem.current) {
-          console.log(
-            `[Algset: ${algset}] Storing pending item for caseId=${currentItem.current.caseId}`
-          );
           setPendingItem(algset, currentItem.current);
           currentItem.current = null;
         }
@@ -135,27 +136,33 @@ export function useTrainingSession(algset: string) {
   );
 
   const advanceToNextCase = async (updatedCases: CaseWithProgress[]) => {
-    console.log("CALLED HERE")
     const nextCase = pickNextCase(updatedCases);
-    console.log(nextCase)
     setCurrentCase(nextCase);
     if (nextCase) {
-      setIsLoading(true);
       await waitForNextFrame();
-      console.log("FETCHING NEW SCMRALBe")
       const fetched = await fetchFreshScramble(nextCase.alg, event, algset, 'next', scrambleWithAUF);
-      console.log("finished fetching")
       if (fetched) {
         setScramble(fetched.scramble);
         setSolution(fetched.solution);
         currentItem.current = { caseId: nextCase.id, alg: nextCase.alg, ...fetched };
       }
-      setIsLoading(false);
     }
+    // Always clear, even if there was no next case to pick - submitGrade
+    // sets this true unconditionally before this runs, so it must not be
+    // left stuck on if this branch is skipped.
+    setIsLoading(false);
   };
 
   const submitGrade = async (grade: number) => {
     if (!currentCase) return;
+    // Set before the `getCasesWithProgress` await below, which is a real
+    // async DB round trip (unlike the sync calls around it) - without this,
+    // handleGrade's synchronous setAttemptDone(false) would briefly
+    // re-enable the timer with the stale scramble still showing, right
+    // before the next scramble's heavy synchronous generation freezes the
+    // JS thread underneath a finger that just landed on it.
+    setIsLoading(true);
+
     const newFluency = getUpdatedFluency(currentCase.fluency, grade);
     const newState = getNextState(currentCase.state, newFluency);
     updateCaseProgress(currentCase.id, newFluency, newState);

@@ -27,12 +27,12 @@ describe('validateAlgSetName', () => {
     expect(validateAlgSetName('  A  ')).toBe(true);
   });
 
-  it('accepts exactly 32 characters', () => {
-    expect(validateAlgSetName('a'.repeat(32))).toBe(true);
+  it('accepts exactly 16 characters', () => {
+    expect(validateAlgSetName('a'.repeat(16))).toBe(true);
   });
 
-  it('rejects 33 characters', () => {
-    expect(validateAlgSetName('a'.repeat(33))).toBe(false);
+  it('rejects 17 characters', () => {
+    expect(validateAlgSetName('a'.repeat(17))).toBe(false);
   });
 });
 
@@ -61,8 +61,8 @@ describe('validateAlgSet', () => {
     );
   });
 
-  it('rejects a name over 32 characters', () => {
-    const algset = makeAlgSet({ name: 'a'.repeat(33) });
+  it('rejects a name over 16 characters', () => {
+    const algset = makeAlgSet({ name: 'a'.repeat(17) });
     expect(validateAlgSet(algset, [])).toBe(
       algsetNameLengthError
     );

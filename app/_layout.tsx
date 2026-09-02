@@ -26,7 +26,7 @@ import { Inter_600SemiBold_Italic } from '@expo-google-fonts/inter/600SemiBold_I
 import { Inter_700Bold_Italic } from '@expo-google-fonts/inter/700Bold_Italic';
 import { Inter_800ExtraBold_Italic } from '@expo-google-fonts/inter/800ExtraBold_Italic';
 import { Inter_900Black_Italic } from '@expo-google-fonts/inter/900Black_Italic';
-import { initDB } from '@/src/db/schema';
+import { initDB, resetDB } from '@/src/db/schema';
 import { getSetting, getAlgSets, getAlgSet, applyDecayToAllCases } from '@/src/db/queries';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SELECTED_ALGSET_KEY } from '@/src/logic/algsets';
@@ -46,16 +46,12 @@ export default function RootLayout() {
   // (MainScreen is already subscribed to this store), risking it reading a
   // stale selectedAlgSet on first mount.
   useEffect(() => {
-    let selectedAlgsetName = getSetting(SELECTED_ALGSET_KEY);
-    if (selectedAlgsetName === null) {
-      // guaranteed to not be null if initDB is called successfully
-      const defaultAlgset = getAlgSets()[0];
-      setSelectedAlgSet(defaultAlgset);
-    } else {
-      const retrievedAlgSet = getAlgSet(selectedAlgsetName);
-      if (retrievedAlgSet !== null) setSelectedAlgSet(retrievedAlgSet);
-      else alert("No Algset exists")
-    }
+    const selectedAlgsetName = getSetting(SELECTED_ALGSET_KEY);
+    // A saved name can go stale (its algset was deleted/renamed elsewhere),
+    // so fall back to the first available algset rather than leaving
+    // selectedAlgSet unset - guaranteed to exist if initDB succeeded.
+    const retrievedAlgSet = selectedAlgsetName !== null ? getAlgSet(selectedAlgsetName) : null;
+    setSelectedAlgSet(retrievedAlgSet ?? getAlgSets()[0]);
 
     loadAlgSets();
     loadSettings();
@@ -89,6 +85,10 @@ export default function RootLayout() {
         <BottomSheetModalProvider>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="algset/create" options={{ headerShown: false, presentation: 'modal' }} />
+            <Stack.Screen name="algset/edit/[name]" options={{ headerShown: false, presentation: 'modal' }} />
+            <Stack.Screen name="folder/create" options={{ headerShown: false, presentation: 'modal' }} />
+            <Stack.Screen name="folder/edit/[name]" options={{ headerShown: false, presentation: 'modal' }} />
           </Stack>
           <Toaster offset={110} visibleToasts={1} theme="light" />
         </BottomSheetModalProvider>

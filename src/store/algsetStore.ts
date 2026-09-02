@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { InteractionManager } from 'react-native';
 import { SELECTED_ALGSET_KEY, insertNewAlgSet } from '@/src/logic/algsets';
 import { deleteAlgset, setSetting, getSetting, getAlgSets } from '@/src/db/queries';
 import { clearPendingItem } from '@/src/logic/pendingScramble';
@@ -10,7 +11,11 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
 
   setSelectedAlgSet: (algSet) => {
     set({ selectedAlgSet: algSet });
-    setSetting(SELECTED_ALGSET_KEY, algSet.name);
+    // Defer the blocking DB write past the next frame so the row's
+    // press/select highlight animation isn't stalled waiting on disk I/O.
+    InteractionManager.runAfterInteractions(() => {
+      setSetting(SELECTED_ALGSET_KEY, algSet.name);
+    });
   },
 
   loadAlgSets: () => {
@@ -18,7 +23,15 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
     set({ algSets });
 
     const { selectedAlgSet } = get();
-    if (selectedAlgSet || algSets.length === 0) return;
+    if (algSets.length === 0) return;
+
+    // Re-resolve the current selection against the freshly loaded list so it
+    // never keeps pointing at a stale object (e.g. an outdated `folder`).
+    if (selectedAlgSet) {
+      const fresh = algSets.find((a) => a.name === selectedAlgSet.name);
+      if (fresh) set({ selectedAlgSet: fresh });
+      return;
+    }
 
     const savedName = getSetting(SELECTED_ALGSET_KEY);
     const restored = algSets.find((a) => a.name === savedName);
@@ -34,7 +47,7 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
   },
 
   deleteAlgSet: (algSet): boolean => {
-    const { algSets } = get();
+    const { algSets, selectedAlgSet } = get();
 
     if (algSets.length <= 1) return false;
 
@@ -43,10 +56,14 @@ export const useAlgSetStore = create<AlgSetStore>((set, get) => ({
     clearPendingItem(algSet.name);
 
     const remaining = algSets.filter((a) => a.name !== algSet.name);
-    const nextSelected = remaining[0];
 
-    set({ algSets: remaining, selectedAlgSet: nextSelected });
-    setSetting(SELECTED_ALGSET_KEY, nextSelected.name);
+    if (selectedAlgSet?.name === algSet.name) {
+      const nextSelected = remaining[0];
+      set({ algSets: remaining, selectedAlgSet: nextSelected });
+      setSetting(SELECTED_ALGSET_KEY, nextSelected.name);
+    } else {
+      set({ algSets: remaining });
+    }
     return true;
   },
 }));

@@ -1,23 +1,39 @@
 import type { CaseWithProgress, CubeEvent, SheetRef } from "@/types";
 import { showToast } from "@/utils/toast";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DrawScramble } from "./DrawScramble";
 import { Sheet } from "./Sheet";
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withTiming, useSharedValue, Easing } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withRepeat, withSpring, withTiming, useSharedValue, Easing } from "react-native-reanimated";
 import { invertAlgorithm } from "@/src/logic/scramble";
 import { sanitiseAlgorithm } from "@/src/logic/alg";
 import { Text, View, Pressable } from "react-native";
 import { convertScoreToPercentage } from "@/src/logic/fluency";
 import { ALG_CATEGORIES } from "@/utils/categories";
 import { toggleCaseFocus, markCaseMastered, unmarkCaseMastered } from "@/src/db/queries";
+import { useSettingsStore } from "@/src/store/settingsStore";
 
 const FOCUSED_COLOR = ALG_CATEGORIES.find((c) => c.key === "focused")?.borderColor ?? "#000000";
+const PRESS_SCALE = 0.97;
 
-export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent }) {
+export function CaseRow({ c, event, onMasteredChange }: { c: CaseWithProgress, event: CubeEvent, onMasteredChange?: () => void }) {
   const [isFocused, setIsFocused] = useState<boolean>(c.is_focused);
   const [state, setState] = useState(c.state);
   const [fluency, setFluency] = useState(c.fluency);
   const sheetRef = useRef<SheetRef>(null);
+  const shiftNavbarUp = useSettingsStore((s) => s.shiftNavbarUp);
+  const scale = useSharedValue(1);
+
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(PRESS_SCALE);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1);
+  }, [scale]);
 
   useEffect(() => {
     setIsFocused(!!c.is_focused);
@@ -49,8 +65,8 @@ export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent })
 
   function onToggleMastered() {
     if (isMastered) {
-      unmarkCaseMastered(c.id);
-      setState('learning');
+      const restoredState = unmarkCaseMastered(c.id);
+      setState(restoredState);
       setFluency(1);
       showToast(`Case ${c.id} progress reset`);
     } else {
@@ -59,17 +75,24 @@ export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent })
       setFluency(5);
       showToast(`Case ${c.id} marked as mastered!`);
     }
+    onMasteredChange?.();
     sheetRef.current?.dismiss();
   }
 
   return (
     <>
-      <Pressable onPress={() => sheetRef.current?.present()}>
-        <Animated.View
-          style={{
-            borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor,
-          }}
-          className={`w-full border border-black/5 border-l-4 bg-white py-3 rounded-2xl justify-between items-center flex flex-row px-3 min-h-20`}
+      <Animated.View
+        style={[
+          pressStyle,
+          { borderLeftColor: isFocused ? FOCUSED_COLOR : categoryAttributes.borderColor },
+        ]}
+        className="w-full border border-black/5 border-l-4 bg-white py-3 rounded-2xl justify-between items-center flex flex-row px-3 min-h-20"
+      >
+        <Pressable
+          onLongPress={() => sheetRef.current?.present()}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          className="flex-1 flex-row justify-between items-center"
         >
           <View className="flex-1 mr-3">
 
@@ -92,10 +115,10 @@ export function CaseRow({ c, event }: { c: CaseWithProgress, event: CubeEvent })
           <View className="flex-shrink-0">
             <DrawScramble scramble={invertAlgorithm(sanitiseAlgorithm(c.alg))} scale={0.5} event={event} />
           </View>
-        </Animated.View>
-      </Pressable>
+        </Pressable>
+      </Animated.View>
 
-      <Sheet ref={sheetRef} snapPoints={['40%']}>
+      <Sheet ref={sheetRef} snapPoints={[!shiftNavbarUp ? '40%' : '45%']}>
         <View className="w-full">
           <Text className="text-form-header text-center">{c.alg}</Text>
           <Text className="text-muted text-center text-xs mt-1 mb-5">
